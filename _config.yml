@@ -13,9 +13,8 @@ timezone: 'Asia/Shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-## 仓库建好后，把 <your-github-username> 和 <repo-name> 替换成真实值
-## 仓库建好后，把 <your-github-username> 和 <repo-name> 替换成真实值
-url: https://<your-github-username>.github.io/<repo-name>
+## 仓库名为 blog（项目站点），URL 需带 /blog 路径
+url: https://cardchoosen.github.io/blog
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -103,8 +102,7 @@ theme: landscape
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 ## 分支隔离法：源码在 main，生成的静态站推送到 gh-pages 分支
-## 仓库建好后，把 <your-github-username> 和 <repo-name> 替换成真实值
 deploy:
   type: git
-  repo: https://github.com/<your-github-username>/<repo-name>.git
+  repo: https://github.com/cardchoosen/blog.git
   branch: gh-pages
