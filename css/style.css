@@ -505,7 +505,9 @@ html.theme-dark .theme-char[data-char="浅"] {
 }
 .post-body figure.highlight .code pre {
   padding: 14px 16px;
-  color: var(--color-code-text);
+}
+.post-body .hljs {
+  background: var(--color-code-bg) !important;
 }
 .post-body table {
   border-collapse: collapse;

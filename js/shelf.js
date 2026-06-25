@@ -73,12 +73,27 @@
 
     // ---- 主题切换 ----
     var toggle = document.querySelector('.theme-toggle');
+    function applyHljsTheme(theme) {
+      // 启用时 media 设为 'all'，禁用时设为 'not all'
+      // 不要带 prefers-color-scheme 条件，否则手动切换主题时
+      // 系统偏好可能与用户选择相反，导致启用方不匹配
+      document.querySelectorAll('.hljs-theme-light').forEach(function (el) {
+        el.media = (theme === 'light') ? 'all' : 'not all';
+      });
+      document.querySelectorAll('.hljs-theme-dark').forEach(function (el) {
+        el.media = (theme === 'dark') ? 'all' : 'not all';
+      });
+    }
+    var html = document.documentElement;
+    var initialTheme = html.classList.contains('theme-dark') ? 'dark' : 'light';
+    applyHljsTheme(initialTheme);
+
     if (toggle) {
       toggle.addEventListener('click', function () {
-        var html = document.documentElement;
         var isDark = html.classList.contains('theme-dark');
         var next = isDark ? 'light' : 'dark';
         html.className = 'theme-' + next;
+        applyHljsTheme(next);
         try { localStorage.setItem('theme', next); } catch (e) {}
       });
     }
