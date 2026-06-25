@@ -166,3 +166,50 @@
 - `doc/FEATURES.md`：新增"深/浅主题切换"核心功能章节、更新书架交互为多开模式、更新代码块底色（浅色 #e8e8e8 / 深色 #0a0a0a）、补充禁用弹性滚动
 - `doc/CHANGELOG.md`：追加本次条目
 
+---
+
+## 2026-06-25 23:10 · （本次提交）· feat: 接入 highlight.js 主题实现代码语法高亮
+
+> 本条目对应本次提交，为代码块接入彩色语法高亮，跟随深/浅主题切换。所有改动已经用户本地验证通过。
+
+### 改动
+
+- **`_config.yml`**：`highlight.hljs` 从 `false` 改为 `true`
+  - 之前输出旧式 class（`keyword`/`string`），不匹配 hljs 官方主题 CSS 选择器
+  - 现在输出标准 `.hljs-keyword` / `.hljs-string` 等 token class
+
+- **`head.ejs`**：加两个 `<link>` 引入 highlight.js 官方主题 CSS
+  - `atom-one-light.min.css`（浅色模式）
+  - `atom-one-dark.min.css`（深色模式）
+  - 初始通过 `<link media="(prefers-color-scheme: xxx)">` 跟随系统偏好
+
+- **`shelf.js`**：新增 `applyHljsTheme()` 函数
+  - 主题切换时通过 `link.media` 启停对应 hljs 主题：启用 `'all'`、禁用 `'not all'`
+  - 在 DOMContentLoaded 时根据 html class 初始化启用对应主题
+  - 关键修复：启用时 media 必须设为 `'all'`，不能带 `prefers-color-scheme` 条件——否则用户手动切到与系统相反的主题时，启用方不匹配
+
+- **`style.styl`**：
+  - 新增 `.post-body .hljs { background: var(--color-code-bg) !important }` 强制代码块底色由主题变量控制（不被 hljs 主题 CSS 覆盖）
+  - 去掉 `figure.highlight .code pre` 的 `color: var(--color-code-text)`——避免父级 color 通过继承覆盖 hljs 主题设的 token 颜色
+
+### 调研过程
+
+- 现状排查：发现 Hexo 已用 highlight.js 渲染，HTML 输出含 token class，但 CSS 没给这些 class 上色，所以视觉上看不到高亮
+- 方案对比：A. 手写黑白灰阶规则；B. 引入 hljs 官方主题；C. 切换到 Prism.js
+- 选 B 方案：改动最小（约 30 行），保留所有现有代码块修复（行号隐藏、hover 不变色、focus 不变色、无白线）
+- 子决策：跟随主题切换（浅色用 atom-one-light，深色用 atom-one-dark）
+
+### 踩坑记录
+
+1. **`hljs: false` 导致无高亮**：Hexo 输出 `class="keyword"` 而非 `class="hljs-keyword"`，hljs 主题 CSS 选择器不匹配
+2. **`color: !important` 覆盖 token 颜色**：最初给 `.hljs` 同时设 `background !important` 和 `color !important`，后者通过继承盖住了 token 颜色；后改为只保留 `background !important`
+3. **`link.disabled` 不稳定**：Safari/Chrome 对 `<link rel="stylesheet">` 的 `disabled` 属性行为不一致；改用 `media = 'not all'` 禁用
+4. **`media` 带条件导致切换失效**：启用时 media 设为 `(prefers-color-scheme: light)`，若用户系统是深色但手动切到浅色，条件不匹配导致 light 主题不生效；改为启用时 `media = 'all'`
+5. **`.code pre` color 覆盖**：`.post-body figure.highlight .code pre` 的 `color: var(--color-code-text)`（特异性 0,3,1）通过继承影响所有子 span，让未匹配 token class 的字符看起来"没高亮"；去掉该 color 让 hljs 主题接管
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：新增"代码语法高亮"小节、配置表加 `highlight.hljs: true` 条目
+- `doc/FEATURES.md`：更新"8. 代码语法高亮"章节，描述 atom-one-light/dark 跟随切换机制
+- `doc/CHANGELOG.md`：追加本次条目
+

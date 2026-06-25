@@ -478,7 +478,11 @@ html.theme-dark
       display none
     .code pre
       padding 14px 16px
-      color var(--color-code-text)
+      // 不设 color，让 hljs 主题 CSS 的 .hljs { color } 接管字色
+  // 覆盖 highlight.js 主题 CSS 的底色（让代码块底色由 --color-code-bg 控制）
+  // 不强制 color，让 hljs 主题的 token 颜色生效
+  .hljs
+    background var(--color-code-bg) !important
   table
     border-collapse collapse
     margin 1em 0

@@ -65,11 +65,14 @@
 - 按发布日期倒序排列
 - 底部分页导航（OLDER / NEWER）
 
-### 8. 代码高亮
-- 引擎：highlight.js
+### 8. 代码语法高亮
+- 引擎：Hexo 内置 highlight.js，`hljs: true` 输出标准 `.hljs-xxx` token class
+- **彩色高亮**：引入 highlight.js 官方主题 CSS，跟随深/浅主题切换
+  - 浅色主题：atom-one-light（紫红关键字、绿字符串、蓝数字等柔和配色）
+  - 深色主题：atom-one-dark（同色系但更鲜艳，适配深色底）
 - **已关闭行号**（`line_number: false`）
-- 浅色主题：代码块底色 `#e8e8e8` + 深灰字
-- 深色主题：代码块底色 `#0a0a0a` + 浅灰字
+- **代码块底色由主题控制**（不被 hljs 主题覆盖）：浅色 `#e8e8e8` / 深色 `#0a0a0a`
+- **主题切换时 token 颜色同步切换**：JS 通过 `link.media` 启停对应 hljs 主题 CSS
 - 鼠标 hover/聚焦不变色（已修复浏览器默认 focus 高亮 bug）
 
 ### 9. 视觉风格（极客黑白）

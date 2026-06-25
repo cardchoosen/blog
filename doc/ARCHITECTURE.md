@@ -73,6 +73,7 @@ Hexo/
 | URL.permalink | `:year/:month/:day/:title/` | 文章永久链接格式 |
 | Writing.syntax_highlighter | `highlight.js` | 代码高亮引擎 |
 | highlight.line_number | `false` | **已关代码行号** |
+| highlight.hljs | `true` | 输出标准 `.hljs-xxx` token class，匹配官方主题 CSS |
 | index_generator.per_page | `10` | 首页每页文章数 |
 | Extensions.theme | `geek-shelf` | 主题名（自制） |
 | Deploy.type | `git` | 部署器类型 |
@@ -117,6 +118,15 @@ themes/geek-shelf/
 - 优先级：localStorage > 系统偏好 > 默认浅色
 
 **视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变。浅色主题代码块 `#e8e8e8` 底，深色主题 `#0a0a0a` 底（比页面背景 `#1a1a1a` 略黑）。无圆角无阴影无渐变。等宽字体 `ui-monospace` 全站。`overscroll-behavior: none` 禁用弹性滚动。
+
+**代码语法高亮**：
+- Hexo 内置 highlight.js 渲染器，`_config.yml` 配 `hljs: true` 输出标准 `.hljs-xxx` token class（`hljs-keyword`/`hljs-string`/`hljs-title` 等）
+- 引入 highlight.js 官方主题 CSS 跟随深/浅主题切换：
+  - `head.ejs` 加两个 `<link>`：atom-one-light（浅色模式）+ atom-one-dark（深色模式）
+  - 初始通过 `<link media>` 跟随系统偏好
+  - `shelf.js` 的 `applyHljsTheme()` 在主题切换时改 `link.media`：启用 `'all'`，禁用 `'not all'`
+- 代码块底色仍由 `var(--color-code-bg)` 控制（CSS `.hljs { background !important }` 覆盖主题 CSS 的底色），token 颜色由 hljs 主题 CSS 提供
+- `.code pre` 不设 `color`，让 hljs 主题的 `.hljs { color }` 接管字色，避免父级 color 通过继承覆盖 token 颜色
 
 **CSS 关键设计**：
 - `hover-soft()` mixin：统一管理"hover 时浅灰底 + 深灰字 + 0.12s 过渡"，多处复用
