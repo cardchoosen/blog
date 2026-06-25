@@ -33,12 +33,13 @@ Hexo/
 │   ├── page.md
 │   └── post.md
 ├── source/                  # 内容源文件
-│   └── _posts/              #   文章 Markdown
-│       ├── hello-world.md       # 默认示例（已加 Java/Go/TS 代码段）
-│       ├── test-frontend-1.md   # 测试文章（categories: 前端）
-│       ├── test-frontend-2.md   # 测试文章（categories: 前端）
-│       ├── test-backend-1.md    # 测试文章（categories: 后端）
-│       └── test-backend-2.md    # 测试文章（categories: 后端）
+│   ├── _posts/              #   文章 Markdown
+│   │   ├── hello-world.md       # 默认示例（已加 Java/Go/TS 代码段）
+│   │   ├── test-frontend-1.md   # 测试文章（categories: 前端）
+│   │   ├── test-frontend-2.md   # 测试文章（categories: 前端）
+│   │   ├── test-backend-1.md    # 测试文章（categories: 后端）
+│   │   └── test-backend-2.md    # 测试文章（categories: 后端）
+│   └── CNAME                   # GitHub Pages 自定义域名绑定（内容：anemone.wiki）
 ├── themes/
 │   ├── .gitkeep             # 占位（已无用但保留）
 │   └── geek-shelf/          # 自制主题（见下"主题结构"）
@@ -146,6 +147,7 @@ gh-pages   ← hexo g 生成的静态站（由 hexo d 自动推送）
 - `main` 分支通过 `git push` 维护，保存所有源文件
 - `gh-pages` 分支由 `hexo-deployer-git` 自动创建并推送，只含 `public/` 内容
 - GitHub Pages Source 配置为 `gh-pages` 分支 `/ (root)` 目录
+- **自定义域名**：`source/CNAME` 文件（内容 `anemone.wiki`）由 Hexo 拷贝到 `public/`，随 `hexo d` 推到 `gh-pages` 根目录，GitHub Pages 据此识别 Custom domain。**没有这个文件，每次 `hexo d` 后 GitHub 仓库的 Custom domain 设置会被清空**
 - 访问入口：`https://anemone.wiki`（自定义域名，根路径访问）
 
 ## 常用命令（npm scripts）

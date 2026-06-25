@@ -238,3 +238,31 @@
 - `doc/FEATURES.md`：更新访问入口、本地预览 URL
 - `doc/CHANGELOG.md`：追加本次条目
 
+---
+
+## 2026-06-25 23:55 · （本次提交）· fix: 加 source/CNAME 防止自定义域名被部署清空
+
+> 本条目对应本次提交，修复 GitHub Pages 自定义域名在 `hexo d` 后丢失的问题。
+
+### 问题
+
+- 用户在 GitHub 仓库 Settings → Pages → Custom domain 配置了 `anemone.wiki`，DNS check successful
+- 但每次 `hexo d` 部署后，GitHub Pages 的 Custom domain 设置被清空，域名失效
+
+### 根因
+
+- GitHub Pages 的 Custom domain 配置依赖仓库根的 `CNAME` 文件
+- `hexo-deployer-git` 把 `public/` 内容**强制覆盖**到 `gh-pages` 分支
+- `public/` 里原本没有 `CNAME` 文件（它由 GitHub UI 写到 `gh-pages`，不属于 Hexo 生成物）→ 每次 `hexo d` 后 `CNAME` 被覆盖删除 → GitHub 检测到 `CNAME` 丢失 → 清空 Custom domain 设置
+
+### 修复
+
+- 新建 `source/CNAME` 文件，内容只有一行 `anemone.wiki`
+- Hexo 把 `source/` 下所有非下划线开头文件原样拷贝到 `public/`，所以 `CNAME` 会随 `hexo d` 推到 `gh-pages` 根目录
+- 这样每次部署后 `CNAME` 都在，GitHub Pages 的 Custom domain 配置不再被清空
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：目录结构补 `source/CNAME`、分支隔离方案补"自定义域名"说明（含根因提示）
+- `doc/CHANGELOG.md`：追加本次条目
+
