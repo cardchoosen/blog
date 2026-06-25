@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <script>
+    // 防 FOUC：CSS 加载前根据 localStorage 或系统偏好设置主题 class
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = saved || (mql ? 'dark' : 'light');
+        document.documentElement.className = 'theme-' + theme;
+      } catch (e) {}
+    })();
+  </script>
   
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,6 +48,13 @@
   
 </nav>
 
+<button class="theme-toggle" type="button" aria-label="切换主题" title="切换深/浅主题">
+  <span class="theme-stack">
+    <span class="theme-char" data-char="深">深</span>
+    <span class="theme-char" data-char="浅">浅</span>
+  </span>
+</button>
+
   </header>
 
   <div class="main-layout">
@@ -45,20 +63,24 @@
   <div class="shelf-head">目录</div>
   <ul class="shelf-list">
     
+      
       <li class="shelf-item" data-cat="前端">
-        <button class="shelf-cat" type="button">
+        <button class="shelf-cat active" type="button">
           <span class="cat-name">前端</span>
           <span class="cat-count">2</span>
         </button>
-        <ul class="shelf-posts">
+        <ul class="shelf-posts open">
           
+            
             <li><a href="/blog/2026/06/25/test-frontend-2/" class="post-link">Vue3 新特性</a></li>
           
+            
             <li><a href="/blog/2026/06/25/test-frontend-1/" class="post-link">React 入门指南</a></li>
           
         </ul>
       </li>
     
+      
       <li class="shelf-item" data-cat="后端">
         <button class="shelf-cat" type="button">
           <span class="cat-name">后端</span>
@@ -66,8 +88,10 @@
         </button>
         <ul class="shelf-posts">
           
+            
             <li><a href="/blog/2026/06/25/test-backend-2/" class="post-link">MySQL 索引调优</a></li>
           
+            
             <li><a href="/blog/2026/06/25/test-backend-1/" class="post-link">Go 并发编程</a></li>
           
         </ul>

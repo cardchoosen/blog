@@ -1,60 +1,86 @@
-// geek-shelf · 左侧书架手风琴交互（原生 JS）
+// geek-shelf · 左侧书架手风琴交互 + 主题切换（原生 JS）
 (function () {
   'use strict';
-
-  function norm(path) {
-    return path && path.length > 1 && path.charAt(path.length - 1) === '/'
-      ? path.slice(0, -1) : path;
-  }
 
   function onReady(fn) {
     if (document.readyState !== 'loading') fn();
     else document.addEventListener('DOMContentLoaded', fn);
   }
 
+  // 展开状态持久化键
+  var STORAGE_KEY = 'shelf-opened';
+
+  function loadOpened() {
+    try {
+      var v = localStorage.getItem(STORAGE_KEY);
+      return v ? JSON.parse(v) : null;
+    } catch (e) { return null; }
+  }
+
+  function saveOpened(set) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(set))); } catch (e) {}
+  }
+
   onReady(function () {
+    // ---- 书架手风琴 ----
+    // 注意：当前文章所在分类的 active/open 已由 EJS 模板在服务端渲染时加上
+    // JS 只负责恢复 localStorage 持久化的其他展开分类 + 点击交互
     var buttons = document.querySelectorAll('.shelf-cat');
-    if (!buttons.length) return;
+    if (buttons.length) {
+      var openedCats = new Set(loadOpened() || []);
 
-    var currentPath = norm(window.location.pathname);
-
-    // 进入文章页时自动展开当前分类
-    var openedItem = null;
-    document.querySelectorAll('.shelf-item').forEach(function (item) {
-      item.querySelectorAll('.post-link').forEach(function (link) {
-        if (norm(link.getAttribute('href')) === currentPath) {
-          link.classList.add('current');
-          openedItem = item;
+      // 恢复 localStorage 持久化的展开分类（不覆盖 EJS 已加的 active/open）
+      document.querySelectorAll('.shelf-item').forEach(function (item) {
+        var cat = item.getAttribute('data-cat');
+        if (cat && openedCats.has(cat)) {
+          var posts = item.querySelector('.shelf-posts');
+          var btn = item.querySelector('.shelf-cat');
+          if (posts) posts.classList.add('open');
+          if (btn) btn.classList.add('active');
         }
       });
-    });
 
-    if (openedItem) {
-      var posts = openedItem.querySelector('.shelf-posts');
-      var btn = openedItem.querySelector('.shelf-cat');
-      if (posts) posts.classList.add('open');
-      if (btn) btn.classList.add('active');
+      // 把当前文章所在分类（EJS 已加 active 的）也持久化
+      document.querySelectorAll('.shelf-item').forEach(function (item) {
+        var btn = item.querySelector('.shelf-cat.active');
+        if (btn) {
+          var cat = item.getAttribute('data-cat');
+          if (cat) openedCats.add(cat);
+        }
+      });
+      saveOpened(openedCats);
+
+      // 点击切换自己展开/收起，不影响其他（允许多开），并持久化
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var item = btn.parentElement;
+          var posts = item.querySelector('.shelf-posts');
+          if (!posts) return;
+
+          var willOpen = !posts.classList.contains('open');
+          posts.classList.toggle('open', willOpen);
+          btn.classList.toggle('active', willOpen);
+
+          var cat = item.getAttribute('data-cat');
+          if (cat) {
+            if (willOpen) openedCats.add(cat);
+            else openedCats.delete(cat);
+            saveOpened(openedCats);
+          }
+        });
+      });
     }
 
-    // 手风琴：一次只展开一个
-    buttons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var item = btn.parentElement;
-        var posts = item.querySelector('.shelf-posts');
-        if (!posts) return;
-
-        var willOpen = !posts.classList.contains('open');
-
-        document.querySelectorAll('.shelf-posts.open').forEach(function (el) {
-          if (el !== posts) el.classList.remove('open');
-        });
-        document.querySelectorAll('.shelf-cat.active').forEach(function (el) {
-          if (el !== btn) el.classList.remove('active');
-        });
-
-        posts.classList.toggle('open', willOpen);
-        btn.classList.toggle('active', willOpen);
+    // ---- 主题切换 ----
+    var toggle = document.querySelector('.theme-toggle');
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        var html = document.documentElement;
+        var isDark = html.classList.contains('theme-dark');
+        var next = isDark ? 'light' : 'dark';
+        html.className = 'theme-' + next;
+        try { localStorage.setItem('theme', next); } catch (e) {}
       });
-    });
+    }
   });
 })();
