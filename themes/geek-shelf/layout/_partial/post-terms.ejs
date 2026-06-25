@@ -1,0 +1,13 @@
+<%
+  // 渲染文章的分类或标签条
+  // type: 'category' | 'tag'
+  var prefix = type === 'tag' ? '#' : '';
+  var cls = type === 'tag' ? 'post-tags' : 'post-categories';
+  var items = type === 'tag' ? post.tags : post.categories;
+%>
+<span class="<%= cls %>">
+  <% items.each(function(item, i) { %>
+    <% if (i > 0) { %>, <% } %>
+    <a href="<%- url_for(item.path) %>" class="<%= type %>-link"><%= prefix %><%= item.name %></a>
+  <% }) %>
+</span>

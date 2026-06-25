@@ -1,0 +1,20 @@
+<div class="post-list">
+  <% page.posts.each(function(post) { %>
+    <article class="post-item">
+      <div class="item-date"><%= date(post.date, 'YYYY-MM-DD') %></div>
+      <h2 class="item-title">
+        <a href="<%- url_for(post.path) %>"><%= post.title %></a>
+      </h2>
+      <% if (post.excerpt) { %>
+        <div class="item-excerpt"><%- post.excerpt %></div>
+      <% } %>
+    </article>
+  <% }) %>
+</div>
+
+<% if (page.prev || page.next) { %>
+  <nav class="pager">
+    <a class="pager-cell" href="<%- page.prev ? url_for(page.prev_link) : '#' %>" <% if (!page.prev) { %>aria-disabled="true"<% } %>>&lt; OLDER</a>
+    <a class="pager-cell right" href="<%- page.next ? url_for(page.next_link) : '#' %>" <% if (!page.next) { %>aria-disabled="true"<% } %>>NEWER &gt;</a>
+  </nav>
+<% } %>

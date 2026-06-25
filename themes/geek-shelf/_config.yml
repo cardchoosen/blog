@@ -1,0 +1,7 @@
+# geek-shelf theme configuration
+
+menu:
+  首页: /
+  归档: /archives
+
+favicon: /favicon.ico

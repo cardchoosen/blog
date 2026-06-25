@@ -1,0 +1,24 @@
+<%
+  // 左侧书架：按 front-matter categories 聚合
+  var cats = site.categories.sort('name', 1).toArray();
+%>
+<aside class="shelf">
+  <div class="shelf-head">目录</div>
+  <ul class="shelf-list">
+    <% if (cats.length === 0) { %>
+      <li class="shelf-empty">无分类</li>
+    <% } else { cats.forEach(function(cat) { %>
+      <li class="shelf-item" data-cat="<%= cat.name %>">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name"><%= cat.name %></span>
+          <span class="cat-count"><%= cat.posts.length %></span>
+        </button>
+        <ul class="shelf-posts">
+          <% cat.posts.sort('date', -1).each(function(post) { %>
+            <li><a href="<%- url_for(post.path) %>" class="post-link"><%= post.title || post.slug %></a></li>
+          <% }) %>
+        </ul>
+      </li>
+    <% }) } %>
+  </ul>
+</aside>

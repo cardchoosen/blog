@@ -8,8 +8,11 @@
 | 维度 | 选型 |
 |------|------|
 | 静态站点生成器 | Hexo 8.1.2 |
-| 主题 | Landscape（默认，经 npm 安装，非实体目录） |
-| 模板渲染 | hexo-renderer-ejs / hexo-renderer-marked / hexo-renderer-stylus |
+| 主题 | `geek-shelf`（自制定制主题，位于 `themes/geek-shelf/`，git 跟踪） |
+| 模板引擎 | EJS（hexo-renderer-ejs） |
+| 样式 | Stylus（hexo-renderer-stylus），含 mixin 抽象 |
+| Markdown 渲染 | hexo-renderer-marked |
+| 代码高亮 | highlight.js（已关行号） |
 | 内容生成器 | archive / category / index / tag |
 | 部署器 | hexo-deployer-git（推送静态站到 gh-pages 分支） |
 | 运行时 | Node.js（开发机 v24.6.0） |
@@ -21,18 +24,24 @@
 
 ```
 Hexo/
-├── _config.yml              # 站点主配置（标题/语言/URL/deploy 等）
-├── _config.landscape.yml    # 主题专属配置（当前空文件，Landscape 默认未覆盖）
+├── _config.yml              # 站点主配置（标题/语言/URL/deploy/theme 等）
+├── _config.landscape.yml    # Landscape 主题专属配置（空文件，已不使用）
 ├── package.json             # 依赖与 npm scripts
 ├── package-lock.json        # 依赖锁
 ├── scaffolds/               # 文章模板
-│   ├── draft.md             #   草稿模板
-│   ├── page.md              #   自定义页面模板
-│   └── post.md              #   文章模板
+│   ├── draft.md
+│   ├── page.md
+│   └── post.md
 ├── source/                  # 内容源文件
 │   └── _posts/              #   文章 Markdown
-│       └── hello-world.md   #   默认示例文章
-├── themes/                  # 主题目录（当前仅 .gitkeep，Landscape 通过 npm 提供）
+│       ├── hello-world.md       # 默认示例（已加 Java/Go/TS 代码段）
+│       ├── test-frontend-1.md   # 测试文章（categories: 前端）
+│       ├── test-frontend-2.md   # 测试文章（categories: 前端）
+│       ├── test-backend-1.md    # 测试文章（categories: 后端）
+│       └── test-backend-2.md    # 测试文章（categories: 后端）
+├── themes/
+│   ├── .gitkeep             # 占位（已无用但保留）
+│   └── geek-shelf/          # 自制主题（见下"主题结构"）
 ├── .github/
 │   └── dependabot.yml       # Dependabot 依赖更新配置
 ├── .gitignore
@@ -56,18 +65,60 @@ Hexo/
 
 | 配置块 | 关键值 | 说明 |
 |--------|--------|------|
-| Site.title | `My Blog` | 站点标题 |
+| Site.title | `Anemone's Blog` | 站点标题 |
 | Site.author | `nannnzhang` | 作者 |
 | Site.language | `zh-CN` | 站点语言 |
 | Site.timezone | `Asia/Shanghai` | 时区 |
-| URL.url | `https://cardchoosen.github.io/blog` | 站点 URL（项目站点，带 `/blog` 路径） |
+| URL.url | `https://cardchoosen.github.io/blog` | 站点 URL（项目站点，带 `/blog`） |
 | URL.permalink | `:year/:month/:day/:title/` | 文章永久链接格式 |
-| Writing.syntax_highlighter | `highlight.js` | 代码高亮 |
+| Writing.syntax_highlighter | `highlight.js` | 代码高亮引擎 |
+| highlight.line_number | `false` | **已关代码行号** |
 | index_generator.per_page | `10` | 首页每页文章数 |
-| Extensions.theme | `landscape` | 主题名 |
+| Extensions.theme | `geek-shelf` | 主题名（自制） |
 | Deploy.type | `git` | 部署器类型 |
 | Deploy.repo | `https://github.com/cardchoosen/blog.git` | 部署目标仓库 |
 | Deploy.branch | `gh-pages` | 部署目标分支 |
+
+## 主题结构（themes/geek-shelf/）
+
+```
+themes/geek-shelf/
+├── _config.yml                    # 主题配置（menu / favicon）
+├── layout/
+│   ├── layout.ejs                 # 主布局：顶部黑条 + 左书架 + 右内容
+│   ├── index.ejs                  # 首页文章列表 + 分页
+│   ├── post.ejs                   # 文章详情（引入 article + post-nav）
+│   ├── page.ejs                   # 自定义页面（复用 article）
+│   ├── archive.ejs                # 归档（按年分组）
+│   ├── category.ejs               # 分类索引（引入 archive-list）
+│   ├── tag.ejs                    # 标签索引（引入 archive-list）
+│   └── _partial/
+│       ├── head.ejs               # <head>（meta/title/css/open_graph）
+│       ├── header.ejs             # 顶部色块（站点标题 + 导航）
+│       ├── shelf.ejs              # 左侧书架（核心：按 categories 聚合）
+│       ├── article.ejs            # 文章渲染（标题/日期/分类/标签/正文）
+│       ├── post-terms.ejs         # 文章的分类/标签条（参数化 type）
+│       ├── post-nav.ejs           # 上一篇/下一篇导航
+│       ├── archive-list.ejs       # 归档列表组件（category/tag 复用）
+│       └── footer.ejs             # 版权
+└── source/
+    ├── css/style.styl             # 极客黑白样式（含 hover-soft mixin）
+    └── js/shelf.js                # 手风琴交互（原生 JS，无依赖）
+```
+
+### 主题核心机制
+
+**左侧书架**：遍历 `site.categories` 聚合所有分类及文章。点击分类按钮手风琴展开该分类下文章列表（一次只展开一个）。进入文章页时，自动展开当前文章所在分类并高亮当前文章链接。
+
+**视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变；代码块深灰底 `#2a2a2a` + 浅灰字 `#e0e0e0`。无圆角无阴影无渐变。等宽字体 `ui-monospace` 全站。
+
+**CSS 关键设计**：
+- `hover-soft()` mixin：统一管理"hover 时浅灰底 + 深灰字 + 0.12s 过渡"，7 处复用
+- 代码块 `<figure class="highlight"><table><td>` 结构特殊处理：
+  - `.gutter` `display:none`（隐藏行号列）
+  - `td` `border:none`（去掉代码块四周白线，与 markdown 表格的 td 边框区分）
+  - `tr:hover td` `background:transparent`（避免鼠标 hover 代码块时变白底）
+  - `:focus`/`:focus-visible` 重置 outline 与背景（避免浏览器默认 focus 高亮覆盖深灰底）
 
 ## 分支隔离发布方案
 
@@ -86,7 +137,7 @@ gh-pages   ← hexo g 生成的静态站（由 hexo d 自动推送）
 ```bash
 npm run build    # = hexo generate，生成静态站到 public/
 npm run clean    # = hexo clean，清理 public/、db.json、.deploy_git/
-npm run server   # = hexo server，本地预览 http://localhost:4000
+npm run server   # = hexo server，本地预览 http://localhost:4000/blog/
 npm run deploy   # = hexo deploy，推送 public/ 到 gh-pages
 ```
 
@@ -96,7 +147,7 @@ npm run deploy   # = hexo deploy，推送 public/ 到 gh-pages
 # 1. 写新文章
 npx hexo new "文章标题"
 
-# 2. 编辑 source/_posts/文章标题.md
+# 2. 编辑 source/_posts/文章标题.md（注意在 front-matter 写 categories）
 
 # 3. 一键发布
 npx hexo clean && npx hexo g && npx hexo d
@@ -119,3 +170,9 @@ public/  （静态 HTML/CSS/JS）
       ▼
 gh-pages 分支  →  GitHub Pages  →  https://cardchoosen.github.io/blog
 ```
+
+## 开发注意事项
+
+- **改 `_config.yml` 后必须重启 hexo server**：hexo server 不热重载站点配置，进程内存里保留旧值。停掉 `npx hexo s` 再重新启动即可。
+- **改主题代码无需重启**：hexo server 监听 `themes/` 和 `source/` 下文件变化，会自动重新渲染。
+- **Stylus mixin 调用语法**：用 `name()`（不带 `+` 前缀），不要用 `+name()`——当前 stylus 版本不支持 `+name()` 调用形式，会导致整个 CSS 编译失败生成空文件。

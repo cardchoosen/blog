@@ -1,0 +1,17 @@
+<%
+  var title = page.title || config.title;
+  var description = page.description || config.description || '';
+  var keywords = [].concat(page.keywords || config.keywords || []);
+%>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title %></title>
+<meta name="description" content="<%= description %>">
+<% if (keywords.length) { %>
+  <meta name="keywords" content="<%= keywords.join(', ') %>">
+<% } %>
+<% if (theme.favicon) { %>
+  <link rel="icon" href="<%- theme.favicon %>">
+<% } %>
+<%- css('/css/style') %>
+<%- open_graph() %>

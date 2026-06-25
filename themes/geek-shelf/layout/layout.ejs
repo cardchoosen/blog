@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="<%= config.language %>">
+<head>
+  <%- partial('_partial/head') %>
+</head>
+<body>
+  <header class="topbar">
+    <%- partial('_partial/header') %>
+  </header>
+
+  <div class="main-layout">
+    <%- partial('_partial/shelf') %>
+    <main class="content">
+      <%- body %>
+    </main>
+  </div>
+
+  <%- partial('_partial/footer') %>
+  <%- js('/js/shelf.js') %>
+</body>
+</html>

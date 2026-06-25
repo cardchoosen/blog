@@ -1,0 +1,10 @@
+<%
+  // 归档列表（首页归档/分类索引/标签索引复用）
+  // dateFormat: 日期格式字符串
+%>
+<% page.posts.each(function(post) { %>
+  <div class="archive-row">
+    <time class="archive-date"><%= date(post.date, dateFormat) %></time>
+    <a href="<%- url_for(post.path) %>" class="archive-link"><%= post.title %></a>
+  </div>
+<% }) %>

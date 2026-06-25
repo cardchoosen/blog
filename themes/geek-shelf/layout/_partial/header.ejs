@@ -1,0 +1,12 @@
+<div class="brand">
+  <a href="<%- url_for('/') %>" class="brand-title"><%= config.title %></a>
+  <% if (config.subtitle) { %>
+    <span class="brand-sub"><%= config.subtitle %></span>
+  <% } %>
+</div>
+
+<nav class="topnav">
+  <% for (var name in (theme.menu || {})) { %>
+    <a href="<%- url_for(theme.menu[name]) %>" class="nav-item"><%= name %></a>
+  <% } %>
+</nav>
