@@ -69,7 +69,7 @@ Hexo/
 | Site.author | `nannnzhang` | 作者 |
 | Site.language | `zh-CN` | 站点语言 |
 | Site.timezone | `Asia/Shanghai` | 时区 |
-| URL.url | `https://cardchoosen.github.io/blog` | 站点 URL（项目站点，带 `/blog`） |
+| URL.url | `https://anemone.wiki` | 站点 URL（自定义域名，根路径访问） |
 | URL.permalink | `:year/:month/:day/:title/` | 文章永久链接格式 |
 | Writing.syntax_highlighter | `highlight.js` | 代码高亮引擎 |
 | highlight.line_number | `false` | **已关代码行号** |
@@ -146,14 +146,14 @@ gh-pages   ← hexo g 生成的静态站（由 hexo d 自动推送）
 - `main` 分支通过 `git push` 维护，保存所有源文件
 - `gh-pages` 分支由 `hexo-deployer-git` 自动创建并推送，只含 `public/` 内容
 - GitHub Pages Source 配置为 `gh-pages` 分支 `/ (root)` 目录
-- 访问入口：`https://cardchoosen.github.io/blog`
+- 访问入口：`https://anemone.wiki`（自定义域名，根路径访问）
 
 ## 常用命令（npm scripts）
 
 ```bash
 npm run build    # = hexo generate，生成静态站到 public/
 npm run clean    # = hexo clean，清理 public/、db.json、.deploy_git/
-npm run server   # = hexo server，本地预览 http://localhost:4000/blog/
+npm run server   # = hexo server，本地预览 http://localhost:4000/
 npm run deploy   # = hexo deploy，推送 public/ 到 gh-pages
 ```
 
@@ -184,7 +184,7 @@ public/  （静态 HTML/CSS/JS）
       │
       │  hexo deploy（hexo-deployer-git）
       ▼
-gh-pages 分支  →  GitHub Pages  →  https://cardchoosen.github.io/blog
+gh-pages 分支  →  GitHub Pages  →  https://anemone.wiki
 ```
 
 ## 开发注意事项

@@ -15,7 +15,7 @@
 | 作者 | nannnzhang |
 | 语言 | 简体中文 |
 | 时区 | Asia/Shanghai |
-| 访问入口 | https://cardchoosen.github.io/blog |
+| 访问入口 | https://anemone.wiki |
 | 主题 | geek-shelf（自制，纯黑白极客风） |
 
 ## 核心功能
@@ -85,7 +85,7 @@
 - `overscroll-behavior: none` 禁用弹性滚动
 
 ### 10. 本地预览
-- `npm run server` 启动本地服务，访问 `http://localhost:4000/blog/`
+- `npm run server` 启动本地服务，访问 `http://localhost:4000/`
 - 监听 source/ 和 themes/ 文件变化自动重载
 - 注意：改 `_config.yml` 站点配置后需重启 server
 

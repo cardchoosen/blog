@@ -213,3 +213,28 @@
 - `doc/FEATURES.md`：更新"8. 代码语法高亮"章节，描述 atom-one-light/dark 跟随切换机制
 - `doc/CHANGELOG.md`：追加本次条目
 
+---
+
+## 2026-06-25 23:40 · （本次提交）· config: 绑定自定义域名 anemone.wiki
+
+> 本条目对应本次提交，把站点 URL 从 GitHub Pages 默认地址改为自定义域名。
+
+### 改动
+
+- **`_config.yml`**：`url` 从 `https://cardchoosen.github.io/blog` 改为 `https://anemone.wiki`
+  - 之前：项目站点默认走 `/<仓库名>/` 子路径，资源链接带 `/blog` 前缀
+  - 现在：自定义域名根路径访问，资源链接自动改为根路径 `/css/style.css` 等
+
+### 背景
+
+- 用户在腾讯云为 `anemone.wiki` 配置了 DNS 解析（CNAME 指向 `cardchoosen.github.io` + 4 条 A 记录指向 GitHub Pages IP）
+- 在 GitHub 仓库 `cardchoosen/blog` Settings → Pages → Custom domain 绑定 `anemone.wiki`，DNS check successful
+- 绑定后 `https://anemone.wiki/` 能访问到博客 HTML 内容，但**无样式**——因为资源链接还是 `/blog/css/style.css`，而 `/blog/` 路径在自定义域名下不存在（404）
+- 修复方式：把 `url` 改为 `https://anemone.wiki`，Hexo 的 `url_for()`/`css()`/`js()` 会根据 `url` 自动计算 root，所有资源链接自动变成根路径
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：更新站点 URL 配置、访问入口、部署链路、本地预览 URL
+- `doc/FEATURES.md`：更新访问入口、本地预览 URL
+- `doc/CHANGELOG.md`：追加本次条目
+

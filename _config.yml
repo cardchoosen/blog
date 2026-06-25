@@ -13,8 +13,8 @@ timezone: 'Asia/Shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-## 仓库名为 blog（项目站点），URL 需带 /blog 路径
-url: https://cardchoosen.github.io/blog
+## 绑定自定义域名 anemone.wiki，根路径访问
+url: https://anemone.wiki
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
