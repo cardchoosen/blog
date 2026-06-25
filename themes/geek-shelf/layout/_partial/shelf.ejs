@@ -1,6 +1,17 @@
 <%
   // 左侧书架：按 front-matter categories 聚合
+  // 渲染时即判断当前页面所属分类，直接给对应按钮加 active/open
+  // 避免 JS 后加 class 导致的闪烁
   var cats = site.categories.sort('name', 1).toArray();
+  var currentCat = null;
+  if (page.category) {
+    currentCat = page.category;
+  } else if (page.posts && page.posts.length && page.base) {
+    // 文章详情页：page 是 post 对象，遍历其 categories
+    if (page.categories && page.categories.length) {
+      page.categories.each(function (c) { currentCat = c.name; });
+    }
+  }
 %>
 <aside class="shelf">
   <div class="shelf-head">目录</div>
@@ -8,14 +19,24 @@
     <% if (cats.length === 0) { %>
       <li class="shelf-empty">无分类</li>
     <% } else { cats.forEach(function(cat) { %>
+      <%
+        var isActive = (cat.name === currentCat);
+        // 文章详情页：检测当前文章是否属于此分类
+        if (!isActive && page.categories) {
+          page.categories.each(function (c) {
+            if (c.name === cat.name) isActive = true;
+          });
+        }
+      %>
       <li class="shelf-item" data-cat="<%= cat.name %>">
-        <button class="shelf-cat" type="button">
+        <button class="shelf-cat<%= isActive ? ' active' : '' %>" type="button">
           <span class="cat-name"><%= cat.name %></span>
           <span class="cat-count"><%= cat.posts.length %></span>
         </button>
-        <ul class="shelf-posts">
+        <ul class="shelf-posts<%= isActive ? ' open' : '' %>">
           <% cat.posts.sort('date', -1).each(function(post) { %>
-            <li><a href="<%- url_for(post.path) %>" class="post-link"><%= post.title || post.slug %></a></li>
+            <% var isCurrent = (post.path === page.path); %>
+            <li><a href="<%- url_for(post.path) %>" class="post-link<%= isCurrent ? ' current' : '' %>"><%= post.title || post.slug %></a></li>
           <% }) %>
         </ul>
       </li>

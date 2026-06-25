@@ -113,3 +113,56 @@
 - `doc/FEATURES.md`：更新站点信息（标题改为 Anemone's Blog）、新增"左侧分类书架"核心功能、更新视觉风格描述、更新当前内容（5 篇文章）、更新待规划项
 - `doc/CHANGELOG.md`：追加本次条目
 
+---
+
+## 2026-06-25 22:30 · （本次提交）· feat: 深/浅主题切换 + 顶栏布局调整 + 书架交互优化
+
+> 本条目对应本次提交，涵盖主题切换架构、顶栏布局重排、书架交互优化、视觉细节调整等改动。所有改动已经用户本地验证通过。
+
+### 顶栏布局调整
+
+- **导航移到标题旁**：首页/归档从顶栏右侧移到左侧，紧挨着站点标题（gap 24px）
+- **顶栏最右侧加主题切换按钮**
+
+### 深/浅主题切换架构
+
+- **CSS 变量系统**：`:root` 定义浅色主题默认变量；`@media (prefers-color-scheme: dark)` 覆盖深色；`html.theme-light`/`html.theme-dark` 手动覆盖（优先级最高）
+- **防 FOUC**：`layout.ejs` 在 `<head>` 加内联脚本，CSS 加载前根据 localStorage 或系统偏好给 `<html>` 加 class，避免页面加载时闪默认主题色
+- **主题切换按钮**：
+  - 显示"深"/"浅"两字叠加，当前主题字放大在左（16px 不透明），另一字缩小半透明在右（10px, opacity 0.35）
+  - 容器宽 28px，两字约 1/3 部分重叠
+  - 按钮 hover/focus 不变背景色（避免在黑底顶栏内被全局 hover 规则覆盖）
+- **shelf.js** 加主题切换 click 逻辑：切换 html.className + 写 localStorage
+- **优先级**：localStorage > 系统偏好 > 默认浅色
+
+### 书架交互优化
+
+- **允许多开**：点击分类按钮只切换自己展开/收起，不影响其他已展开分类（之前是手风琴一次只展开一个）
+- **状态持久化**：展开状态存于 localStorage（key: `shelf-opened`），跨页面保持。用户在 A 页面展开多个分类后，跳到文章页时这些展开状态不丢失
+- **active 状态前移到 EJS 渲染**：当前文章所在分类的 `active`/`open`/`current` class 由 `shelf.ejs` 服务端渲染时直接写入 HTML，避免 JS 在 DOMContentLoaded 后加 class 导致的"白→灰"闪烁
+
+### 目录标题样式优化
+
+- 字号 10px → 13px，加粗
+- 颜色从 `#999` 改为 `var(--color-text)`（主文字色）
+- 左侧加 3px 粗竖线 accent bar（`::before` 伪元素）作为视觉提示
+- 去掉 `text-transform: uppercase`（中文不生效）
+
+### 视觉细节
+
+- **顶栏 sticky 修复**：根因是 `html, body { height: 100% }` 破坏了 sticky（body 高度被限制为视口高度，内容溢出后 sticky 锚点错乱）。已删除该规则
+- **禁用弹性滚动**：`html` 和 `body` 都加 `overscroll-behavior: none`，滑动到顶/底时不再延伸出空白区域
+- **深色主题代码块底色**：从纯黑 `#000` 改为 `#0a0a0a`（比页面背景 `#1a1a1a` 略黑，不是纯黑）
+- **浅色主题代码块底色**：从 `#2a2a2a` 改为 `#e8e8e8`（避免过黑费眼）
+
+### 站点配置
+
+- **brand-title hover/focus 修复**：黑底顶栏内的标题，hover/focus 仅加下划线，不变背景色（避免被全局 `a:hover` 浅灰底规则覆盖导致看不清）
+- **nav-item focus 统一**：hover 与 focus 行为一致（反白），禁掉 focus-visible outline
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：更新主题结构描述（多开 + 持久化 + EJS active 渲染）、新增深/浅主题切换机制、补充开发注意事项（EJS 注释语法、active 状态前移、sticky 限制、防 FOUC）
+- `doc/FEATURES.md`：新增"深/浅主题切换"核心功能章节、更新书架交互为多开模式、更新代码块底色（浅色 #e8e8e8 / 深色 #0a0a0a）、补充禁用弹性滚动
+- `doc/CHANGELOG.md`：追加本次条目
+

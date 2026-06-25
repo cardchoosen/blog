@@ -94,7 +94,7 @@ themes/geek-shelf/
 │   ├── tag.ejs                    # 标签索引（引入 archive-list）
 │   └── _partial/
 │       ├── head.ejs               # <head>（meta/title/css/open_graph）
-│       ├── header.ejs             # 顶部色块（站点标题 + 导航）
+│       ├── header.ejs             # 顶部色块（站点标题 + 导航 + 主题切换按钮）
 │       ├── shelf.ejs              # 左侧书架（核心：按 categories 聚合）
 │       ├── article.ejs            # 文章渲染（标题/日期/分类/标签/正文）
 │       ├── post-terms.ejs         # 文章的分类/标签条（参数化 type）
@@ -108,12 +108,18 @@ themes/geek-shelf/
 
 ### 主题核心机制
 
-**左侧书架**：遍历 `site.categories` 聚合所有分类及文章。点击分类按钮手风琴展开该分类下文章列表（一次只展开一个）。进入文章页时，自动展开当前文章所在分类并高亮当前文章链接。
+**左侧书架**：遍历 `site.categories` 聚合所有分类及文章。点击分类按钮展开/收起该分类下文章列表，**允许多开**（点击不影响其他已展开分类）。展开状态通过 `localStorage` 持久化，跨页面保持。进入文章页时，**EJS 服务端渲染**即判断当前文章所属分类并直接给按钮加 `active` class、列表加 `open` class、文章链接加 `current` class——避免 JS 后加 class 导致的闪烁。
 
-**视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变；代码块深灰底 `#2a2a2a` + 浅灰字 `#e0e0e0`。无圆角无阴影无渐变。等宽字体 `ui-monospace` 全站。
+**深/浅主题切换**：
+- CSS 变量（自定义属性）系统：`:root` 定义浅色主题默认变量，`@media (prefers-color-scheme: dark)` 覆盖深色，`html.theme-light`/`html.theme-dark` 手动切换覆盖（优先级最高）
+- 顶栏右侧切换按钮：显示"深"/"浅"两字叠加，当前主题字放大在左（标识当前主题），另一字缩小透明在右（提示可切到）
+- 防 FOUC：`layout.ejs` 在 `<head>` 内联脚本，CSS 加载前根据 localStorage 或 prefers-color-scheme 给 `<html>` 加 class
+- 优先级：localStorage > 系统偏好 > 默认浅色
+
+**视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变。浅色主题代码块 `#e8e8e8` 底，深色主题 `#0a0a0a` 底（比页面背景 `#1a1a1a` 略黑）。无圆角无阴影无渐变。等宽字体 `ui-monospace` 全站。`overscroll-behavior: none` 禁用弹性滚动。
 
 **CSS 关键设计**：
-- `hover-soft()` mixin：统一管理"hover 时浅灰底 + 深灰字 + 0.12s 过渡"，7 处复用
+- `hover-soft()` mixin：统一管理"hover 时浅灰底 + 深灰字 + 0.12s 过渡"，多处复用
 - 代码块 `<figure class="highlight"><table><td>` 结构特殊处理：
   - `.gutter` `display:none`（隐藏行号列）
   - `td` `border:none`（去掉代码块四周白线，与 markdown 表格的 td 边框区分）
@@ -176,3 +182,8 @@ gh-pages 分支  →  GitHub Pages  →  https://cardchoosen.github.io/blog
 - **改 `_config.yml` 后必须重启 hexo server**：hexo server 不热重载站点配置，进程内存里保留旧值。停掉 `npx hexo s` 再重新启动即可。
 - **改主题代码无需重启**：hexo server 监听 `themes/` 和 `source/` 下文件变化，会自动重新渲染。
 - **Stylus mixin 调用语法**：用 `name()`（不带 `+` 前缀），不要用 `+name()`——当前 stylus 版本不支持 `+name()` 调用形式，会导致整个 CSS 编译失败生成空文件。
+- **EJS 注释语法**：只能用 `<%# 注释 %>`，不要用 `<%-- 注释 --%>`（JSP 风格），后者会导致 EJS 编译抛 `SyntaxError: missing ) after argument list`，hexo server 进程崩溃退出。
+- **hexo server 异常退出排查**：若 task 启动后秒退，先看 stderr 是否有 EJS/Stylus 编译错误——通常是模板语法问题导致渲染流程抛 Unhandled rejection，不是端口冲突。
+- **书架 active 状态由 EJS 渲染**：当前文章所在分类的 `active`/`open`/`current` class 在 `shelf.ejs` 服务端渲染时即写入 HTML，JS 只负责 localStorage 持久化的其他展开分类恢复 + 点击交互。这样避免 JS 后加 class 导致的闪烁。
+- **顶栏 sticky 不要被 html/body height 破坏**：不要给 html/body 设 `height: 100%`，会让 sticky 在滚动到某位置失效（顶栏消失）。
+- **主题切换防 FOUC**：`layout.ejs` 的 `<head>` 内联脚本必须在 CSS 加载前执行，根据 localStorage/prefers-color-scheme 给 `<html>` 加 class，否则页面加载时会闪一下默认主题色。

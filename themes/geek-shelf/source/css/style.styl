@@ -1,30 +1,81 @@
 // ============================================================
 // geek-shelf theme · 极客黑白风
 // 黑白主调 + 灰阶过渡 / 等宽字体 / 无圆角无阴影无渐变
+// 支持深/浅主题（CSS 变量 + prefers-color-scheme + localStorage）
 // ============================================================
 
-// ---- 变量 ----
-color-text = #1a1a1a
-color-bg = #ffffff
-color-line = #d0d0d0
-color-hover-bg = #f0f0f0
-color-hover-text = #1a1a1a
-color-active-bg = #e0e0e0
-color-active-text = #000
-color-bar-bg = #1a1a1a
-color-bar-text = #ffffff
-color-code-bg = #2a2a2a
-color-code-text = #e0e0e0
+// ---- 静态变量（不参与主题切换） ----
 font-mono = ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace
 width-shelf = 280px
 height-topbar = 56px
+
+// ---- 主题变量（CSS 自定义属性） ----
+// 默认浅色主题
+:root
+  --color-bg #ffffff
+  --color-text #1a1a1a
+  --color-line #d0d0d0
+  --color-hover-bg #f0f0f0
+  --color-hover-text #1a1a1a
+  --color-active-bg #e0e0e0
+  --color-active-text #000
+  --color-bar-bg #1a1a1a
+  --color-bar-text #ffffff
+  --color-code-bg #e8e8e8
+  --color-code-text #1a1a1a
+  --color-shelf-posts-bg #fafafa
+
+// 系统深色偏好
+@media (prefers-color-scheme: dark)
+  :root
+    --color-bg #1a1a1a
+    --color-text #e0e0e0
+    --color-line #2a2a2a
+    --color-hover-bg #2a2a2a
+    --color-hover-text #e0e0e0
+    --color-active-bg #3a3a3a
+    --color-active-text #fff
+    --color-bar-bg #000
+    --color-bar-text #e0e0e0
+    --color-code-bg #0a0a0a
+    --color-code-text #e0e0e0
+    --color-shelf-posts-bg #222
+
+// JS 手动切换：在 <html> 加 class 覆盖（优先级最高）
+html.theme-light
+  --color-bg #ffffff
+  --color-text #1a1a1a
+  --color-line #d0d0d0
+  --color-hover-bg #f0f0f0
+  --color-hover-text #1a1a1a
+  --color-active-bg #e0e0e0
+  --color-active-text #000
+  --color-bar-bg #1a1a1a
+  --color-bar-text #ffffff
+  --color-code-bg #e8e8e8
+  --color-code-text #1a1a1a
+  --color-shelf-posts-bg #fafafa
+
+html.theme-dark
+  --color-bg #1a1a1a
+  --color-text #e0e0e0
+  --color-line #2a2a2a
+  --color-hover-bg #2a2a2a
+  --color-hover-text #e0e0e0
+  --color-active-bg #3a3a3a
+  --color-active-text #fff
+  --color-bar-bg #000
+  --color-bar-text #e0e0e0
+  --color-code-bg #0a0a0a
+  --color-code-text #e0e0e0
+  --color-shelf-posts-bg #222
 
 // ---- mixin ----
 hover-soft()
   transition background-color 0.12s ease, color 0.12s ease
   &:hover
-    background color-hover-bg
-    color color-hover-text
+    background var(--color-hover-bg)
+    color var(--color-hover-text)
 
 // ---- reset ----
 *
@@ -32,35 +83,40 @@ hover-soft()
   padding 0
   box-sizing border-box
 
-html, body
-  height 100%
+// 注意：不要给 html/body 设 height: 100%，会破坏 topbar 的 position: sticky
+// body 高度被限制为视口后，sticky 在滚动到某位置会失效（顶栏消失）
+html
+  overscroll-behavior none
 
 body
   font-family font-mono
-  color color-text
-  background color-bg
+  color var(--color-text)
+  background var(--color-bg)
   font-size 14px
   line-height 1.6
   -webkit-font-smoothing antialiased
+  // 禁用弹性滚动：滑动到顶/底时不再延伸出超出页面的空白区域
+  overscroll-behavior none
 
 a
-  color color-text
+  color var(--color-text)
   text-decoration underline
   hover-soft()
 
 // ---- 顶部色块 ----
 .topbar
   height height-topbar
-  background color-bar-bg
-  color color-bar-text
+  background var(--color-bar-bg)
+  color var(--color-bar-text)
   display flex
   align-items center
-  justify-content space-between
   padding 0 24px
   position sticky
   top 0
   z-index 100
+  gap 24px
 
+// 左侧：品牌 + 导航（紧挨着标题）
 .brand
   display flex
   align-items baseline
@@ -70,12 +126,11 @@ a
   font-size 16px
   font-weight bold
   letter-spacing 0.04em
-  color color-bar-text
+  color var(--color-bar-text)
   text-decoration none
-  // 在黑底顶栏内，hover/focus 仅加下划线，不变背景色（避免与全局 a:hover 浅灰底冲突）
   &:hover, &:focus
     background transparent
-    color color-bar-text
+    color var(--color-bar-text)
     text-decoration underline
   &:focus-visible
     outline none
@@ -87,20 +142,105 @@ a
 
 .topnav
   display flex
-  gap 20px
+  gap 16px
 
 .nav-item
-  color color-bar-text
+  color var(--color-bar-text)
   font-size 13px
   text-decoration none
   letter-spacing 0.04em
   padding 4px 8px
   transition background-color 0.12s ease, color 0.12s ease
   &:hover, &:focus
-    background color-bar-text
-    color color-bar-bg
+    background var(--color-bar-text)
+    color var(--color-bar-bg)
   &:focus-visible
     outline none
+
+// 右侧：主题切换按钮（"深"/"浅"两字叠加，hover/focus 不变背景色）
+.theme-toggle
+  margin-left auto
+  background transparent
+  border none
+  color var(--color-bar-text)
+  cursor pointer
+  font-family font-mono
+  line-height 1
+  padding 4px 8px
+  display flex
+  align-items center
+  justify-content center
+  &:hover, &:focus
+    background transparent
+    color var(--color-bar-text)
+  &:focus-visible
+    outline none
+
+// 两字叠加容器（加宽，让两字有错位空间）
+.theme-stack
+  position relative
+  width 28px
+  height 22px
+  display inline-block
+
+// 两个字都绝对定位，各自偏移让约 1/3 重叠
+.theme-char
+  position absolute
+  top 50%
+  font-weight bold
+  transition font-size 0.12s ease, opacity 0.12s ease
+
+// 默认状态（浅色主题）：浅字放大在左（标识当前主题），深字缩小透明在右（提示可切到深色）
+.theme-char[data-char="深"]
+  right 0
+  transform translateY(-50%)
+  font-size 10px
+  opacity 0.35
+.theme-char[data-char="浅"]
+  left 0
+  transform translateY(-50%)
+  font-size 16px
+  opacity 1
+
+// 浅色主题：浅字放大在左，深字缩小透明在右
+html.theme-light
+  .theme-char[data-char="深"]
+    right 0
+    transform translateY(-50%)
+    font-size 10px
+    opacity 0.35
+  .theme-char[data-char="浅"]
+    left 0
+    transform translateY(-50%)
+    font-size 16px
+    opacity 1
+
+// 深色主题：深字放大在左（标识当前主题），浅字缩小透明在右
+html.theme-dark
+  .theme-char[data-char="深"]
+    left 0
+    transform translateY(-50%)
+    font-size 16px
+    opacity 1
+  .theme-char[data-char="浅"]
+    right 0
+    transform translateY(-50%)
+    font-size 10px
+    opacity 0.35
+
+// 没有显式 class 时（首次访问未 JS），随系统
+@media (prefers-color-scheme: dark)
+  :root
+    .theme-char[data-char="深"]
+      left 0
+      transform translateY(-50%)
+      font-size 16px
+      opacity 1
+    .theme-char[data-char="浅"]
+      right 0
+      transform translateY(-50%)
+      font-size 10px
+      opacity 0.35
 
 // ---- 主布局：左书架 + 右内容 ----
 .main-layout
@@ -112,30 +252,40 @@ a
 .shelf
   width width-shelf
   flex-shrink 0
-  border-right 1px solid color-line
+  border-right 1px solid var(--color-line)
   position sticky
   top height-topbar
   height calc(100vh - 56px)
   overflow-y auto
 
+// 目录标题：加大字号、左侧粗竖线 accent bar、与下方区分
 .shelf-head
-  font-size 10px
-  font-weight normal
-  letter-spacing 0.18em
-  text-transform uppercase
-  color #999
-  padding 20px 20px 12px
-  border-bottom 1px solid color-line
+  font-size 13px
+  font-weight bold
+  letter-spacing 0.04em
+  color var(--color-text)
+  padding 20px 20px 16px 24px
+  border-bottom 1px solid var(--color-line)
+  position relative
+  &::before
+    content ''
+    position absolute
+    left 12px
+    top 22px
+    bottom 18px
+    width 3px
+    background var(--color-text)
 
 .shelf-list
   list-style none
 
 .shelf-item
-  border-bottom 1px solid color-line
+  border-bottom 1px solid var(--color-line)
 
 .shelf-cat
   width 100%
   border none
+  background transparent
   text-align left
   padding 14px 20px
   font-family font-mono
@@ -145,11 +295,11 @@ a
   display flex
   justify-content space-between
   align-items center
-  color color-text
+  color var(--color-text)
   hover-soft()
   &.active
-    background color-active-bg
-    color color-active-text
+    background var(--color-active-bg)
+    color var(--color-active-text)
 
 .cat-name
   flex 1
@@ -163,14 +313,14 @@ a
 .shelf-posts
   list-style none
   display none
-  background #fafafa
-  border-top 1px solid color-line
+  background var(--color-shelf-posts-bg)
+  border-top 1px solid var(--color-line)
 
 .shelf-item .shelf-posts.open
   display block
 
 .shelf-posts li
-  border-bottom 1px solid color-line
+  border-bottom 1px solid var(--color-line)
   &:last-child
     border-bottom none
 
@@ -179,11 +329,11 @@ a
   padding 10px 20px 10px 32px
   font-size 12px
   text-decoration none
-  color color-text
+  color var(--color-text)
   hover-soft()
   &.current
-    background color-active-bg
-    color color-active-text
+    background var(--color-active-bg)
+    color var(--color-active-text)
     font-weight bold
 
 .shelf-empty
@@ -203,7 +353,7 @@ a
 
 .post-item
   padding 20px 0
-  border-bottom 1px solid color-line
+  border-bottom 1px solid var(--color-line)
   &:first-child
     padding-top 0
 
@@ -230,7 +380,7 @@ a
   max-width 720px
 
 .post-header
-  border-bottom 1px solid color-line
+  border-bottom 1px solid var(--color-line)
   padding-bottom 16px
   margin-bottom 24px
 
@@ -265,11 +415,11 @@ a
     line-height 1.3
   h1
     font-size 20px
-    border-bottom 2px solid color-line
+    border-bottom 2px solid var(--color-line)
     padding-bottom 4px
   h2
     font-size 17px
-    border-bottom 1px solid color-line
+    border-bottom 1px solid var(--color-line)
     padding-bottom 4px
   h3
     font-size 15px
@@ -281,30 +431,29 @@ a
   li
     margin 0.3em 0
   blockquote
-    border-left 3px solid color-line
+    border-left 3px solid var(--color-line)
     padding 4px 12px
     margin 1em 0
     & > p
       margin 0.4em 0
   code
     font-family font-mono
-    background color-active-bg
-    color color-active-text
+    background var(--color-active-bg)
+    color var(--color-active-text)
     padding 1px 5px
     font-size 0.92em
   pre
-    background color-code-bg
-    color color-code-text
+    background var(--color-code-bg)
+    color var(--color-code-text)
     padding 14px 16px
     overflow-x auto
     margin 1em 0
     font-size 13px
     line-height 1.5
-    // 禁用浏览器对可滚动 pre 的默认 :focus 高亮（白底白字 bug 来源）
     &:focus
       outline none
-      background color-code-bg
-      color color-code-text
+      background var(--color-code-bg)
+      color var(--color-code-text)
     &:focus-visible
       outline none
     code
@@ -313,12 +462,12 @@ a
       padding 0
   // Hexo highlight.js 渲染的代码块：<figure.highlight><table><td.gutter><td.code>
   figure.highlight
-    background color-code-bg
+    background var(--color-code-bg)
     margin 1em 0
     overflow-x auto
     &:focus
       outline none
-      background color-code-bg
+      background var(--color-code-bg)
     &:focus-visible
       outline none
     pre
@@ -326,26 +475,26 @@ a
       margin 0
       padding 0
     .gutter
-      display none    // 关行号：直接隐藏左侧行号列
+      display none
     .code pre
       padding 14px 16px
-      color color-code-text
+      color var(--color-code-text)
   table
     border-collapse collapse
     margin 1em 0
     width 100%
   th, td
-    border 1px solid color-line
+    border 1px solid var(--color-line)
     padding 6px 10px
     text-align left
   th
-    background color-active-bg
-    color color-active-text
+    background var(--color-active-bg)
+    color var(--color-active-text)
     font-weight bold
   tr:hover td
-    background color-hover-bg
-  // 代码块也用 <table> 渲染，需排除 figure.highlight 内的 td：
-  // - 去 border（避免代码块上下出现白线）
+    background var(--color-hover-bg)
+  // 代码块也用 <table> 渲染，排除 figure.highlight 内的 td：
+  // - 去 border（避免代码块四周白线）
   // - 去 hover 背景（避免鼠标移过代码变浅灰底）
   figure.highlight
     td
@@ -357,7 +506,7 @@ a
     max-width 100%
     height auto
     display block
-    border 1px solid color-line
+    border 1px solid var(--color-line)
   a
     text-decoration underline
     hover-soft()
@@ -368,7 +517,7 @@ a
   justify-content space-between
   margin-top 40px
   padding-top 16px
-  border-top 1px solid color-line
+  border-top 1px solid var(--color-line)
   max-width 720px
 
 .post-nav-cell
@@ -395,7 +544,7 @@ a
   justify-content space-between
   margin-top 32px
   padding-top 16px
-  border-top 1px solid color-line
+  border-top 1px solid var(--color-line)
   max-width 720px
 
 .pager-cell
@@ -416,7 +565,7 @@ a
   font-weight bold
   letter-spacing 0.08em
   padding-bottom 12px
-  border-bottom 2px solid color-line
+  border-bottom 2px solid var(--color-line)
   margin-bottom 20px
 
 .archive-year
@@ -424,8 +573,8 @@ a
   font-weight bold
   margin 20px 0 8px
   padding 4px 8px
-  background color-bar-bg
-  color color-bar-text
+  background var(--color-bar-bg)
+  color var(--color-bar-text)
   display inline-block
 
 .archive-row
@@ -433,7 +582,7 @@ a
   gap 16px
   align-items baseline
   padding 8px 0
-  border-bottom 1px solid color-line
+  border-bottom 1px solid var(--color-line)
 
 .archive-date
   font-size 11px
@@ -448,7 +597,7 @@ a
 
 // ---- footer ----
 .site-footer
-  border-top 1px solid color-line
+  border-top 1px solid var(--color-line)
   padding 16px 24px
   font-size 11px
 
@@ -464,8 +613,11 @@ a
 @media (max-width: 768px)
   .topbar
     padding 0 16px
-  .topnav
     gap 12px
+  .topnav
+    gap 10px
+  .nav-item
+    padding 4px 6px
   .main-layout
     flex-direction column
   .shelf
@@ -473,6 +625,6 @@ a
     position static
     height auto
     border-right none
-    border-bottom 1px solid color-line
+    border-bottom 1px solid var(--color-line)
   .content
     padding 24px 16px

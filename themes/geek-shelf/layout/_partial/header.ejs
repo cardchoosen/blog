@@ -10,3 +10,10 @@
     <a href="<%- url_for(theme.menu[name]) %>" class="nav-item"><%= name %></a>
   <% } %>
 </nav>
+
+<button class="theme-toggle" type="button" aria-label="切换主题" title="切换深/浅主题">
+  <span class="theme-stack">
+    <span class="theme-char" data-char="深">深</span>
+    <span class="theme-char" data-char="浅">浅</span>
+  </span>
+</button>
