@@ -368,3 +368,22 @@
 - `doc/ARCHITECTURE.md`：补充 `source/categories/index.md`、`source/tags/index.md`、主题菜单、category/tag 模板分支与总览页机制
 - `doc/FEATURES.md`：更新"分类与标签"功能，说明顶栏入口与总览页行为
 - `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-07-01 19:47 · （本次提交）· docs: 新增 README 常用命令清单
+
+> 本条目对应本次提交，新增根目录 README，仅记录项目常用指令及简短用途说明。
+
+### 改动
+
+- 新增 `README.md`
+- 记录依赖安装、本地预览、构建、清理、部署命令
+- 记录 post-admin 本地后台、文章列表、文章导入、文章删除命令
+- 记录 Hexo 新建文章、草稿、页面命令
+- 记录 `hexo clean` / `hexo generate` / `hexo deploy` 及组合发布命令
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：目录结构补充 `README.md`
+- `doc/CHANGELOG.md`：追加本次条目

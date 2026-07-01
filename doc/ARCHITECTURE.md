@@ -52,6 +52,7 @@ Hexo/
 ├── .github/
 │   └── dependabot.yml       # Dependabot 依赖更新配置
 ├── .gitignore
+├── README.md                 # 常用命令清单
 ├── CODEBUDDY.md             # AI 协作规则（每次对话自动加载）
 ├── tools/
 │   └── post-admin/           # 本地文章管理工具（CLI + Web UI + 输入格式文档）
