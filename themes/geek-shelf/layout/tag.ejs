@@ -1,4 +1,16 @@
 <section class="archive">
-  <h1 class="archive-title">TAG / <%= page.tag %></h1>
-  <%- partial('_partial/archive-list', { dateFormat: 'YYYY-MM-DD' }) %>
+  <% if (page.tag) { %>
+    <h1 class="archive-title">TAG / <%= page.tag %></h1>
+    <%- partial('_partial/archive-list', { dateFormat: 'YYYY-MM-DD' }) %>
+  <% } else { %>
+    <h1 class="archive-title">TAG</h1>
+    <div class="term-list">
+      <% site.tags.sort('name', 1).each(function(tag) { %>
+        <a class="term-row" href="<%- url_for(tag.path) %>">
+          <span class="term-name"><%= tag.name %></span>
+          <span class="term-count"><%= tag.posts.length %></span>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
 </section>

@@ -337,3 +337,34 @@
 - `doc/ARCHITECTURE.md`：新增 post-admin 架构、文章包导入机制、发布快照机制、npm scripts、SSH deploy repo
 - `doc/FEATURES.md`：新增本地后台、CLI、文章包输入协议、发布差异可视化、当前内容 6 篇
 - `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-07-01 19:39 · （本次提交）· feat: 新增分类与标签顶栏入口
+
+> 本条目对应本次提交，给博客顶栏增加 `CATEGORY` 与 `TAG` 入口，并新增分类/标签总览页。所有改动已经用户本地验证通过。
+
+### 改动
+
+- **`themes/geek-shelf/_config.yml`**：顶栏菜单新增 `CATEGORY` 与 `TAG`
+- **`source/categories/index.md`**：新增分类总览页入口，使用 `layout: category`
+- **`source/tags/index.md`**：新增标签总览页入口，使用 `layout: tag`
+- **`category.ejs`**：
+  - 有 `page.category` 时保持原有分类文章列表
+  - 无 `page.category` 时展示所有分类及文章数
+- **`tag.ejs`**：
+  - 有 `page.tag` 时保持原有标签文章列表
+  - 无 `page.tag` 时展示所有标签及文章数
+- **`style.styl`**：新增 `.term-list` / `.term-row` / `.term-name` / `.term-count` 样式，贴合现有归档页黑白等宽风格
+
+### 验证
+
+- `npm run build` 成功
+- 本地预览 `http://localhost:4000/categories/` 与 `http://localhost:4000/tags/` 可访问
+- 顶栏可直接进入分类/标签总览页
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：补充 `source/categories/index.md`、`source/tags/index.md`、主题菜单、category/tag 模板分支与总览页机制
+- `doc/FEATURES.md`：更新"分类与标签"功能，说明顶栏入口与总览页行为
+- `doc/CHANGELOG.md`：追加本次条目

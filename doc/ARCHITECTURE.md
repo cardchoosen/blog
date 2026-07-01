@@ -43,6 +43,8 @@ Hexo/
 │   │   └── test.md              # 本地文章后台创建的测试文章（categories: test）
 │   ├── images/posts/            #   文章图片资源（按 slug 分目录，由 post-admin 导入）
 │   ├── files/posts/             #   文章附件资源（按 slug 分目录，由 post-admin 导入）
+│   ├── categories/index.md      #   分类总览页入口（layout: category）
+│   ├── tags/index.md            #   标签总览页入口（layout: tag）
 │   └── CNAME                   # GitHub Pages 自定义域名绑定（内容：anemone.wiki）
 ├── themes/
 │   ├── .gitkeep             # 占位（已无用但保留）
@@ -134,15 +136,15 @@ source/files/posts/
 
 ```
 themes/geek-shelf/
-├── _config.yml                    # 主题配置（menu / favicon）
+├── _config.yml                    # 主题配置（menu：首页/归档/CATEGORY/TAG，favicon）
 ├── layout/
 │   ├── layout.ejs                 # 主布局：顶部黑条 + 左书架 + 右内容
 │   ├── index.ejs                  # 首页文章列表 + 分页
 │   ├── post.ejs                   # 文章详情（引入 article + post-nav）
 │   ├── page.ejs                   # 自定义页面（复用 article）
 │   ├── archive.ejs                # 归档（按年分组）
-│   ├── category.ejs               # 分类索引（引入 archive-list）
-│   ├── tag.ejs                    # 标签索引（引入 archive-list）
+│   ├── category.ejs               # 分类总览 + 分类文章列表（引入 archive-list）
+│   ├── tag.ejs                    # 标签总览 + 标签文章列表（引入 archive-list）
 │   └── _partial/
 │       ├── head.ejs               # <head>（meta/title/css/open_graph）
 │       ├── header.ejs             # 顶部色块（站点标题 + 导航 + 主题切换按钮）
@@ -180,6 +182,7 @@ themes/geek-shelf/
 
 **CSS 关键设计**：
 - `hover-soft()` mixin：统一管理"hover 时浅灰底 + 深灰字 + 0.12s 过渡"，多处复用
+- `.term-list` / `.term-row`：用于 `/categories/` 与 `/tags/` 总览页，展示"名称 + 文章数"的黑白等宽列表
 - 代码块 `<figure class="highlight"><table><td>` 结构特殊处理：
   - `.gutter` `display:none`（隐藏行号列）
   - `td` `border:none`（去掉代码块四周白线，与 markdown 表格的 td 边框区分）
@@ -211,6 +214,15 @@ npm run post:list               # 列出 source/_posts 下文章
 npm run post:import -- <path>   # 导入单篇文章包或批量文章包
 npm run post:delete -- <slug>   # 预览删除清单；加 --yes 移动到回收站
 ```
+
+## 分类与标签入口
+
+主题顶栏菜单由 `themes/geek-shelf/_config.yml` 控制，当前入口为：首页、归档、`CATEGORY`、`TAG`。
+
+- `/categories/`：由 `source/categories/index.md` 触发 `layout: category`，在 `page.category` 为空时展示全部分类及文章数
+- `/categories/<name>/`：Hexo category generator 生成，`page.category` 有值时展示该分类下文章列表
+- `/tags/`：由 `source/tags/index.md` 触发 `layout: tag`，在 `page.tag` 为空时展示全部标签及文章数
+- `/tags/<name>/`：Hexo tag generator 生成，`page.tag` 有值时展示该标签下文章列表
 
 ## 完整发布流程
 

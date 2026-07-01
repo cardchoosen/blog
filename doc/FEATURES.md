@@ -58,6 +58,9 @@
 
 ### 5. 分类与标签
 - 文章 front-matter 中声明 `categories` 与 `tags`
+- 顶栏提供 `CATEGORY` 与 `TAG` 入口，可直接进入分类/标签总览页
+- `/categories/` 默认展示所有分类及文章数，点击分类进入对应文章列表
+- `/tags/` 默认展示所有标签及文章数，点击标签进入对应文章列表
 - 自动生成 `/categories/<name>/` 与 `/tags/<name>/` 索引页
 - 文章详情页的 meta 区显示分类链接与标签链接（# 前缀）
 

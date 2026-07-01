@@ -3,5 +3,7 @@
 menu:
   首页: /
   归档: /archives
+  CATEGORY: /categories/
+  TAG: /tags/
 
 favicon: /favicon.ico
