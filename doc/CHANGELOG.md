@@ -266,3 +266,74 @@
 - `doc/ARCHITECTURE.md`：目录结构补 `source/CNAME`、分支隔离方案补"自定义域名"说明（含根因提示）
 - `doc/CHANGELOG.md`：追加本次条目
 
+---
+
+## 2026-07-01 16:46 · （本次提交）· feat: 新增本地文章管理后台与发布工具
+
+> 本条目对应本次提交，新增本机使用的文章管理工具 `post-admin`，并打通通过 SSH 发布到 GitHub Pages 的流程。所有改动已经用户本地验证通过。
+
+### 本地文章管理工具
+
+- 新增 `tools/post-admin/`，提供 Web UI + CLI 两种入口
+- `npm run post:admin` 启动本地后台 `http://127.0.0.1:4100/`
+- `npm run post:import -- <path>` 支持导入单篇文章包或批量文章包
+- `npm run post:list` 列出当前 `source/_posts/` 下文章
+- `npm run post:delete -- <slug>` 预览删除清单，追加 `--yes` 后移动到 `.trash/posts/<slug>-<timestamp>/`
+- 工具使用 Node.js 内置模块实现，无新增 npm 依赖
+
+### 文章包输入协议
+
+- 新增 `tools/post-admin/POST_INPUT_FORMAT.md`，规定供人和 AI 使用的文章包格式
+- 文章包结构：一个目录一篇文章，必含 `post.md`，可选 `assets/`
+- `post.md` front-matter 要求 `title` / `slug` / `date` / `categories` / `tags`
+- 导入后文章写入 `source/_posts/<slug>.md`
+- 图片资源写入 `source/images/posts/<slug>/`
+- 非图片附件写入 `source/files/posts/<slug>/`
+- Markdown 中的 `assets/...` 引用自动重写为站点可访问路径
+- 默认拒绝覆盖已有文章，必须传 `--force` 才覆盖
+
+### Web 后台
+
+- 页面风格贴合 `geek-shelf`：黑白主调、等宽字体、左侧导航、右侧操作区
+- 提供文章列表、文章包导入、新建文章、删除文章、发布五个页面
+- 新建文章页可填写标题、slug、日期、分类、标签、摘要和 Markdown 正文
+- 删除文章默认移动到本地回收站，不做永久删除
+
+### 发布页与差异可视化
+
+- 发布页提供"仅构建检查"与"构建并发布"两个入口
+- "仅构建检查"执行 `npm run build`
+- "构建并发布"依次执行 `npm run clean` → `npm run build` → `npm run deploy`
+- 发布前只检测博客内容与素材目录：
+  - `source/_posts/`
+  - `source/images/posts/`
+  - `source/files/posts/`
+- 不展示项目代码、工具代码、配置文件等非博客内容差异
+- 内容变更以"目录 + 文件名 + 新增/删除行数或 binary"方式展示
+- 发布成功后写入 `.tmp/post-admin/published-content.json` 作为"上次成功发布内容快照"
+- 后续刷新发布页时，以该快照为基准判断是否还有未发布内容，而不是使用 git 工作区状态
+
+### SSH 部署修复
+
+- `_config.yml` 的 `deploy.repo` 从 HTTPS 改为 SSH：
+  - 旧：`https://github.com/cardchoosen/blog.git`
+  - 新：`git@github.com:cardchoosen/blog.git`
+- 用户将本机 SSH 公钥添加到 GitHub 后，验证 `ssh -T git@github.com` 通过
+- 执行 `npm run deploy` 成功推送到 `gh-pages`
+
+### 内容更新
+
+- 新增 `source/_posts/test.md`，通过 post-admin 创建并发布
+- 当前文章数从 5 篇变为 6 篇
+
+### 忽略规则
+
+- `.gitignore` 新增：
+  - `.tmp/`：post-admin 临时目录与发布快照
+  - `.trash/`：post-admin 删除文章时的本地回收站
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：新增 post-admin 架构、文章包导入机制、发布快照机制、npm scripts、SSH deploy repo
+- `doc/FEATURES.md`：新增本地后台、CLI、文章包输入协议、发布差异可视化、当前内容 6 篇
+- `doc/CHANGELOG.md`：追加本次条目

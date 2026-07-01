@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anemone Post Admin</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Anemone Post Admin</div>
+    <div class="hint">127.0.0.1 · local only</div>
+  </header>
+
+  <div class="layout">
+    <aside class="shelf">
+      <div class="shelf-head">文章</div>
+      <button class="nav-button active" data-panel="posts">列表</button>
+      <button class="nav-button" data-panel="import">导入</button>
+      <button class="nav-button" data-panel="compose">新建</button>
+      <button class="nav-button" data-panel="delete">删除</button>
+      <button class="nav-button" data-panel="publish">发布</button>
+    </aside>
+
+    <main class="content">
+      <section class="panel active" id="panel-posts">
+        <div class="panel-head">
+          <h1>文章列表</h1>
+          <button class="ghost" id="refresh-posts" type="button">刷新</button>
+        </div>
+        <div class="post-list" id="post-list"></div>
+      </section>
+
+      <section class="panel" id="panel-import">
+        <h1>导入文章包</h1>
+        <p class="muted">输入本机文章包路径，支持单篇目录或包含多篇文章包的父目录。</p>
+        <label>
+          <span>路径</span>
+          <input id="import-path" type="text" placeholder="./incoming/my-post">
+        </label>
+        <label class="check">
+          <input id="import-force" type="checkbox">
+          <span>允许覆盖已有文章（--force）</span>
+        </label>
+        <button id="run-import" type="button">导入</button>
+      </section>
+
+      <section class="panel" id="panel-compose">
+        <h1>新建文章</h1>
+        <div class="grid">
+          <label>
+            <span>标题</span>
+            <input id="title" type="text" placeholder="文章标题">
+          </label>
+          <label>
+            <span>Slug</span>
+            <input id="slug" type="text" placeholder="my-post-slug">
+          </label>
+          <label>
+            <span>日期</span>
+            <input id="date" type="text" placeholder="2026-07-01 20:30:00">
+          </label>
+          <label>
+            <span>分类</span>
+            <input id="categories" type="text" placeholder="前端, 工程化">
+          </label>
+          <label>
+            <span>标签</span>
+            <input id="tags" type="text" placeholder="React, Hexo">
+          </label>
+          <label>
+            <span>摘要</span>
+            <input id="excerpt" type="text" placeholder="可选">
+          </label>
+        </div>
+        <label>
+          <span>正文 Markdown</span>
+          <textarea id="body" rows="18" placeholder="从这里开始写正文..."></textarea>
+        </label>
+        <label class="check">
+          <input id="create-force" type="checkbox">
+          <span>允许覆盖已有文章（--force）</span>
+        </label>
+        <button id="create-post" type="button">保存文章</button>
+      </section>
+
+      <section class="panel" id="panel-delete">
+        <h1>删除文章</h1>
+        <p class="muted">删除会移动到 <code>.trash/posts/</code>，不会直接永久移除。</p>
+        <label>
+          <span>Slug</span>
+          <input id="delete-slug" type="text" placeholder="my-post-slug">
+        </label>
+        <button id="preview-delete" type="button">查看删除清单</button>
+        <button id="run-delete" class="danger" type="button">移动到回收站</button>
+      </section>
+
+      <section class="panel" id="panel-publish">
+        <div class="panel-head">
+          <h1>发布</h1>
+          <button class="ghost" id="refresh-worktree" type="button">刷新差异</button>
+        </div>
+        <p class="muted">发布会在本机依次执行 clean、build、deploy，把生成后的静态站推送到 GitHub Pages 的 gh-pages 分支。</p>
+
+        <div class="actions">
+          <button id="run-build" type="button">仅构建检查</button>
+          <button id="run-publish" class="danger" type="button">构建并发布</button>
+        </div>
+
+        <h2>内容变更</h2>
+        <div class="change-list" id="content-changes"></div>
+
+        <h2>统计</h2>
+        <pre class="diff-box" id="worktree-stat"></pre>
+
+        <h2>新增文章预览</h2>
+        <pre class="diff-box large" id="worktree-diff"></pre>
+      </section>
+
+      <pre class="output" id="output"></pre>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

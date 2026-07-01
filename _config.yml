@@ -104,5 +104,5 @@ theme: geek-shelf
 ## 分支隔离法：源码在 main，生成的静态站推送到 gh-pages 分支
 deploy:
   type: git
-  repo: https://github.com/cardchoosen/blog.git
+  repo: git@github.com:cardchoosen/blog.git
   branch: gh-pages

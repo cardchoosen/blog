@@ -7,6 +7,8 @@
 
 基于 Hexo + GitHub Pages 的个人技术博客。源码托管在 GitHub，静态站通过 GitHub Pages 免费提供访问，采用分支隔离法（`main` 源码 / `gh-pages` 静态站）管理发布流程。使用自制定制主题 `geek-shelf`，定位为"极客风技术笔记博客"。
 
+同时提供本机文章管理工具 `post-admin`，用于更方便地导入 AI 生成的文章包、管理文章与素材、预览待发布内容变更，并一键构建发布到 GitHub Pages。
+
 ## 站点信息
 
 | 项 | 值 |
@@ -25,6 +27,10 @@
 - **草稿**：`hexo new draft <title>` 生成草稿，存放于 `source/_drafts/`（默认不渲染）
 - **自定义页面**：`hexo new page <name>` 生成独立页面
 - **文章模板**：`scaffolds/` 下提供 `post.md` / `draft.md` / `page.md` 三种模板
+- **本机后台**：`npm run post:admin` 启动 `http://127.0.0.1:4100/`，提供文章列表、导入、新建、删除、发布等操作
+- **CLI 工具**：`npm run post:import` / `post:list` / `post:delete` 支持单篇或批量文章包导入、文章列表查看、删除到回收站
+- **文章包格式**：一篇文章一个目录，包含 `post.md` 与可选 `assets/`，格式详见 `tools/post-admin/POST_INPUT_FORMAT.md`
+- **素材管理**：图片导入到 `source/images/posts/<slug>/`，其他附件导入到 `source/files/posts/<slug>/`，Markdown 引用自动重写为站点根路径
 
 ### 2. 左侧分类书架（核心交互）
 - **数据源**：文章 front-matter 的 `categories` 字段
@@ -89,29 +95,39 @@
 - 监听 source/ 和 themes/ 文件变化自动重载
 - 注意：改 `_config.yml` 站点配置后需重启 server
 
-### 11. 一键部署
+### 11. 本地后台发布
+- **发布入口**：post-admin 的"发布"页提供"仅构建检查"与"构建并发布"两个按钮
+- **构建检查**：执行 `npm run build`，用于发布前确认 Hexo 能正常生成静态站
+- **构建并发布**：依次执行 `npm run clean` → `npm run build` → `npm run deploy`
+- **差异可视化**：只展示博客内容相关目录的变化：`source/_posts/`、`source/images/posts/`、`source/files/posts/`
+- **内容变更列表**：以"目录 + 文件名 + 新增/删除行数或 binary"方式展示，贴合站点黑白等宽风格
+- **发布快照**：发布成功后记录 `.tmp/post-admin/published-content.json`，刷新后不再显示已发布内容差异；后续只有再次修改文章或素材才显示新差异
+- **部署凭据**：`_config.yml` 的 deploy repo 使用 SSH 地址 `git@github.com:cardchoosen/blog.git`，依赖本机 GitHub SSH key
+
+### 12. 一键部署（命令行）
 - 命令：`npx hexo clean && npx hexo g && npx hexo d`
 - 流程：清理 → 生成静态站 → 推送到 `gh-pages` 分支
 - GitHub Pages 自动识别 `gh-pages` 分支并提供访问
 
-### 12. 响应式
+### 13. 响应式
 - 桌面端（>768px）：左书架 + 右内容 双栏布局
 - 移动端（≤768px）：书架堆叠到内容上方，单栏布局
 
 ## 当前内容
 
-- **文章数**：5 篇
+- **文章数**：6 篇
   - `hello-world.md`（Hexo 默认示例，已加 Java/Go/TypeScript 多语言代码段）
   - `test-frontend-1.md` / `test-frontend-2.md`（categories: 前端，测试用）
   - `test-backend-1.md` / `test-backend-2.md`（categories: 后端，测试用）
+  - `test.md`（通过本地 post-admin 创建并发布的测试文章，categories: test）
 - **自定义页面**：无
 - **主题**：geek-shelf（已实现并跑通）
+- **本地内容工具**：post-admin 已实现并跑通，支持 Web UI + CLI
 
 ## 待规划 / 未实现
 
 - [ ] 评论系统接入（如 Giscus）
 - [ ] 站点统计（如 Google Analytics / Umami）
-- [ ] 自定义域名绑定
 - [ ] SEO 优化（sitemap、robots.txt、meta 信息）
 - [ ] 图床方案接入
 - [ ] About / 友链 等独立页面

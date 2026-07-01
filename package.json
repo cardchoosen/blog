@@ -6,6 +6,10 @@
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
+    "post:admin": "node tools/post-admin/cli.js server",
+    "post:delete": "node tools/post-admin/cli.js delete",
+    "post:import": "node tools/post-admin/cli.js import",
+    "post:list": "node tools/post-admin/cli.js list",
     "server": "hexo server"
   },
   "hexo": {

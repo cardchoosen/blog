@@ -19,6 +19,7 @@
 | 包管理 | npm |
 | 版本控制 | git |
 | 托管 | GitHub Pages（仓库 `cardchoosen/blog`，Public） |
+| 本地内容管理 | `tools/post-admin/`（Node.js 内置 http + 原生前端，无新增依赖） |
 
 ## 目录结构
 
@@ -38,7 +39,10 @@ Hexo/
 │   │   ├── test-frontend-1.md   # 测试文章（categories: 前端）
 │   │   ├── test-frontend-2.md   # 测试文章（categories: 前端）
 │   │   ├── test-backend-1.md    # 测试文章（categories: 后端）
-│   │   └── test-backend-2.md    # 测试文章（categories: 后端）
+│   │   ├── test-backend-2.md    # 测试文章（categories: 后端）
+│   │   └── test.md              # 本地文章后台创建的测试文章（categories: test）
+│   ├── images/posts/            #   文章图片资源（按 slug 分目录，由 post-admin 导入）
+│   ├── files/posts/             #   文章附件资源（按 slug 分目录，由 post-admin 导入）
 │   └── CNAME                   # GitHub Pages 自定义域名绑定（内容：anemone.wiki）
 ├── themes/
 │   ├── .gitkeep             # 占位（已无用但保留）
@@ -47,6 +51,8 @@ Hexo/
 │   └── dependabot.yml       # Dependabot 依赖更新配置
 ├── .gitignore
 ├── CODEBUDDY.md             # AI 协作规则（每次对话自动加载）
+├── tools/
+│   └── post-admin/           # 本地文章管理工具（CLI + Web UI + 输入格式文档）
 └── doc/                     # 项目文档目录
     ├── ARCHITECTURE.md      #   本文档：代码工程结构
     ├── FEATURES.md          #   产品功能文档
@@ -61,6 +67,8 @@ Hexo/
 | `db.json` | Hexo 内容数据库缓存 | 否 |
 | `.deploy_git/` | `hexo deploy` 推送前的暂存区 | 否 |
 | `node_modules/` | npm 依赖 | 否 |
+| `.tmp/` | post-admin 运行时临时目录与发布快照 | 否 |
+| `.trash/` | post-admin 删除文章时的本地回收站 | 否 |
 
 ## 配置关键项（_config.yml）
 
@@ -78,8 +86,49 @@ Hexo/
 | index_generator.per_page | `10` | 首页每页文章数 |
 | Extensions.theme | `geek-shelf` | 主题名（自制） |
 | Deploy.type | `git` | 部署器类型 |
-| Deploy.repo | `https://github.com/cardchoosen/blog.git` | 部署目标仓库 |
+| Deploy.repo | `git@github.com:cardchoosen/blog.git` | 部署目标仓库（SSH，用本机 GitHub SSH key 推送） |
 | Deploy.branch | `gh-pages` | 部署目标分支 |
+
+## 本地文章管理工具（tools/post-admin/）
+
+`tools/post-admin/` 提供本机使用的文章管理后台与 CLI，目标是把"AI 生成文章包 → 本地导入 → 预览差异 → 构建发布"流程工具化。该工具只监听 `127.0.0.1`，不作为公网后台部署。
+
+```
+tools/post-admin/
+├── cli.js                         # CLI 入口：import/list/delete/server
+├── server.js                      # 本地 Web 后台与 API
+├── POST_INPUT_FORMAT.md           # 给人和 AI 使用的文章包输入格式说明
+├── lib/
+│   └── content-manager.js         # 文章包解析、资源复制、路径重写、删除回收站
+└── web/
+    ├── index.html                 # 本地后台页面
+    ├── style.css                  # 贴合 geek-shelf 的黑白等宽 UI
+    └── app.js                     # 前端交互
+```
+
+### 文章包导入机制
+
+文章包格式为一个目录一篇文章，必含 `post.md`，可选 `assets/`。`post.md` 使用 Hexo 兼容 front-matter，额外要求 `slug` 字段。导入时：
+
+- `post.md` 写入 `source/_posts/<slug>.md`
+- 图片资源写入 `source/images/posts/<slug>/`
+- 非图片附件写入 `source/files/posts/<slug>/`
+- Markdown 中的 `assets/...` 引用自动重写为 `/images/posts/<slug>/...` 或 `/files/posts/<slug>/...`
+- 默认拒绝覆盖已有文章，传 `--force` 才覆盖
+
+删除文章时，工具不会直接永久删除，而是移动到 `.trash/posts/<slug>-<timestamp>/`。
+
+### 发布页差异机制
+
+Web 后台的"发布"页只关心博客内容与素材目录：
+
+```
+source/_posts/
+source/images/posts/
+source/files/posts/
+```
+
+它不展示项目代码、配置、工具自身等差异。差异基准不是 git 工作区，而是 `.tmp/post-admin/published-content.json` 中记录的"上次成功发布内容快照"。执行"构建并发布"且 `clean → build → deploy` 全部成功后，工具自动更新该快照；因此发布成功后刷新页面不会继续显示已发布文章差异。
 
 ## 主题结构（themes/geek-shelf/）
 
@@ -157,6 +206,10 @@ npm run build    # = hexo generate，生成静态站到 public/
 npm run clean    # = hexo clean，清理 public/、db.json、.deploy_git/
 npm run server   # = hexo server，本地预览 http://localhost:4000/
 npm run deploy   # = hexo deploy，推送 public/ 到 gh-pages
+npm run post:admin              # 启动本地文章后台 http://127.0.0.1:4100/
+npm run post:list               # 列出 source/_posts 下文章
+npm run post:import -- <path>   # 导入单篇文章包或批量文章包
+npm run post:delete -- <slug>   # 预览删除清单；加 --yes 移动到回收站
 ```
 
 ## 完整发布流程
