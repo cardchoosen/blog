@@ -640,6 +640,32 @@ html.theme-dark .theme-char[data-char="浅"] {
   background: var(--color-hover-bg);
   color: var(--color-hover-text);
 }
+.term-list {
+  border-top: 1px solid var(--color-line);
+}
+.term-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-line);
+  text-decoration: none;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.term-row:hover {
+  background: var(--color-hover-bg);
+  color: var(--color-hover-text);
+}
+.term-name {
+  font-size: 14px;
+  font-weight: bold;
+}
+.term-count {
+  font-size: 12px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
 .site-footer {
   border-top: 1px solid var(--color-line);
   padding: 16px 24px;
