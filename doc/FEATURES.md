@@ -89,6 +89,7 @@
 - 灰阶过渡：hover 浅灰底 `#f0f0f0`，active 中灰底 `#e0e0e0`（浅色主题）
 - 顶栏黑色色块 + 反白文字（站点标题 + 导航 + 主题切换按钮）
 - 全站等宽字体 `ui-monospace, SFMono-Regular, Menlo, Monaco, ...`
+- 首页列表、文章正文、归档、分类、标签等主体内容在右侧内容区内居中显示，保持 720px 阅读宽度
 - 无圆角 / 无阴影 / 无渐变
 - 0.12s 平滑过渡
 - `overscroll-behavior: none` 禁用弹性滚动
@@ -118,11 +119,12 @@
 
 ## 当前内容
 
-- **文章数**：6 篇
+- **文章数**：7 篇
   - `hello-world.md`（Hexo 默认示例，已加 Java/Go/TypeScript 多语言代码段）
   - `test-frontend-1.md` / `test-frontend-2.md`（categories: 前端，测试用）
   - `test-backend-1.md` / `test-backend-2.md`（categories: 后端，测试用）
   - `test.md`（通过本地 post-admin 创建并发布的测试文章，categories: test）
+  - `bilibili-bv1opafzpef9-p1.md`（B 站课程整理文章，含 6 张截图素材）
 - **自定义页面**：无
 - **主题**：geek-shelf（已实现并跑通）
 - **本地内容工具**：post-admin 已实现并跑通，支持 Web UI + CLI

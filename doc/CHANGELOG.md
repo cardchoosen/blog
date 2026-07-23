@@ -387,3 +387,36 @@
 
 - `doc/ARCHITECTURE.md`：目录结构补充 `README.md`
 - `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-07-23 20:51 · （本次提交）· feat: 文章主体内容居中并发布课程笔记
+
+> 本条目对应本次提交，优化博客正文区域布局，并发布一篇 B 站课程整理文章。所有改动已经用户本地验证通过。
+
+### 布局优化
+
+- **`themes/geek-shelf/source/css/style.styl`**：
+  - `.post-list` 增加左右 `auto` margin，首页文章列表在右侧内容区居中
+  - `.post` 增加左右 `auto` margin，文章正文在右侧内容区居中
+  - `.post-nav` 增加左右 `auto` margin，上下篇导航与正文对齐
+  - `.pager` 增加左右 `auto` margin，分页与首页列表对齐
+  - `.archive` 增加左右 `auto` margin，归档、分类、标签页面主体居中
+- 保持主体内容 `max-width: 720px`，只调整其在右侧内容区内的位置
+
+### 内容更新
+
+- 新增 `source/_posts/bilibili-bv1opafzpef9-p1.md`
+- 新增文章图片素材目录 `source/images/posts/bilibili-bv1opafzpef9-p1/`
+- 当前文章数从 6 篇变为 7 篇
+
+### 发布
+
+- `npm run build` 成功
+- `npm run deploy` 成功推送静态站到 `gh-pages`
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：补充新增文章、右侧主体内容居中 CSS 机制
+- `doc/FEATURES.md`：更新视觉风格与当前内容文章数
+- `doc/CHANGELOG.md`：追加本次条目

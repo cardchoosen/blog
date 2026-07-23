@@ -40,7 +40,8 @@ Hexo/
 │   │   ├── test-frontend-2.md   # 测试文章（categories: 前端）
 │   │   ├── test-backend-1.md    # 测试文章（categories: 后端）
 │   │   ├── test-backend-2.md    # 测试文章（categories: 后端）
-│   │   └── test.md              # 本地文章后台创建的测试文章（categories: test）
+│   │   ├── test.md              # 本地文章后台创建的测试文章（categories: test）
+│   │   └── bilibili-bv1opafzpef9-p1.md # B 站课程整理文章（categories: 南京大学操作系统原理）
 │   ├── images/posts/            #   文章图片资源（按 slug 分目录，由 post-admin 导入）
 │   ├── files/posts/             #   文章附件资源（按 slug 分目录，由 post-admin 导入）
 │   ├── categories/index.md      #   分类总览页入口（layout: category）
@@ -183,6 +184,7 @@ themes/geek-shelf/
 
 **CSS 关键设计**：
 - `hover-soft()` mixin：统一管理"hover 时浅灰底 + 深灰字 + 0.12s 过渡"，多处复用
+- `.post-list` / `.post` / `.post-nav` / `.pager` / `.archive`：统一 `max-width: 720px` 且左右 `auto` margin，使首页列表、文章正文、归档、分类、标签等主体内容在右侧内容区内居中
 - `.term-list` / `.term-row`：用于 `/categories/` 与 `/tags/` 总览页，展示"名称 + 文章数"的黑白等宽列表
 - 代码块 `<figure class="highlight"><table><td>` 结构特殊处理：
   - `.gutter` `display:none`（隐藏行号列）
