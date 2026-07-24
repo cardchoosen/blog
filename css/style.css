@@ -68,8 +68,8 @@ body {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   color: var(--color-text);
   background: var(--color-bg);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
@@ -83,24 +83,24 @@ a:hover {
   color: var(--color-hover-text);
 }
 .topbar {
-  height: 56px;
+  height: 64px;
   background: var(--color-bar-bg);
   color: var(--color-bar-text);
   display: flex;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 28px;
   position: sticky;
   top: 0;
   z-index: 100;
-  gap: 24px;
+  gap: 28px;
 }
 .brand {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 14px;
 }
 .brand-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   letter-spacing: 0.04em;
   color: var(--color-bar-text);
@@ -117,19 +117,19 @@ a:hover {
   text-decoration: underline;
 }
 .brand-sub {
-  font-size: 12px;
+  font-size: 13px;
   opacity: 0.7;
 }
 .topnav {
   display: flex;
-  gap: 16px;
+  gap: 18px;
 }
 .nav-item {
   color: var(--color-bar-text);
-  font-size: 13px;
+  font-size: 15px;
   text-decoration: none;
   letter-spacing: 0.04em;
-  padding: 4px 8px;
+  padding: 6px 10px;
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 .nav-item:hover,
@@ -148,7 +148,7 @@ a:hover {
   cursor: pointer;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   line-height: 1;
-  padding: 4px 8px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,8 +163,8 @@ a:hover {
 }
 .theme-stack {
   position: relative;
-  width: 28px;
-  height: 22px;
+  width: 32px;
+  height: 24px;
   display: inline-block;
 }
 .theme-char {
@@ -176,82 +176,82 @@ a:hover {
 .theme-char[data-char="深"] {
   right: 0;
   transform: translateY(-50%);
-  font-size: 10px;
+  font-size: 11px;
   opacity: 0.35;
 }
 .theme-char[data-char="浅"] {
   left: 0;
   transform: translateY(-50%);
-  font-size: 16px;
+  font-size: 18px;
   opacity: 1;
 }
 html.theme-light .theme-char[data-char="深"] {
   right: 0;
   transform: translateY(-50%);
-  font-size: 10px;
+  font-size: 11px;
   opacity: 0.35;
 }
 html.theme-light .theme-char[data-char="浅"] {
   left: 0;
   transform: translateY(-50%);
-  font-size: 16px;
+  font-size: 18px;
   opacity: 1;
 }
 html.theme-dark .theme-char[data-char="深"] {
   left: 0;
   transform: translateY(-50%);
-  font-size: 16px;
+  font-size: 18px;
   opacity: 1;
 }
 html.theme-dark .theme-char[data-char="浅"] {
   right: 0;
   transform: translateY(-50%);
-  font-size: 10px;
+  font-size: 11px;
   opacity: 0.35;
 }
 @media (prefers-color-scheme: dark) {
   :root .theme-char[data-char="深"] {
     left: 0;
     transform: translateY(-50%);
-    font-size: 16px;
+    font-size: 18px;
     opacity: 1;
   }
   :root .theme-char[data-char="浅"] {
     right: 0;
     transform: translateY(-50%);
-    font-size: 10px;
+    font-size: 11px;
     opacity: 0.35;
   }
 }
 .main-layout {
   display: flex;
   align-items: flex-start;
-  min-height: calc(100vh - 56px);
+  min-height: calc(100vh - 64px);
 }
 .shelf {
-  width: 280px;
+  width: 320px;
   flex-shrink: 0;
   border-right: 1px solid var(--color-line);
   position: sticky;
-  top: 56px;
-  height: calc(100vh - 56px);
+  top: 64px;
+  height: calc(100vh - 64px);
   overflow-y: auto;
 }
 .shelf-head {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: bold;
   letter-spacing: 0.04em;
   color: var(--color-text);
-  padding: 20px 20px 16px 24px;
+  padding: 22px 22px 18px 28px;
   border-bottom: 1px solid var(--color-line);
   position: relative;
 }
 .shelf-head::before {
   content: '';
   position: absolute;
-  left: 12px;
-  top: 22px;
-  bottom: 18px;
+  left: 14px;
+  top: 24px;
+  bottom: 20px;
   width: 3px;
   background: var(--color-text);
 }
@@ -266,9 +266,9 @@ html.theme-dark .theme-char[data-char="浅"] {
   border: none;
   background: transparent;
   text-align: left;
-  padding: 14px 20px;
+  padding: 16px 22px;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
   display: flex;
@@ -289,7 +289,7 @@ html.theme-dark .theme-char[data-char="浅"] {
   flex: 1;
 }
 .cat-count {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: normal;
   opacity: 0.5;
   margin-left: 8px;
@@ -311,8 +311,8 @@ html.theme-dark .theme-char[data-char="浅"] {
 }
 .post-link {
   display: block;
-  padding: 10px 20px 10px 32px;
-  font-size: 12px;
+  padding: 12px 22px 12px 36px;
+  font-size: 14px;
   text-decoration: none;
   color: var(--color-text);
   transition: background-color 0.12s ease, color 0.12s ease;
@@ -327,35 +327,35 @@ html.theme-dark .theme-char[data-char="浅"] {
   font-weight: bold;
 }
 .shelf-empty {
-  padding: 20px;
-  font-size: 12px;
+  padding: 22px;
+  font-size: 14px;
   opacity: 0.5;
 }
 .content {
   flex: 1;
-  padding: 40px 48px;
+  padding: 48px 56px;
   min-width: 0;
 }
 .post-list {
-  max-width: 720px;
+  max-width: 780px;
   margin-left: auto;
   margin-right: auto;
 }
 .post-item {
-  padding: 20px 0;
+  padding: 24px 0;
   border-bottom: 1px solid var(--color-line);
 }
 .post-item:first-child {
   padding-top: 0;
 }
 .item-date {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   opacity: 0.6;
   margin-bottom: 6px;
 }
 .item-title {
-  font-size: 18px;
+  font-size: 21px;
   font-weight: bold;
 }
 .item-title a {
@@ -368,21 +368,21 @@ html.theme-dark .theme-char[data-char="浅"] {
 }
 .item-excerpt {
   margin-top: 8px;
-  font-size: 13px;
+  font-size: 15px;
   opacity: 0.8;
 }
 .post {
-  max-width: 720px;
+  max-width: 780px;
   margin-left: auto;
   margin-right: auto;
 }
 .post-header {
   border-bottom: 1px solid var(--color-line);
-  padding-bottom: 16px;
-  margin-bottom: 24px;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
 }
 .post-title {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
   line-height: 1.3;
   margin-bottom: 12px;
@@ -396,7 +396,7 @@ html.theme-dark .theme-char[data-char="浅"] {
   color: var(--color-hover-text);
 }
 .post-meta {
-  font-size: 12px;
+  font-size: 13px;
   opacity: 0.7;
 }
 .meta-sep {
@@ -413,8 +413,8 @@ html.theme-dark .theme-char[data-char="浅"] {
   color: var(--color-hover-text);
 }
 .post-body {
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.75;
 }
 .post-body h1,
 .post-body h2,
@@ -427,17 +427,17 @@ html.theme-dark .theme-char[data-char="浅"] {
   line-height: 1.3;
 }
 .post-body h1 {
-  font-size: 20px;
+  font-size: 24px;
   border-bottom: 2px solid var(--color-line);
   padding-bottom: 4px;
 }
 .post-body h2 {
-  font-size: 17px;
+  font-size: 21px;
   border-bottom: 1px solid var(--color-line);
   padding-bottom: 4px;
 }
 .post-body h3 {
-  font-size: 15px;
+  font-size: 18px;
 }
 .post-body p {
   margin: 0.8em 0;
@@ -471,7 +471,7 @@ html.theme-dark .theme-char[data-char="浅"] {
   padding: 14px 16px;
   overflow-x: auto;
   margin: 1em 0;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
 }
 .post-body pre:focus {
@@ -561,7 +561,7 @@ html.theme-dark .theme-char[data-char="浅"] {
   margin-right: auto;
   padding-top: 16px;
   border-top: 1px solid var(--color-line);
-  max-width: 720px;
+  max-width: 780px;
 }
 .post-nav-cell {
   flex: 1;
@@ -571,13 +571,13 @@ html.theme-dark .theme-char[data-char="浅"] {
 }
 .nav-label {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   opacity: 0.6;
   margin-bottom: 4px;
 }
 .nav-link {
-  font-size: 13px;
+  font-size: 15px;
   text-decoration: none;
   font-weight: bold;
   transition: background-color 0.12s ease, color 0.12s ease;
@@ -594,10 +594,10 @@ html.theme-dark .theme-char[data-char="浅"] {
   margin-right: auto;
   padding-top: 16px;
   border-top: 1px solid var(--color-line);
-  max-width: 720px;
+  max-width: 780px;
 }
 .pager-cell {
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.08em;
   text-decoration: none;
   font-weight: bold;
@@ -607,12 +607,12 @@ html.theme-dark .theme-char[data-char="浅"] {
   pointer-events: none;
 }
 .archive {
-  max-width: 720px;
+  max-width: 780px;
   margin-left: auto;
   margin-right: auto;
 }
 .archive-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   letter-spacing: 0.08em;
   padding-bottom: 12px;
@@ -620,7 +620,7 @@ html.theme-dark .theme-char[data-char="浅"] {
   margin-bottom: 20px;
 }
 .archive-year {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   margin: 20px 0 8px;
   padding: 4px 8px;
@@ -636,13 +636,13 @@ html.theme-dark .theme-char[data-char="浅"] {
   border-bottom: 1px solid var(--color-line);
 }
 .archive-date {
-  font-size: 11px;
+  font-size: 12px;
   opacity: 0.6;
   flex-shrink: 0;
   width: 60px;
 }
 .archive-link {
-  font-size: 13px;
+  font-size: 15px;
   text-decoration: none;
   transition: background-color 0.12s ease, color 0.12s ease;
 }
@@ -668,18 +668,18 @@ html.theme-dark .theme-char[data-char="浅"] {
   color: var(--color-hover-text);
 }
 .term-name {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
 }
 .term-count {
-  font-size: 12px;
+  font-size: 13px;
   opacity: 0.6;
   flex-shrink: 0;
 }
 .site-footer {
   border-top: 1px solid var(--color-line);
   padding: 16px 24px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .footer-inner {
   display: flex;
@@ -691,14 +691,14 @@ html.theme-dark .theme-char[data-char="浅"] {
 }
 @media (max-width: 768px) {
   .topbar {
-    padding: 0 16px;
-    gap: 12px;
+    padding: 0 18px;
+    gap: 14px;
   }
   .topnav {
-    gap: 10px;
+    gap: 8px;
   }
   .nav-item {
-    padding: 4px 6px;
+    padding: 5px 6px;
   }
   .main-layout {
     flex-direction: column;
@@ -711,6 +711,6 @@ html.theme-dark .theme-char[data-char="浅"] {
     border-bottom: 1px solid var(--color-line);
   }
   .content {
-    padding: 24px 16px;
+    padding: 32px 18px;
   }
 }
