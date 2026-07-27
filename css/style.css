@@ -441,6 +441,7 @@ html.theme-dark .theme-char[data-char="浅"] {
 }
 .post-body p {
   margin: 0.8em 0;
+  text-indent: 2em;
 }
 .post-body ul,
 .post-body ol {
@@ -457,6 +458,7 @@ html.theme-dark .theme-char[data-char="浅"] {
 }
 .post-body blockquote > p {
   margin: 0.4em 0;
+  text-indent: 0;
 }
 .post-body code {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
