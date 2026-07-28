@@ -1,4 +1,5 @@
 const output = document.querySelector('#output');
+let cachedPosts = [];
 
 function show(value) {
   output.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
@@ -31,19 +32,65 @@ function setDefaultDate() {
 
 async function loadPosts() {
   const data = await api('/api/posts');
+  cachedPosts = data.posts || [];
   const list = document.querySelector('#post-list');
-  if (!data.posts.length) {
+  renderEditList(cachedPosts);
+  renderDeleteList(cachedPosts);
+  if (!cachedPosts.length) {
     list.innerHTML = '<div class="post-row"><div class="post-meta">暂无文章</div></div>';
     return;
   }
-  list.innerHTML = data.posts.map((post) => `
+  list.innerHTML = cachedPosts.map((post) => `
     <div class="post-row">
       <div class="post-meta">${post.date || '-'}</div>
       <div>
-        <div class="post-title">${post.title}</div>
-        <div class="post-meta">${post.categories.join(', ')} / ${post.tags.join(', ')}</div>
+        <div class="post-title">${escapeHtml(post.title)}</div>
+        <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
       </div>
-      <div class="post-meta">${post.slug}</div>
+      <div class="post-meta">${escapeHtml(post.slug)}</div>
+    </div>
+  `).join('');
+}
+
+function renderEditList(posts) {
+  const list = document.querySelector('#edit-list');
+  if (!list) return;
+  if (!posts.length) {
+    list.innerHTML = '<div class="edit-empty">暂无可修改文章</div>';
+    return;
+  }
+
+  list.innerHTML = posts.map((post) => `
+    <div class="edit-row">
+      <div>
+        <div class="post-title">${escapeHtml(post.title)}</div>
+        <div class="post-meta">${escapeHtml(post.date || '-')} / ${escapeHtml(post.slug)}</div>
+        <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
+      </div>
+      <button class="ghost load-edit-item" type="button" data-slug="${escapeHtml(post.slug)}">修改</button>
+    </div>
+  `).join('');
+}
+
+function renderDeleteList(posts) {
+  const list = document.querySelector('#delete-list');
+  if (!list) return;
+  if (!posts.length) {
+    list.innerHTML = '<div class="delete-empty">暂无可删除文章</div>';
+    return;
+  }
+
+  list.innerHTML = posts.map((post) => `
+    <div class="delete-row">
+      <div>
+        <div class="post-title">${escapeHtml(post.title)}</div>
+        <div class="post-meta">${escapeHtml(post.date || '-')} / ${escapeHtml(post.slug)}</div>
+        <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
+      </div>
+      <div class="delete-actions">
+        <button class="ghost preview-delete-item" type="button" data-slug="${escapeHtml(post.slug)}">清单</button>
+        <button class="danger run-delete-item" type="button" data-slug="${escapeHtml(post.slug)}">删除</button>
+      </div>
     </div>
   `).join('');
 }
@@ -129,6 +176,24 @@ document.querySelector('#refresh-posts').addEventListener('click', async () => {
   }
 });
 
+document.querySelector('#refresh-delete-posts').addEventListener('click', async () => {
+  try {
+    await loadPosts();
+    show('删除列表已刷新');
+  } catch (err) {
+    show(`ERROR: ${err.message}`);
+  }
+});
+
+document.querySelector('#refresh-edit-posts').addEventListener('click', async () => {
+  try {
+    await loadPosts();
+    show('修改列表已刷新');
+  } catch (err) {
+    show(`ERROR: ${err.message}`);
+  }
+});
+
 document.querySelector('#run-import').addEventListener('click', async () => {
   try {
     const data = await api('/api/import', {
@@ -167,6 +232,59 @@ document.querySelector('#create-post').addEventListener('click', async () => {
   }
 });
 
+async function loadEditPost(slug) {
+  const data = await api(`/api/post?slug=${encodeURIComponent(slug)}`);
+  const post = data.post;
+  document.querySelector('#edit-form').hidden = false;
+  document.querySelector('#edit-title').value = post.title || '';
+  document.querySelector('#edit-slug').value = post.slug || '';
+  document.querySelector('#edit-date').value = post.date || '';
+  document.querySelector('#edit-categories').value = (post.categories || []).join(', ');
+  document.querySelector('#edit-tags').value = (post.tags || []).join(', ');
+  document.querySelector('#edit-excerpt').value = post.excerpt || '';
+  document.querySelector('#edit-body').value = post.body || '';
+}
+
+document.querySelector('#edit-list').addEventListener('click', async (event) => {
+  const button = event.target.closest('button[data-slug]');
+  if (!button) return;
+
+  try {
+    await loadEditPost(button.dataset.slug);
+    show(`已加载文章：${button.dataset.slug}`);
+  } catch (err) {
+    show(`ERROR: ${err.message}`);
+  }
+});
+
+document.querySelector('#update-post').addEventListener('click', async () => {
+  const slug = document.querySelector('#edit-slug').value;
+  if (!slug) {
+    show('ERROR: 请先选择一篇文章');
+    return;
+  }
+
+  try {
+    const data = await api('/api/update', {
+      method: 'POST',
+      body: {
+        slug,
+        title: document.querySelector('#edit-title').value,
+        date: document.querySelector('#edit-date').value,
+        categories: splitList(document.querySelector('#edit-categories').value),
+        tags: splitList(document.querySelector('#edit-tags').value),
+        excerpt: document.querySelector('#edit-excerpt').value,
+        body: document.querySelector('#edit-body').value
+      }
+    });
+    show(data);
+    await loadPosts();
+    await loadWorktree();
+  } catch (err) {
+    show(`ERROR: ${err.message}`);
+  }
+});
+
 document.querySelector('#preview-delete').addEventListener('click', async () => {
   try {
     const data = await api('/api/delete', {
@@ -192,6 +310,37 @@ document.querySelector('#run-delete').addEventListener('click', async () => {
     });
     show(data);
     await loadPosts();
+  } catch (err) {
+    show(`ERROR: ${err.message}`);
+  }
+});
+
+document.querySelector('#delete-list').addEventListener('click', async (event) => {
+  const button = event.target.closest('button[data-slug]');
+  if (!button) return;
+  const slug = button.dataset.slug;
+
+  try {
+    if (button.classList.contains('preview-delete-item')) {
+      document.querySelector('#delete-slug').value = slug;
+      const data = await api('/api/delete', {
+        method: 'POST',
+        body: { slug, yes: false }
+      });
+      show(data);
+      return;
+    }
+
+    if (button.classList.contains('run-delete-item')) {
+      if (!window.confirm(`确认把 ${slug} 移动到回收站？`)) return;
+      const data = await api('/api/delete', {
+        method: 'POST',
+        body: { slug, yes: true }
+      });
+      show(data);
+      await loadPosts();
+      await loadWorktree();
+    }
   } catch (err) {
     show(`ERROR: ${err.message}`);
   }

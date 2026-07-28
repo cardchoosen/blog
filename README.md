@@ -19,6 +19,9 @@ npm run deploy
 # 启动本地文章管理后台（http://127.0.0.1:4100/）
 npm run post:admin
 
+# 在浏览器打开本地文章管理后台页面（需要先运行 npm run post:admin）
+open http://127.0.0.1:4100/
+
 # 列出当前文章
 npm run post:list
 

@@ -18,6 +18,7 @@
       <button class="nav-button active" data-panel="posts">列表</button>
       <button class="nav-button" data-panel="import">导入</button>
       <button class="nav-button" data-panel="compose">新建</button>
+      <button class="nav-button" data-panel="edit">修改</button>
       <button class="nav-button" data-panel="delete">删除</button>
       <button class="nav-button" data-panel="publish">发布</button>
     </aside>
@@ -74,7 +75,10 @@
           </label>
         </div>
         <label>
-          <span>正文 Markdown</span>
+          <span class="field-head">
+            <span>正文 Markdown</span>
+            <code class="copy-token" title="段首缩进可复制">&amp;emsp;&amp;emsp;</code>
+          </span>
           <textarea id="body" rows="18" placeholder="从这里开始写正文..."></textarea>
         </label>
         <label class="check">
@@ -84,9 +88,58 @@
         <button id="create-post" type="button">保存文章</button>
       </section>
 
+      <section class="panel" id="panel-edit">
+        <div class="panel-head">
+          <h1>修改文章</h1>
+          <button class="ghost" id="refresh-edit-posts" type="button">刷新</button>
+        </div>
+        <p class="muted">选择一篇已有文章，修改后会直接写回 <code>source/_posts/</code> 下的 Markdown 文件。</p>
+        <div class="edit-list" id="edit-list"></div>
+
+        <div class="edit-form" id="edit-form" hidden>
+          <h2>编辑内容</h2>
+          <div class="grid">
+            <label>
+              <span>标题</span>
+              <input id="edit-title" type="text" placeholder="文章标题">
+            </label>
+            <label>
+              <span>Slug</span>
+              <input id="edit-slug" type="text" readonly>
+            </label>
+            <label>
+              <span>日期</span>
+              <input id="edit-date" type="text" placeholder="2026-07-01 20:30:00">
+            </label>
+            <label>
+              <span>分类</span>
+              <input id="edit-categories" type="text" placeholder="前端, 工程化">
+            </label>
+            <label>
+              <span>标签</span>
+              <input id="edit-tags" type="text" placeholder="React, Hexo">
+            </label>
+            <label>
+              <span>摘要</span>
+              <input id="edit-excerpt" type="text" placeholder="可选">
+            </label>
+          </div>
+          <label>
+            <span>正文 Markdown</span>
+            <textarea id="edit-body" rows="20" placeholder="从这里修改正文..."></textarea>
+          </label>
+          <button id="update-post" type="button">保存修改</button>
+        </div>
+      </section>
+
       <section class="panel" id="panel-delete">
-        <h1>删除文章</h1>
+        <div class="panel-head">
+          <h1>删除文章</h1>
+          <button class="ghost" id="refresh-delete-posts" type="button">刷新</button>
+        </div>
         <p class="muted">删除会移动到 <code>.trash/posts/</code>，不会直接永久移除。</p>
+        <div class="delete-list" id="delete-list"></div>
+        <h2>手动输入</h2>
         <label>
           <span>Slug</span>
           <input id="delete-slug" type="text" placeholder="my-post-slug">

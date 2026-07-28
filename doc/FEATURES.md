@@ -27,10 +27,11 @@
 - **草稿**：`hexo new draft <title>` 生成草稿，存放于 `source/_drafts/`（默认不渲染）
 - **自定义页面**：`hexo new page <name>` 生成独立页面
 - **文章模板**：`scaffolds/` 下提供 `post.md` / `draft.md` / `page.md` 三种模板
-- **本机后台**：`npm run post:admin` 启动 `http://127.0.0.1:4100/`，提供文章列表、导入、新建、删除、发布等操作
+- **本机后台**：`npm run post:admin` 启动 `http://127.0.0.1:4100/`，提供文章列表、导入、新建、修改、删除、发布等操作
 - **CLI 工具**：`npm run post:import` / `post:list` / `post:delete` 支持单篇或批量文章包导入、文章列表查看、删除到回收站
 - **文章包格式**：一篇文章一个目录，包含 `post.md` 与可选 `assets/`，格式详见 `tools/post-admin/POST_INPUT_FORMAT.md`
 - **素材管理**：图片导入到 `source/images/posts/<slug>/`，其他附件导入到 `source/files/posts/<slug>/`，Markdown 引用自动重写为站点根路径
+- **段落排版**：文章普通正文段落自动首行缩进 `2em`，引用块内段落不缩进
 
 ### 2. 左侧分类书架（核心交互）
 - **数据源**：文章 front-matter 的 `categories` 字段
@@ -84,22 +85,28 @@
 - **主题切换时 token 颜色同步切换**：JS 通过 `link.media` 启停对应 hljs 主题 CSS
 - 鼠标 hover/聚焦不变色（已修复浏览器默认 focus 高亮 bug）
 
-### 9. 视觉风格（极客黑白）
+### 9. 评论
+- 文章详情页正文下方提供 `COMMENTS` 评论区
+- 评论系统使用 utterances，按页面 `pathname` 将文章评论映射到 GitHub Issue
+- 深/浅主题切换时，评论框主题同步切换为 `github-light` / `github-dark`
+- 生效前置条件：`cardchoosen/blog` 仓库需要安装 utterances GitHub App，并允许创建 issue
+
+### 10. 视觉风格（极客黑白）
 - 纯黑白主调，无彩色强调色
 - 灰阶过渡：hover 浅灰底 `#f0f0f0`，active 中灰底 `#e0e0e0`（浅色主题）
 - 顶栏黑色色块 + 反白文字（站点标题 + 导航 + 主题切换按钮）
 - 全站等宽字体 `ui-monospace, SFMono-Regular, Menlo, Monaco, ...`
-- 首页列表、文章正文、归档、分类、标签等主体内容在右侧内容区内居中显示，保持 720px 阅读宽度
+- 首页列表、文章正文、评论区、归档、分类、标签等主体内容在右侧内容区内居中显示，保持 780px 阅读宽度
 - 无圆角 / 无阴影 / 无渐变
 - 0.12s 平滑过渡
 - `overscroll-behavior: none` 禁用弹性滚动
 
-### 10. 本地预览
+### 11. 本地预览
 - `npm run server` 启动本地服务，访问 `http://localhost:4000/`
 - 监听 source/ 和 themes/ 文件变化自动重载
 - 注意：改 `_config.yml` 站点配置后需重启 server
 
-### 11. 本地后台发布
+### 12. 本地后台发布
 - **发布入口**：post-admin 的"发布"页提供"仅构建检查"与"构建并发布"两个按钮
 - **构建检查**：执行 `npm run build`，用于发布前确认 Hexo 能正常生成静态站
 - **构建并发布**：依次执行 `npm run clean` → `npm run build` → `npm run deploy`
@@ -108,30 +115,35 @@
 - **发布快照**：发布成功后记录 `.tmp/post-admin/published-content.json`，刷新后不再显示已发布内容差异；后续只有再次修改文章或素材才显示新差异
 - **部署凭据**：`_config.yml` 的 deploy repo 使用 SSH 地址 `git@github.com:cardchoosen/blog.git`，依赖本机 GitHub SSH key
 
-### 12. 一键部署（命令行）
+### 13. 本地后台修改文章
+- **修改入口**：post-admin 的"修改"页列出当前所有文章
+- **加载文章**：点击"修改"后读取 `source/_posts/<slug>.md`，回填标题、日期、分类、标签、摘要与正文 Markdown
+- **保存修改**：保存后直接写回原 Markdown 文件，并刷新文章列表与发布差异
+- **Slug 策略**：修改页的 slug 只读，不做文章文件改名或素材路径迁移
+- **写作辅助**：新建文章页的正文标题右侧显示可复制的 `&emsp;&emsp;`，用于手动段首缩进
+
+### 14. 一键部署（命令行）
 - 命令：`npx hexo clean && npx hexo g && npx hexo d`
 - 流程：清理 → 生成静态站 → 推送到 `gh-pages` 分支
 - GitHub Pages 自动识别 `gh-pages` 分支并提供访问
 
-### 13. 响应式
+### 15. 响应式
 - 桌面端（>768px）：左书架 + 右内容 双栏布局
 - 移动端（≤768px）：书架堆叠到内容上方，单栏布局
 
 ## 当前内容
 
-- **文章数**：7 篇
-  - `hello-world.md`（Hexo 默认示例，已加 Java/Go/TypeScript 多语言代码段）
-  - `test-frontend-1.md` / `test-frontend-2.md`（categories: 前端，测试用）
-  - `test-backend-1.md` / `test-backend-2.md`（categories: 后端，测试用）
-  - `test.md`（通过本地 post-admin 创建并发布的测试文章，categories: test）
-  - `bilibili-bv1opafzpef9-p1.md`（B 站课程整理文章，含 6 张截图素材）
+- **文章数**：4 篇
+  - `bilibili-bv1opafzpef9-p1.md`（B 站课程整理文章，含 9 张截图素材）
+  - `my-note-260724.md`（日常随笔）
+  - `my-note-260727.md`（日常随笔）
+  - `my-note-260728.md`（日常随笔）
 - **自定义页面**：无
 - **主题**：geek-shelf（已实现并跑通）
 - **本地内容工具**：post-admin 已实现并跑通，支持 Web UI + CLI
 
 ## 待规划 / 未实现
 
-- [ ] 评论系统接入（如 Giscus）
 - [ ] 站点统计（如 Google Analytics / Umami）
 - [ ] SEO 优化（sitemap、robots.txt、meta 信息）
 - [ ] 图床方案接入

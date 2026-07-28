@@ -6,8 +6,8 @@
 
 // ---- 静态变量（不参与主题切换） ----
 font-mono = ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace
-width-shelf = 280px
-height-topbar = 56px
+width-shelf = 320px
+height-topbar = 64px
 
 // ---- 主题变量（CSS 自定义属性） ----
 // 默认浅色主题
@@ -92,8 +92,8 @@ body
   font-family font-mono
   color var(--color-text)
   background var(--color-bg)
-  font-size 14px
-  line-height 1.6
+  font-size 16px
+  line-height 1.7
   -webkit-font-smoothing antialiased
   // 禁用弹性滚动：滑动到顶/底时不再延伸出超出页面的空白区域
   overscroll-behavior none
@@ -110,20 +110,20 @@ a
   color var(--color-bar-text)
   display flex
   align-items center
-  padding 0 24px
+  padding 0 28px
   position sticky
   top 0
   z-index 100
-  gap 24px
+  gap 28px
 
 // 左侧：品牌 + 导航（紧挨着标题）
 .brand
   display flex
   align-items baseline
-  gap 12px
+  gap 14px
 
 .brand-title
-  font-size 16px
+  font-size 18px
   font-weight bold
   letter-spacing 0.04em
   color var(--color-bar-text)
@@ -137,19 +137,19 @@ a
     text-decoration underline
 
 .brand-sub
-  font-size 12px
+  font-size 13px
   opacity 0.7
 
 .topnav
   display flex
-  gap 16px
+  gap 18px
 
 .nav-item
   color var(--color-bar-text)
-  font-size 13px
+  font-size 15px
   text-decoration none
   letter-spacing 0.04em
-  padding 4px 8px
+  padding 6px 10px
   transition background-color 0.12s ease, color 0.12s ease
   &:hover, &:focus
     background var(--color-bar-text)
@@ -166,7 +166,7 @@ a
   cursor pointer
   font-family font-mono
   line-height 1
-  padding 4px 8px
+  padding 6px 10px
   display flex
   align-items center
   justify-content center
@@ -179,8 +179,8 @@ a
 // 两字叠加容器（加宽，让两字有错位空间）
 .theme-stack
   position relative
-  width 28px
-  height 22px
+  width 32px
+  height 24px
   display inline-block
 
 // 两个字都绝对定位，各自偏移让约 1/3 重叠
@@ -194,12 +194,12 @@ a
 .theme-char[data-char="深"]
   right 0
   transform translateY(-50%)
-  font-size 10px
+  font-size 11px
   opacity 0.35
 .theme-char[data-char="浅"]
   left 0
   transform translateY(-50%)
-  font-size 16px
+  font-size 18px
   opacity 1
 
 // 浅色主题：浅字放大在左，深字缩小透明在右
@@ -207,12 +207,12 @@ html.theme-light
   .theme-char[data-char="深"]
     right 0
     transform translateY(-50%)
-    font-size 10px
+    font-size 11px
     opacity 0.35
   .theme-char[data-char="浅"]
     left 0
     transform translateY(-50%)
-    font-size 16px
+    font-size 18px
     opacity 1
 
 // 深色主题：深字放大在左（标识当前主题），浅字缩小透明在右
@@ -220,12 +220,12 @@ html.theme-dark
   .theme-char[data-char="深"]
     left 0
     transform translateY(-50%)
-    font-size 16px
+    font-size 18px
     opacity 1
   .theme-char[data-char="浅"]
     right 0
     transform translateY(-50%)
-    font-size 10px
+    font-size 11px
     opacity 0.35
 
 // 没有显式 class 时（首次访问未 JS），随系统
@@ -234,19 +234,19 @@ html.theme-dark
     .theme-char[data-char="深"]
       left 0
       transform translateY(-50%)
-      font-size 16px
+      font-size 18px
       opacity 1
     .theme-char[data-char="浅"]
       right 0
       transform translateY(-50%)
-      font-size 10px
+      font-size 11px
       opacity 0.35
 
 // ---- 主布局：左书架 + 右内容 ----
 .main-layout
   display flex
   align-items flex-start
-  min-height calc(100vh - 56px)
+  min-height calc(100vh - 64px)
 
 // ---- 左侧书架 ----
 .shelf
@@ -255,24 +255,24 @@ html.theme-dark
   border-right 1px solid var(--color-line)
   position sticky
   top height-topbar
-  height calc(100vh - 56px)
+  height calc(100vh - 64px)
   overflow-y auto
 
 // 目录标题：加大字号、左侧粗竖线 accent bar、与下方区分
 .shelf-head
-  font-size 13px
+  font-size 15px
   font-weight bold
   letter-spacing 0.04em
   color var(--color-text)
-  padding 20px 20px 16px 24px
+  padding 22px 22px 18px 28px
   border-bottom 1px solid var(--color-line)
   position relative
   &::before
     content ''
     position absolute
-    left 12px
-    top 22px
-    bottom 18px
+    left 14px
+    top 24px
+    bottom 20px
     width 3px
     background var(--color-text)
 
@@ -287,9 +287,9 @@ html.theme-dark
   border none
   background transparent
   text-align left
-  padding 14px 20px
+  padding 16px 22px
   font-family font-mono
-  font-size 13px
+  font-size 15px
   font-weight bold
   cursor pointer
   display flex
@@ -305,7 +305,7 @@ html.theme-dark
   flex 1
 
 .cat-count
-  font-size 11px
+  font-size 12px
   font-weight normal
   opacity 0.5
   margin-left 8px
@@ -326,8 +326,8 @@ html.theme-dark
 
 .post-link
   display block
-  padding 10px 20px 10px 32px
-  font-size 12px
+  padding 12px 22px 12px 36px
+  font-size 14px
   text-decoration none
   color var(--color-text)
   hover-soft()
@@ -337,36 +337,36 @@ html.theme-dark
     font-weight bold
 
 .shelf-empty
-  padding 20px
-  font-size 12px
+  padding 22px
+  font-size 14px
   opacity 0.5
 
 // ---- 右侧内容区 ----
 .content
   flex 1
-  padding 40px 48px
+  padding 48px 56px
   min-width 0
 
 // ---- 首页文章列表 ----
 .post-list
-  max-width 720px
+  max-width 780px
   margin-left auto
   margin-right auto
 
 .post-item
-  padding 20px 0
+  padding 24px 0
   border-bottom 1px solid var(--color-line)
   &:first-child
     padding-top 0
 
 .item-date
-  font-size 11px
+  font-size 12px
   letter-spacing 0.08em
   opacity 0.6
   margin-bottom 6px
 
 .item-title
-  font-size 18px
+  font-size 21px
   font-weight bold
   a
     text-decoration none
@@ -374,22 +374,22 @@ html.theme-dark
 
 .item-excerpt
   margin-top 8px
-  font-size 13px
+  font-size 15px
   opacity 0.8
 
 // ---- 文章详情 ----
 .post
-  max-width 720px
+  max-width 780px
   margin-left auto
   margin-right auto
 
 .post-header
   border-bottom 1px solid var(--color-line)
-  padding-bottom 16px
-  margin-bottom 24px
+  padding-bottom 20px
+  margin-bottom 28px
 
 .post-title
-  font-size 24px
+  font-size 28px
   font-weight bold
   line-height 1.3
   margin-bottom 12px
@@ -398,7 +398,7 @@ html.theme-dark
     hover-soft()
 
 .post-meta
-  font-size 12px
+  font-size 13px
   opacity 0.7
 
 .meta-sep
@@ -411,24 +411,25 @@ html.theme-dark
 
 // ---- 文章正文 ----
 .post-body
-  font-size 14px
-  line-height 1.7
+  font-size 16px
+  line-height 1.75
   h1, h2, h3, h4, h5, h6
     font-weight bold
     margin 1.4em 0 0.6em
     line-height 1.3
   h1
-    font-size 20px
+    font-size 24px
     border-bottom 2px solid var(--color-line)
     padding-bottom 4px
   h2
-    font-size 17px
+    font-size 21px
     border-bottom 1px solid var(--color-line)
     padding-bottom 4px
   h3
-    font-size 15px
+    font-size 18px
   p
     margin 0.8em 0
+    text-indent 2em
   ul, ol
     margin 0.8em 0
     padding-left 1.4em
@@ -440,6 +441,7 @@ html.theme-dark
     margin 1em 0
     & > p
       margin 0.4em 0
+      text-indent 0
   code
     font-family font-mono
     background var(--color-active-bg)
@@ -452,7 +454,7 @@ html.theme-dark
     padding 14px 16px
     overflow-x auto
     margin 1em 0
-    font-size 13px
+    font-size 15px
     line-height 1.5
     &:focus
       outline none
@@ -519,6 +521,22 @@ html.theme-dark
     text-decoration underline
     hover-soft()
 
+// ---- 评论 ----
+.post-comments
+  max-width 780px
+  margin 40px auto 0
+  padding-top 18px
+  border-top 1px solid var(--color-line)
+
+.comments-title
+  font-size 16px
+  font-weight bold
+  letter-spacing 0.12em
+  margin-bottom 16px
+
+.utterances
+  max-width 100% !important
+
 // ---- 上下篇导航 ----
 .post-nav
   display flex
@@ -528,7 +546,7 @@ html.theme-dark
   margin-right auto
   padding-top 16px
   border-top 1px solid var(--color-line)
-  max-width 720px
+  max-width 780px
 
 .post-nav-cell
   flex 1
@@ -537,13 +555,13 @@ html.theme-dark
 
 .nav-label
   display block
-  font-size 10px
+  font-size 11px
   letter-spacing 0.12em
   opacity 0.6
   margin-bottom 4px
 
 .nav-link
-  font-size 13px
+  font-size 15px
   text-decoration none
   font-weight bold
   hover-soft()
@@ -557,10 +575,10 @@ html.theme-dark
   margin-right auto
   padding-top 16px
   border-top 1px solid var(--color-line)
-  max-width 720px
+  max-width 780px
 
 .pager-cell
-  font-size 12px
+  font-size 14px
   letter-spacing 0.08em
   text-decoration none
   font-weight bold
@@ -570,12 +588,12 @@ html.theme-dark
 
 // ---- 归档 ----
 .archive
-  max-width 720px
+  max-width 780px
   margin-left auto
   margin-right auto
 
 .archive-title
-  font-size 16px
+  font-size 18px
   font-weight bold
   letter-spacing 0.08em
   padding-bottom 12px
@@ -583,7 +601,7 @@ html.theme-dark
   margin-bottom 20px
 
 .archive-year
-  font-size 14px
+  font-size 16px
   font-weight bold
   margin 20px 0 8px
   padding 4px 8px
@@ -599,13 +617,13 @@ html.theme-dark
   border-bottom 1px solid var(--color-line)
 
 .archive-date
-  font-size 11px
+  font-size 12px
   opacity 0.6
   flex-shrink 0
   width 60px
 
 .archive-link
-  font-size 13px
+  font-size 15px
   text-decoration none
   hover-soft()
 
@@ -624,11 +642,11 @@ html.theme-dark
   hover-soft()
 
 .term-name
-  font-size 14px
+  font-size 16px
   font-weight bold
 
 .term-count
-  font-size 12px
+  font-size 13px
   opacity 0.6
   flex-shrink 0
 
@@ -636,7 +654,7 @@ html.theme-dark
 .site-footer
   border-top 1px solid var(--color-line)
   padding 16px 24px
-  font-size 11px
+  font-size 12px
 
 .footer-inner
   display flex
@@ -649,12 +667,12 @@ html.theme-dark
 // ---- 响应式 ----
 @media (max-width: 768px)
   .topbar
-    padding 0 16px
-    gap 12px
+    padding 0 18px
+    gap 14px
   .topnav
-    gap 10px
+    gap 8px
   .nav-item
-    padding 4px 6px
+    padding 5px 6px
   .main-layout
     flex-direction column
   .shelf
@@ -664,4 +682,4 @@ html.theme-dark
     border-right none
     border-bottom 1px solid var(--color-line)
   .content
-    padding 24px 16px
+    padding 32px 18px

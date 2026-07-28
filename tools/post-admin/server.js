@@ -267,6 +267,12 @@ async function handleApi(req, res, pathname) {
       return;
     }
 
+    if (req.method === 'GET' && pathname === '/api/post') {
+      const url = new URL(req.url, 'http://127.0.0.1');
+      sendJson(res, 200, { post: manager.getPost(url.searchParams.get('slug')) });
+      return;
+    }
+
     if (req.method === 'POST' && pathname === '/api/import') {
       const body = await readJson(req);
       const imported = manager.importInput(body.path, { force: Boolean(body.force) });
@@ -279,6 +285,13 @@ async function handleApi(req, res, pathname) {
       const packageDir = manager.createPackageFromFields(body);
       const imported = manager.importInput(packageDir, { force: Boolean(body.force) });
       sendJson(res, 200, { imported });
+      return;
+    }
+
+    if (req.method === 'POST' && pathname === '/api/update') {
+      const body = await readJson(req);
+      const updated = manager.updatePost(body.slug, body);
+      sendJson(res, 200, { updated });
       return;
     }
 
@@ -348,4 +361,7 @@ function startServer(options = {}) {
   });
 }
 
-module.exports = { startServer };
+module.exports = {
+  startServer,
+  writePublishedSnapshot
+};

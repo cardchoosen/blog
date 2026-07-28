@@ -420,3 +420,51 @@
 - `doc/ARCHITECTURE.md`：补充新增文章、右侧主体内容居中 CSS 机制
 - `doc/FEATURES.md`：更新视觉风格与当前内容文章数
 - `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-07-28 00:00 · （本次提交）· feat: 启用文章评论并完善本地后台
+
+> 本条目对应本次提交，汇总近期已验证的 post-admin、主题样式、内容与评论系统改动。
+
+### 评论系统
+
+- 主题配置新增 `comments`，默认启用 utterances
+- 新增 `themes/geek-shelf/layout/_partial/comments.ejs`
+- 文章页在正文后、上下篇导航前渲染 `COMMENTS` 评论区
+- 评论按页面 `pathname` 关联 GitHub Issue
+- `shelf.js` 在深/浅主题切换时同步更新 utterances iframe 主题
+
+### 主题与阅读体验
+
+- 博客前台整体字号、顶栏、侧栏、正文、归档与分类/标签页面尺寸放大
+- 主体阅读宽度从 `720px` 调整为 `780px`
+- 普通正文段落自动首行缩进 `2em`
+- 引用块内段落保持不缩进
+
+### 本地 Post Admin
+
+- 新增"修改" tab，可选择已有文章并编辑标题、日期、分类、标签、摘要与正文 Markdown
+- 修改文章保存后直接写回 `source/_posts/<slug>.md`，并刷新文章列表与发布差异
+- 删除页列出现有文章，支持直接查看删除清单或移动到回收站
+- 新建页正文区域标注可复制的 `&emsp;&emsp;`
+- 后台页面禁用弹性滚动
+- `npm run deploy` 改为 `node tools/post-admin/cli.js deploy`，命令行部署后同步更新发布快照
+- 新增 `scripts/post-admin-snapshot.js`，兼容 Hexo deploy 生命周期刷新发布快照
+
+### 内容更新
+
+- 当前源码文章调整为 4 篇：
+  - `bilibili-bv1opafzpef9-p1.md`
+  - `my-note-260724.md`
+  - `my-note-260727.md`
+  - `my-note-260728.md`
+- 删除旧测试文章与旧截图素材
+- B 站课程文章与截图素材更新为当前版本
+
+### 文档同步
+
+- `README.md`：补充本地后台浏览器打开命令
+- `doc/ARCHITECTURE.md`：更新 post-admin、主题评论系统、文章结构、命令与 CSS 机制
+- `doc/FEATURES.md`：更新后台修改文章、评论、段落缩进、当前内容与视觉宽度
+- `doc/CHANGELOG.md`：追加本次条目

@@ -1,0 +1,27 @@
+<%
+  var comments = theme.comments || {};
+  var enabled = comments.enable && comments.provider === 'utterances' && comments.repo;
+  var issueTerm = comments.issue_term || 'pathname';
+  var label = comments.label || 'comment';
+  var lightTheme = comments.theme || 'github-light';
+  var darkTheme = comments.dark_theme || 'github-dark';
+%>
+<% if (enabled) { %>
+  <section
+    class="post-comments"
+    data-comment-provider="utterances"
+    data-comment-light-theme="<%= lightTheme %>"
+    data-comment-dark-theme="<%= darkTheme %>"
+  >
+    <h2 class="comments-title">COMMENTS</h2>
+    <script
+      src="https://utteranc.es/client.js"
+      repo="<%= comments.repo %>"
+      issue-term="<%= issueTerm %>"
+      label="<%= label %>"
+      theme="<%= lightTheme %>"
+      crossorigin="anonymous"
+      async>
+    </script>
+  </section>
+<% } %>

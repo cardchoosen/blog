@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
+const path = require('path');
+const { spawn } = require('child_process');
 const manager = require('./lib/content-manager');
-const { startServer } = require('./server');
+const { startServer, writePublishedSnapshot } = require('./server');
 
 function printHelp() {
   console.log(`Hexo Post Admin
@@ -11,12 +13,14 @@ Usage:
   npm run post:list
   npm run post:delete -- <slug> [--yes]
   npm run post:admin -- [--port 4100]
+  npm run deploy
 
 Commands:
   import    Import one article package or all packages under a parent folder
   list      List current posts from source/_posts
   delete    Move a post and its assets to .trash/posts
   server    Start the local web admin
+  deploy    Run hexo deploy, then update the published content snapshot
 `);
 }
 
@@ -32,6 +36,25 @@ function readOption(args, name, fallback) {
 
 function printJson(value) {
   console.log(JSON.stringify(value, null, 2));
+}
+
+function runCommand(command, args) {
+  return new Promise((resolve) => {
+    const child = spawn(command, args, {
+      cwd: manager.PROJECT_ROOT,
+      shell: false,
+      stdio: 'inherit',
+      env: process.env
+    });
+
+    child.on('error', (err) => {
+      console.error(err.message);
+      resolve(1);
+    });
+    child.on('close', (code) => {
+      resolve(code || 0);
+    });
+  });
 }
 
 async function main() {
@@ -67,6 +90,18 @@ async function main() {
     if (command === 'server') {
       const port = Number(readOption(args, '--port', process.env.POST_ADMIN_PORT || 4100));
       await startServer({ port });
+      return;
+    }
+
+    if (command === 'deploy') {
+      const hexoBin = path.join(manager.PROJECT_ROOT, 'node_modules/.bin/hexo');
+      const code = await runCommand(hexoBin, ['deploy']);
+      if (code !== 0) {
+        process.exitCode = code;
+        return;
+      }
+      const snapshot = writePublishedSnapshot();
+      console.log(`Published content snapshot updated: ${snapshot.publishedAt}`);
       return;
     }
 

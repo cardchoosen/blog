@@ -291,6 +291,7 @@ function readPost(filePath) {
     date: parsed.data.date || '',
     categories: Array.isArray(parsed.data.categories) ? parsed.data.categories : [],
     tags: Array.isArray(parsed.data.tags) ? parsed.data.tags : [],
+    excerpt: parsed.data.excerpt || '',
     path: path.relative(PROJECT_ROOT, filePath)
   };
 }
@@ -301,6 +302,56 @@ function listPosts() {
     .filter((name) => name.endsWith('.md'))
     .map((name) => readPost(path.join(POSTS_DIR, name)))
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+
+function postPathBySlug(slug) {
+  const cleanSlug = normalizeSlug(slug);
+  if (!validateSlug(cleanSlug)) throw new Error('Invalid slug');
+  return path.join(POSTS_DIR, `${cleanSlug}.md`);
+}
+
+function getPost(slug) {
+  const postPath = postPathBySlug(slug);
+  if (!isFile(postPath)) throw new Error(`Post "${slug}" was not found`);
+
+  const markdown = fs.readFileSync(postPath, 'utf8');
+  const parsed = parseFrontMatter(markdown);
+  const data = parsed.data;
+  const cleanSlug = path.basename(postPath, '.md');
+
+  return {
+    slug: cleanSlug,
+    title: data.title || cleanSlug,
+    date: data.date || '',
+    categories: Array.isArray(data.categories) ? data.categories : [],
+    tags: Array.isArray(data.tags) ? data.tags : [],
+    excerpt: data.excerpt || '',
+    body: parsed.body.trimEnd(),
+    path: path.relative(PROJECT_ROOT, postPath)
+  };
+}
+
+function updatePost(slug, fields) {
+  const postPath = postPathBySlug(slug);
+  if (!isFile(postPath)) throw new Error(`Post "${slug}" was not found`);
+
+  const data = validatePostData({
+    title: fields.title,
+    slug,
+    date: fields.date,
+    categories: fields.categories,
+    tags: fields.tags,
+    excerpt: fields.excerpt
+  }, 'edit form');
+
+  const markdown = `${formatFrontMatter(data)}\n\n${String(fields.body || '').trimEnd()}\n`;
+  fs.writeFileSync(postPath, markdown, 'utf8');
+
+  return {
+    slug: data.slug,
+    title: data.title,
+    post: path.relative(PROJECT_ROOT, postPath)
+  };
 }
 
 function timestamp() {
@@ -389,6 +440,8 @@ module.exports = {
   PROJECT_ROOT,
   importInput,
   listPosts,
+  getPost,
+  updatePost,
   deletePlan,
   deletePost,
   createPackageFromFields

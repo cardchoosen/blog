@@ -13,6 +13,7 @@
 | 样式 | Stylus（hexo-renderer-stylus），含 mixin 抽象 |
 | Markdown 渲染 | hexo-renderer-marked |
 | 代码高亮 | highlight.js（已关行号） |
+| 评论系统 | utterances（GitHub Issues，文章页按 pathname 关联评论） |
 | 内容生成器 | archive / category / index / tag |
 | 部署器 | hexo-deployer-git（推送静态站到 gh-pages 分支） |
 | 运行时 | Node.js（开发机 v24.6.0） |
@@ -35,13 +36,10 @@ Hexo/
 │   └── post.md
 ├── source/                  # 内容源文件
 │   ├── _posts/              #   文章 Markdown
-│   │   ├── hello-world.md       # 默认示例（已加 Java/Go/TS 代码段）
-│   │   ├── test-frontend-1.md   # 测试文章（categories: 前端）
-│   │   ├── test-frontend-2.md   # 测试文章（categories: 前端）
-│   │   ├── test-backend-1.md    # 测试文章（categories: 后端）
-│   │   ├── test-backend-2.md    # 测试文章（categories: 后端）
-│   │   ├── test.md              # 本地文章后台创建的测试文章（categories: test）
-│   │   └── bilibili-bv1opafzpef9-p1.md # B 站课程整理文章（categories: 南京大学操作系统原理）
+│   │   ├── bilibili-bv1opafzpef9-p1.md # B 站课程整理文章（categories: 南京大学操作系统原理）
+│   │   ├── my-note-260724.md            # 日常随笔
+│   │   ├── my-note-260727.md            # 日常随笔
+│   │   └── my-note-260728.md            # 日常随笔
 │   ├── images/posts/            #   文章图片资源（按 slug 分目录，由 post-admin 导入）
 │   ├── files/posts/             #   文章附件资源（按 slug 分目录，由 post-admin 导入）
 │   ├── categories/index.md      #   分类总览页入口（layout: category）
@@ -92,6 +90,7 @@ Hexo/
 | Deploy.type | `git` | 部署器类型 |
 | Deploy.repo | `git@github.com:cardchoosen/blog.git` | 部署目标仓库（SSH，用本机 GitHub SSH key 推送） |
 | Deploy.branch | `gh-pages` | 部署目标分支 |
+| Theme.comments | `utterances` | 文章页评论系统，使用 GitHub Issues 按 pathname 关联 |
 
 ## 本地文章管理工具（tools/post-admin/）
 
@@ -99,13 +98,13 @@ Hexo/
 
 ```
 tools/post-admin/
-├── cli.js                         # CLI 入口：import/list/delete/server
-├── server.js                      # 本地 Web 后台与 API
+├── cli.js                         # CLI 入口：import/list/delete/server/deploy
+├── server.js                      # 本地 Web 后台与 API，维护发布快照
 ├── POST_INPUT_FORMAT.md           # 给人和 AI 使用的文章包输入格式说明
 ├── lib/
-│   └── content-manager.js         # 文章包解析、资源复制、路径重写、删除回收站
+│   └── content-manager.js         # 文章包解析、资源复制、路径重写、文章读取/修改、删除回收站
 └── web/
-    ├── index.html                 # 本地后台页面
+    ├── index.html                 # 本地后台页面：列表/导入/新建/修改/删除/发布
     ├── style.css                  # 贴合 geek-shelf 的黑白等宽 UI
     └── app.js                     # 前端交互
 ```
@@ -142,7 +141,7 @@ themes/geek-shelf/
 ├── layout/
 │   ├── layout.ejs                 # 主布局：顶部黑条 + 左书架 + 右内容
 │   ├── index.ejs                  # 首页文章列表 + 分页
-│   ├── post.ejs                   # 文章详情（引入 article + post-nav）
+│   ├── post.ejs                   # 文章详情（引入 article + comments + post-nav）
 │   ├── page.ejs                   # 自定义页面（复用 article）
 │   ├── archive.ejs                # 归档（按年分组）
 │   ├── category.ejs               # 分类总览 + 分类文章列表（引入 archive-list）
@@ -152,6 +151,7 @@ themes/geek-shelf/
 │       ├── header.ejs             # 顶部色块（站点标题 + 导航 + 主题切换按钮）
 │       ├── shelf.ejs              # 左侧书架（核心：按 categories 聚合）
 │       ├── article.ejs            # 文章渲染（标题/日期/分类/标签/正文）
+│       ├── comments.ejs           # utterances 评论区
 │       ├── post-terms.ejs         # 文章的分类/标签条（参数化 type）
 │       ├── post-nav.ejs           # 上一篇/下一篇导航
 │       ├── archive-list.ejs       # 归档列表组件（category/tag 复用）
@@ -170,8 +170,11 @@ themes/geek-shelf/
 - 顶栏右侧切换按钮：显示"深"/"浅"两字叠加，当前主题字放大在左（标识当前主题），另一字缩小透明在右（提示可切到）
 - 防 FOUC：`layout.ejs` 在 `<head>` 内联脚本，CSS 加载前根据 localStorage 或 prefers-color-scheme 给 `<html>` 加 class
 - 优先级：localStorage > 系统偏好 > 默认浅色
+- `shelf.js` 同步切换 highlight.js 与 utterances 评论框主题；utterances iframe 异步出现时用 `MutationObserver` 补一次当前主题
 
-**视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变。浅色主题代码块 `#e8e8e8` 底，深色主题 `#0a0a0a` 底（比页面背景 `#1a1a1a` 略黑）。无圆角无阴影无渐变。等宽字体 `ui-monospace` 全站。`overscroll-behavior: none` 禁用弹性滚动。
+**评论系统**：`themes/geek-shelf/_config.yml` 中 `comments.provider: utterances` 启用文章页评论，`comments.ejs` 在正文后注入 utterances script，按 `pathname` 关联 GitHub Issue。仓库需要安装 utterances GitHub App 并允许在 `cardchoosen/blog` 创建 issue。
+
+**视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变。浅色主题代码块 `#e8e8e8` 底，深色主题 `#0a0a0a` 底（比页面背景 `#1a1a1a` 略黑）。无圆角无阴影无渐变。等宽字体 `ui-monospace` 全站。整体 UI 与正文字号已放大，主体内容宽度为 `780px`。`overscroll-behavior: none` 禁用弹性滚动。
 
 **代码语法高亮**：
 - Hexo 内置 highlight.js 渲染器，`_config.yml` 配 `hljs: true` 输出标准 `.hljs-xxx` token class（`hljs-keyword`/`hljs-string`/`hljs-title` 等）
@@ -184,7 +187,8 @@ themes/geek-shelf/
 
 **CSS 关键设计**：
 - `hover-soft()` mixin：统一管理"hover 时浅灰底 + 深灰字 + 0.12s 过渡"，多处复用
-- `.post-list` / `.post` / `.post-nav` / `.pager` / `.archive`：统一 `max-width: 720px` 且左右 `auto` margin，使首页列表、文章正文、归档、分类、标签等主体内容在右侧内容区内居中
+- `.post-list` / `.post` / `.post-comments` / `.post-nav` / `.pager` / `.archive`：统一 `max-width: 780px` 且左右 `auto` margin，使首页列表、文章正文、评论区、归档、分类、标签等主体内容在右侧内容区内居中
+- `.post-body p`：普通正文段落自动 `text-indent: 2em`；`blockquote > p` 取消缩进
 - `.term-list` / `.term-row`：用于 `/categories/` 与 `/tags/` 总览页，展示"名称 + 文章数"的黑白等宽列表
 - 代码块 `<figure class="highlight"><table><td>` 结构特殊处理：
   - `.gutter` `display:none`（隐藏行号列）
@@ -211,8 +215,9 @@ gh-pages   ← hexo g 生成的静态站（由 hexo d 自动推送）
 npm run build    # = hexo generate，生成静态站到 public/
 npm run clean    # = hexo clean，清理 public/、db.json、.deploy_git/
 npm run server   # = hexo server，本地预览 http://localhost:4000/
-npm run deploy   # = hexo deploy，推送 public/ 到 gh-pages
+npm run deploy   # = node tools/post-admin/cli.js deploy，执行 hexo deploy 并更新发布快照
 npm run post:admin              # 启动本地文章后台 http://127.0.0.1:4100/
+open http://127.0.0.1:4100/     # 在浏览器打开本地文章后台
 npm run post:list               # 列出 source/_posts 下文章
 npm run post:import -- <path>   # 导入单篇文章包或批量文章包
 npm run post:delete -- <slug>   # 预览删除清单；加 --yes 移动到回收站

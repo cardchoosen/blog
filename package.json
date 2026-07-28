@@ -5,7 +5,7 @@
   "scripts": {
     "build": "hexo generate",
     "clean": "hexo clean",
-    "deploy": "hexo deploy",
+    "deploy": "node tools/post-admin/cli.js deploy",
     "post:admin": "node tools/post-admin/cli.js server",
     "post:delete": "node tools/post-admin/cli.js delete",
     "post:import": "node tools/post-admin/cli.js import",

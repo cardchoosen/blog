@@ -7,3 +7,12 @@ menu:
   TAG: /tags/
 
 favicon: /favicon.ico
+
+comments:
+  enable: true
+  provider: utterances
+  repo: cardchoosen/blog
+  issue_term: pathname
+  label: comment
+  theme: github-light
+  dark_theme: github-dark
