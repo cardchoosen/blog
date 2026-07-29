@@ -182,14 +182,20 @@
     data-comment-dark-theme="github-dark"
   >
     <h2 class="comments-title">COMMENTS</h2>
-    <script
-      src="https://utteranc.es/client.js"
-      repo="cardchoosen/blog"
-      issue-term="pathname"
-      label="comment"
-      theme="github-light"
-      crossorigin="anonymous"
-      async>
+    <script>
+      (function () {
+        var container = document.currentScript.parentElement;
+        var isDark = document.documentElement.classList.contains('theme-dark');
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.setAttribute('repo', 'cardchoosen/blog');
+        script.setAttribute('issue-term', 'pathname');
+        script.setAttribute('label', 'comment');
+        script.setAttribute('theme', isDark ? 'github-dark' : 'github-light');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      })();
     </script>
   </section>
 
