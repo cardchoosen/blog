@@ -6,8 +6,8 @@
     (function() {
       try {
         var saved = localStorage.getItem('theme');
-        var mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = saved || (mql ? 'dark' : 'light');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
         document.documentElement.className = 'theme-' + theme;
       } catch (e) {}
     })();
@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)" class="hljs-theme-dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Anemone&#39;s Blog">
-<meta property="og:url" content="https://anemone.wiki/categories/CMU-10-414/index.html">
+<meta property="og:url" content="https://anemone.wiki/categories/object-Object/index.html">
 <meta property="og:site_name" content="Anemone&#39;s Blog">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="nannnzhang">
@@ -71,9 +71,9 @@
   <ul class="shelf-list">
     
       
-      <li class="shelf-item" data-cat="CMU 10-414">
+      <li class="shelf-item" data-cat="[object Object]">
         <button class="shelf-cat active" type="button">
-          <span class="cat-name">CMU 10-414</span>
+          <span class="cat-name">[object Object]</span>
           <span class="cat-count">1</span>
         </button>
         <ul class="shelf-posts open">
@@ -127,7 +127,7 @@
     <main class="content">
       <section class="archive">
   
-    <h1 class="archive-title">CATEGORY / CMU 10-414</h1>
+    <h1 class="archive-title">CATEGORY / [object Object]</h1>
     
 
   <div class="archive-row">

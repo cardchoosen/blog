@@ -6,8 +6,8 @@
     (function() {
       try {
         var saved = localStorage.getItem('theme');
-        var mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = saved || (mql ? 'dark' : 'light');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
         document.documentElement.className = 'theme-' + theme;
       } catch (e) {}
     })();
@@ -38,7 +38,7 @@
 <meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_0942_01.png">
 <meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_1447_01.png">
 <meta property="article:published_time" content="2026-07-29T08:12:12.000Z">
-<meta property="article:modified_time" content="2026-07-29T08:18:02.676Z">
+<meta property="article:modified_time" content="2026-07-29T08:29:29.787Z">
 <meta property="article:author" content="nannnzhang">
 <meta property="article:tag" content="CMU">
 <meta property="article:tag" content="CMU 10-414">
@@ -82,9 +82,9 @@
   <ul class="shelf-list">
     
       
-      <li class="shelf-item" data-cat="CMU 10-414">
+      <li class="shelf-item" data-cat="[object Object]">
         <button class="shelf-cat active" type="button">
-          <span class="cat-name">CMU 10-414</span>
+          <span class="cat-name">[object Object]</span>
           <span class="cat-count">1</span>
         </button>
         <ul class="shelf-posts open">
@@ -149,7 +149,7 @@
 <span class="post-categories">
   
     
-    <a href="/categories/CMU-10-414/" class="category-link">CMU 10-414</a>
+    <a href="/categories/object-Object/" class="category-link">[object Object]</a>
   
 </span>
 

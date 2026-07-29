@@ -6,8 +6,8 @@
     (function() {
       try {
         var saved = localStorage.getItem('theme');
-        var mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = saved || (mql ? 'dark' : 'light');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
         document.documentElement.className = 'theme-' + theme;
       } catch (e) {}
     })();
@@ -73,9 +73,9 @@
   <ul class="shelf-list">
     
       
-      <li class="shelf-item" data-cat="CMU 10-414">
+      <li class="shelf-item" data-cat="[object Object]">
         <button class="shelf-cat" type="button">
-          <span class="cat-name">CMU 10-414</span>
+          <span class="cat-name">[object Object]</span>
           <span class="cat-count">1</span>
         </button>
         <ul class="shelf-posts">
@@ -132,8 +132,8 @@
     <h1 class="archive-title">CATEGORY</h1>
     <div class="term-list">
       
-        <a class="term-row" href="/categories/CMU-10-414/">
-          <span class="term-name">CMU 10-414</span>
+        <a class="term-row" href="/categories/object-Object/">
+          <span class="term-name">[object Object]</span>
           <span class="term-count">1</span>
         </a>
       
