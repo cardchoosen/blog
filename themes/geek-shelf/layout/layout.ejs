@@ -6,8 +6,8 @@
     (function() {
       try {
         var saved = localStorage.getItem('theme');
-        var mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = saved || (mql ? 'dark' : 'light');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
         document.documentElement.className = 'theme-' + theme;
       } catch (e) {}
     })();

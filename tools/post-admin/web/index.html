@@ -19,6 +19,7 @@
       <button class="nav-button" data-panel="import">导入</button>
       <button class="nav-button" data-panel="compose">新建</button>
       <button class="nav-button" data-panel="edit">修改</button>
+      <button class="nav-button" data-panel="categories">分类</button>
       <button class="nav-button" data-panel="delete">删除</button>
       <button class="nav-button" data-panel="publish">发布</button>
     </aside>
@@ -138,6 +139,28 @@
           </label>
           <button id="update-post" type="button">保存修改</button>
         </div>
+      </section>
+
+      <section class="panel" id="panel-categories">
+        <div class="panel-head">
+          <h1>分类管理</h1>
+          <button class="ghost" id="refresh-categories" type="button">刷新</button>
+        </div>
+        <p class="muted">修改分类名会批量更新所有关联文章的 front-matter。</p>
+        <div class="category-list" id="category-list"></div>
+        <h2>重命名分类</h2>
+        <div class="grid">
+          <label>
+            <span>旧分类名</span>
+            <input id="category-old-name" type="text" placeholder="当前分类名">
+          </label>
+          <label>
+            <span>新分类名</span>
+            <input id="category-new-name" type="text" placeholder="新的分类名">
+          </label>
+        </div>
+        <button id="preview-category-rename" type="button">预览影响文章</button>
+        <button id="run-category-rename" class="danger" type="button">确认重命名</button>
       </section>
 
       <section class="panel" id="panel-delete">

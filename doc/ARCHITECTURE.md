@@ -37,6 +37,7 @@ Hexo/
 │   └── post.md
 ├── source/                  # 内容源文件
 │   ├── _posts/              #   文章 Markdown
+│   │   ├── bilibili-bv199rlyjez2-p1.md # CMU 10-414 课程整理文章
 │   │   ├── bilibili-bv1knphzpera-p1.md # B 站课程整理文章 02
 │   │   ├── bilibili-bv1opafzpef9-p1.md # B 站课程整理文章（categories: 南京大学操作系统原理）
 │   │   ├── my-note-260724.md            # 日常随笔
@@ -106,7 +107,7 @@ tools/post-admin/
 ├── lib/
 │   └── content-manager.js         # 文章包解析、资源复制、路径重写、文章读取/修改、删除回收站
 └── web/
-    ├── index.html                 # 本地后台页面：列表/导入/新建/修改/删除/发布
+    ├── index.html                 # 本地后台页面：列表/导入/新建/修改/分类/删除/发布
     ├── style.css                  # 贴合 geek-shelf 的黑白等宽 UI
     └── app.js                     # 前端交互
 ```
@@ -122,6 +123,10 @@ tools/post-admin/
 - 默认拒绝覆盖已有文章，传 `--force` 才覆盖
 
 删除文章时，工具不会直接永久删除，而是移动到 `.trash/posts/<slug>-<timestamp>/`。
+
+### 分类重命名
+
+post-admin 的"分类"页支持把某个分类名批量改为新名称。该能力会扫描 `source/_posts/*.md`，精确匹配 front-matter 里的 `categories` 项，并把所有关联文章一起更新；执行前可先预览受影响文章，确认后再写回 Markdown。
 
 ### 系列文章排序
 
@@ -178,17 +183,17 @@ themes/geek-shelf/
 **左侧书架**：遍历 `site.categories` 聚合所有分类及文章。点击分类按钮展开/收起该分类下文章列表，**允许多开**（点击不影响其他已展开分类）。展开状态通过 `localStorage` 持久化，跨页面保持。进入文章页时，**EJS 服务端渲染**即判断当前文章所属分类并直接给按钮加 `active` class、列表加 `open` class、文章链接加 `current` class——避免 JS 后加 class 导致的闪烁。
 
 **深/浅主题切换**：
-- CSS 变量（自定义属性）系统：`:root` 定义浅色主题默认变量，`@media (prefers-color-scheme: dark)` 覆盖深色，`html.theme-light`/`html.theme-dark` 手动切换覆盖（优先级最高）
+- CSS 变量（自定义属性）系统：`:root` 定义深色默认变量，`@media (prefers-color-scheme: light)` 覆盖浅色，`html.theme-light`/`html.theme-dark` 手动切换覆盖（优先级最高）
 - 顶栏右侧切换按钮：显示"深"/"浅"两字叠加，当前主题字放大在左（标识当前主题），另一字缩小透明在右（提示可切到）
 - 防 FOUC：`layout.ejs` 在 `<head>` 内联脚本，CSS 加载前根据 localStorage 或 prefers-color-scheme 给 `<html>` 加 class
-- 优先级：localStorage > 系统偏好 > 默认浅色
+- 优先级：localStorage > 系统偏好 > 默认深色
 - `shelf.js` 同步切换 highlight.js 与 utterances 评论框主题；utterances iframe 异步出现时用 `MutationObserver` 补一次当前主题
 
 **评论系统**：`themes/geek-shelf/_config.yml` 中 `comments.provider: utterances` 启用文章页评论，`comments.ejs` 在正文后注入 utterances script，按 `pathname` 关联 GitHub Issue。仓库需要安装 utterances GitHub App 并允许在 `cardchoosen/blog` 创建 issue。
 
 **阅读量统计**：文章页 meta 行显示 `阅读 <PV>`。`article.ejs` 提供 `busuanzi_value_page_pv` 占位，`post.ejs` 仅在文章详情页加载 Busuanzi 脚本，由第三方服务按页面 URL 统计并回填阅读量。
 
-**视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变。浅色主题代码块 `#e8e8e8` 底，深色主题 `#0a0a0a` 底（比页面背景 `#1a1a1a` 略黑）。无圆角无阴影无渐变。等宽字体 `ui-monospace` 全站。整体 UI 与正文字号已放大，主体内容宽度为 `780px`。`overscroll-behavior: none` 禁用弹性滚动。
+**视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变。浅色主题代码块 `#e8e8e8` 底，深色主题 `#0a0a0a` 底（比页面背景 `#1a1a1a` 略黑）。无圆角无阴影无渐变。顶栏、侧栏、标题保留等宽字体，正文使用系统阅读字体提升中文长文可读性。首页文章列表更紧凑，正文标题层级通过左侧标记与下边线增强区分。主体内容宽度为 `780px`。`overscroll-behavior: none` 禁用弹性滚动。
 
 **代码语法高亮**：
 - Hexo 内置 highlight.js 渲染器，`_config.yml` 配 `hljs: true` 输出标准 `.hljs-xxx` token class（`hljs-keyword`/`hljs-string`/`hljs-title` 等）

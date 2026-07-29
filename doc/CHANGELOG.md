@@ -515,3 +515,50 @@
 - `doc/ARCHITECTURE.md`：补充系列排序 helper、阅读量统计、当前文章结构
 - `doc/FEATURES.md`：补充系列排序、阅读量统计、post-admin 排序字段与当前文章数
 - `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-07-29 00:00 · （本次提交）· feat: 优化阅读体验并支持分类重命名
+
+> 本条目对应本次提交，汇总博客阅读样式、主题默认策略、post-admin 分类管理与新增课程文章。
+
+### 主题与阅读体验
+
+- 首页文章列表压缩 item 垂直间距，提升列表扫描效率
+- 正文切换为系统阅读字体，保留顶栏、侧栏与标题的等宽风格
+- 正文行高微调，中文长文阅读更紧凑
+- h2/h3 增加左侧标记与分割线，增强标题层级
+- 修复深色模式下小标题左侧标记对比度过低的问题
+
+### 主题默认策略
+
+- 深/浅主题默认跟随系统偏好
+- 无系统偏好或无法判断时默认深色模式
+- 手动切换仍以 localStorage 为最高优先级
+
+### Post Admin
+
+- 新增"分类" tab
+- 支持列出当前所有分类、文章数量与关联文章
+- 支持预览分类重命名影响范围
+- 支持确认后批量更新所有关联文章的 front-matter `categories`
+
+### 内容更新
+
+- 新增 `source/_posts/bilibili-bv199rlyjez2-p1.md`
+- 新增 `source/images/posts/bilibili-bv199rlyjez2-p1/` 文章图片素材
+- 新文章中含冒号的分类名使用引号包裹，避免 YAML 解析为对象
+- 当前文章数从 5 篇变为 6 篇
+
+### 验证
+
+- `node --check tools/post-admin/lib/content-manager.js` 成功
+- `node --check tools/post-admin/server.js` 成功
+- `node --check tools/post-admin/web/app.js` 成功
+- `npm run build` 成功
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：补充分类重命名、主题默认策略、阅读样式与新增文章
+- `doc/FEATURES.md`：补充分类管理、主题默认策略、视觉风格与当前文章数
+- `doc/CHANGELOG.md`：追加本次条目

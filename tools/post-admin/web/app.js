@@ -1,5 +1,6 @@
 const output = document.querySelector('#output');
 let cachedPosts = [];
+let cachedCategories = [];
 
 function show(value) {
   output.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
@@ -59,6 +60,31 @@ async function loadPosts() {
         <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
       </div>
       <div class="post-meta">${escapeHtml(post.slug)}${seriesOrderText(post)}</div>
+    </div>
+  `).join('');
+}
+
+async function loadCategories() {
+  const data = await api('/api/categories');
+  cachedCategories = data.categories || [];
+  renderCategoryList(cachedCategories);
+}
+
+function renderCategoryList(categories) {
+  const list = document.querySelector('#category-list');
+  if (!list) return;
+  if (!categories.length) {
+    list.innerHTML = '<div class="category-empty">暂无分类</div>';
+    return;
+  }
+
+  list.innerHTML = categories.map((category) => `
+    <div class="category-row">
+      <div>
+        <div class="post-title">${escapeHtml(category.name)}</div>
+        <div class="post-meta">${category.count} 篇文章</div>
+      </div>
+      <button class="ghost use-category-item" type="button" data-name="${escapeHtml(category.name)}">选择</button>
     </div>
   `).join('');
 }
@@ -205,6 +231,15 @@ document.querySelector('#refresh-edit-posts').addEventListener('click', async ()
   }
 });
 
+document.querySelector('#refresh-categories').addEventListener('click', async () => {
+  try {
+    await loadCategories();
+    show('分类列表已刷新');
+  } catch (err) {
+    show(`ERROR: ${err.message}`);
+  }
+});
+
 document.querySelector('#run-import').addEventListener('click', async () => {
   try {
     const data = await api('/api/import', {
@@ -293,6 +328,48 @@ document.querySelector('#update-post').addEventListener('click', async () => {
     });
     show(data);
     await loadPosts();
+    await loadWorktree();
+  } catch (err) {
+    show(`ERROR: ${err.message}`);
+  }
+});
+
+document.querySelector('#category-list').addEventListener('click', (event) => {
+  const button = event.target.closest('button[data-name]');
+  if (!button) return;
+  document.querySelector('#category-old-name').value = button.dataset.name;
+  document.querySelector('#category-new-name').focus();
+});
+
+document.querySelector('#preview-category-rename').addEventListener('click', async () => {
+  try {
+    const data = await api('/api/category/rename', {
+      method: 'POST',
+      body: {
+        oldName: document.querySelector('#category-old-name').value,
+        newName: document.querySelector('#category-new-name').value,
+        yes: false
+      }
+    });
+    show(data);
+  } catch (err) {
+    show(`ERROR: ${err.message}`);
+  }
+});
+
+document.querySelector('#run-category-rename').addEventListener('click', async () => {
+  const oldName = document.querySelector('#category-old-name').value;
+  const newName = document.querySelector('#category-new-name').value;
+  if (!window.confirm(`确认把分类 "${oldName}" 重命名为 "${newName}" 吗？`)) return;
+
+  try {
+    const data = await api('/api/category/rename', {
+      method: 'POST',
+      body: { oldName, newName, yes: true }
+    });
+    show(data);
+    await loadPosts();
+    await loadCategories();
     await loadWorktree();
   } catch (err) {
     show(`ERROR: ${err.message}`);
@@ -394,4 +471,5 @@ document.querySelector('#run-publish').addEventListener('click', async () => {
 
 setDefaultDate();
 loadPosts().catch((err) => show(`ERROR: ${err.message}`));
+loadCategories().catch(() => {});
 loadWorktree().catch(() => {});

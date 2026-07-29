@@ -273,6 +273,11 @@ async function handleApi(req, res, pathname) {
       return;
     }
 
+    if (req.method === 'GET' && pathname === '/api/categories') {
+      sendJson(res, 200, { categories: manager.listCategories() });
+      return;
+    }
+
     if (req.method === 'POST' && pathname === '/api/import') {
       const body = await readJson(req);
       const imported = manager.importInput(body.path, { force: Boolean(body.force) });
@@ -292,6 +297,13 @@ async function handleApi(req, res, pathname) {
       const body = await readJson(req);
       const updated = manager.updatePost(body.slug, body);
       sendJson(res, 200, { updated });
+      return;
+    }
+
+    if (req.method === 'POST' && pathname === '/api/category/rename') {
+      const body = await readJson(req);
+      const result = manager.renameCategory(body.oldName, body.newName, { yes: Boolean(body.yes) });
+      sendJson(res, 200, result);
       return;
     }
 

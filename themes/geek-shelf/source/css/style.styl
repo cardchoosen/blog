@@ -6,40 +6,41 @@
 
 // ---- 静态变量（不参与主题切换） ----
 font-mono = ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace
+font-reading = -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif
 width-shelf = 320px
 height-topbar = 64px
 
 // ---- 主题变量（CSS 自定义属性） ----
-// 默认浅色主题
+// 默认深色主题；系统明确浅色时再切浅色，避免无偏好/无 JS 时闪白
 :root
-  --color-bg #ffffff
-  --color-text #1a1a1a
-  --color-line #d0d0d0
-  --color-hover-bg #f0f0f0
-  --color-hover-text #1a1a1a
-  --color-active-bg #e0e0e0
-  --color-active-text #000
-  --color-bar-bg #1a1a1a
-  --color-bar-text #ffffff
-  --color-code-bg #e8e8e8
-  --color-code-text #1a1a1a
-  --color-shelf-posts-bg #fafafa
+  --color-bg #1a1a1a
+  --color-text #e0e0e0
+  --color-line #2a2a2a
+  --color-hover-bg #2a2a2a
+  --color-hover-text #e0e0e0
+  --color-active-bg #3a3a3a
+  --color-active-text #fff
+  --color-bar-bg #000
+  --color-bar-text #e0e0e0
+  --color-code-bg #0a0a0a
+  --color-code-text #e0e0e0
+  --color-shelf-posts-bg #222
 
-// 系统深色偏好
-@media (prefers-color-scheme: dark)
+// 系统浅色偏好
+@media (prefers-color-scheme: light)
   :root
-    --color-bg #1a1a1a
-    --color-text #e0e0e0
-    --color-line #2a2a2a
-    --color-hover-bg #2a2a2a
-    --color-hover-text #e0e0e0
-    --color-active-bg #3a3a3a
-    --color-active-text #fff
-    --color-bar-bg #000
-    --color-bar-text #e0e0e0
-    --color-code-bg #0a0a0a
-    --color-code-text #e0e0e0
-    --color-shelf-posts-bg #222
+    --color-bg #ffffff
+    --color-text #1a1a1a
+    --color-line #d0d0d0
+    --color-hover-bg #f0f0f0
+    --color-hover-text #1a1a1a
+    --color-active-bg #e0e0e0
+    --color-active-text #000
+    --color-bar-bg #1a1a1a
+    --color-bar-text #ffffff
+    --color-code-bg #e8e8e8
+    --color-code-text #1a1a1a
+    --color-shelf-posts-bg #fafafa
 
 // JS 手动切换：在 <html> 加 class 覆盖（优先级最高）
 html.theme-light
@@ -190,17 +191,17 @@ a
   font-weight bold
   transition font-size 0.12s ease, opacity 0.12s ease
 
-// 默认状态（浅色主题）：浅字放大在左（标识当前主题），深字缩小透明在右（提示可切到深色）
+// 默认状态（深色主题）：深字放大在左（标识当前主题），浅字缩小透明在右（提示可切到浅色）
 .theme-char[data-char="深"]
-  right 0
-  transform translateY(-50%)
-  font-size 11px
-  opacity 0.35
-.theme-char[data-char="浅"]
   left 0
   transform translateY(-50%)
   font-size 18px
   opacity 1
+.theme-char[data-char="浅"]
+  right 0
+  transform translateY(-50%)
+  font-size 11px
+  opacity 0.35
 
 // 浅色主题：浅字放大在左，深字缩小透明在右
 html.theme-light
@@ -228,19 +229,19 @@ html.theme-dark
     font-size 11px
     opacity 0.35
 
-// 没有显式 class 时（首次访问未 JS），随系统
-@media (prefers-color-scheme: dark)
+// 没有显式 class 时（首次访问未 JS），系统浅色偏好显示浅色状态
+@media (prefers-color-scheme: light)
   :root
     .theme-char[data-char="深"]
-      left 0
-      transform translateY(-50%)
-      font-size 18px
-      opacity 1
-    .theme-char[data-char="浅"]
       right 0
       transform translateY(-50%)
       font-size 11px
       opacity 0.35
+    .theme-char[data-char="浅"]
+      left 0
+      transform translateY(-50%)
+      font-size 18px
+      opacity 1
 
 // ---- 主布局：左书架 + 右内容 ----
 .main-layout
@@ -354,7 +355,7 @@ html.theme-dark
   margin-right auto
 
 .post-item
-  padding 24px 0
+  padding 16px 0
   border-bottom 1px solid var(--color-line)
   &:first-child
     padding-top 0
@@ -363,18 +364,20 @@ html.theme-dark
   font-size 12px
   letter-spacing 0.08em
   opacity 0.6
-  margin-bottom 6px
+  margin-bottom 4px
 
 .item-title
-  font-size 21px
+  font-size 19px
   font-weight bold
+  line-height 1.35
   a
     text-decoration none
     hover-soft()
 
 .item-excerpt
-  margin-top 8px
-  font-size 15px
+  margin-top 6px
+  font-size 14px
+  line-height 1.55
   opacity 0.8
 
 // ---- 文章详情 ----
@@ -414,51 +417,76 @@ html.theme-dark
 
 // ---- 文章正文 ----
 .post-body
-  font-size 16px
-  line-height 1.75
+  font-family font-reading
+  font-size 18px
+  line-height 1.84
+  letter-spacing 0
   h1, h2, h3, h4, h5, h6
     font-weight bold
-    margin 1.4em 0 0.6em
+    margin 1.55em 0 0.65em
     line-height 1.3
+    letter-spacing 0
+    position relative
   h1
+    font-size 27px
+    border-bottom 2px solid var(--color-line)
+    padding-bottom 8px
+  h2
     font-size 24px
     border-bottom 2px solid var(--color-line)
-    padding-bottom 4px
-  h2
-    font-size 21px
-    border-bottom 1px solid var(--color-line)
-    padding-bottom 4px
+    padding 0 0 8px 14px
+    &::before
+      content ''
+      position absolute
+      left 0
+      top 0.16em
+      bottom 0.28em
+      width 4px
+      background var(--color-text)
+      opacity 0.9
   h3
-    font-size 18px
+    font-size 21px
+    padding-left 12px
+    &::before
+      content ''
+      position absolute
+      left 0
+      top 0.24em
+      bottom 0.32em
+      width 3px
+      background var(--color-text)
+      opacity 0.55
   p
-    margin 0.8em 0
+    margin 0.95em 0
     text-indent 2em
   ul, ol
-    margin 0.8em 0
-    padding-left 1.4em
+    margin 0.95em 0
+    padding-left 1.6em
   li
-    margin 0.3em 0
+    margin 0.35em 0
   blockquote
     border-left 3px solid var(--color-line)
-    padding 4px 12px
-    margin 1em 0
+    padding 10px 18px
+    margin 1.15em 0
+    background var(--color-shelf-posts-bg)
     & > p
-      margin 0.4em 0
+      margin 0.45em 0
       text-indent 0
   code
     font-family font-mono
     background var(--color-active-bg)
     color var(--color-active-text)
-    padding 1px 5px
-    font-size 0.92em
+    padding 2px 6px
+    font-size 0.9em
   pre
+    font-family font-mono
     background var(--color-code-bg)
     color var(--color-code-text)
-    padding 14px 16px
+    padding 16px 18px
     overflow-x auto
-    margin 1em 0
+    margin 1.25em 0
     font-size 15px
-    line-height 1.5
+    line-height 1.6
     &:focus
       outline none
       background var(--color-code-bg)
@@ -486,7 +514,7 @@ html.theme-dark
     .gutter
       display none
     .code pre
-      padding 14px 16px
+      padding 16px 18px
       // 不设 color，让 hljs 主题 CSS 的 .hljs { color } 接管字色
   // 覆盖 highlight.js 主题 CSS 的底色（让代码块底色由 --color-code-bg 控制）
   // 不强制 color，让 hljs 主题的 token 颜色生效
@@ -494,11 +522,12 @@ html.theme-dark
     background var(--color-code-bg) !important
   table
     border-collapse collapse
-    margin 1em 0
+    margin 1.25em 0
     width 100%
+    font-size 0.95em
   th, td
     border 1px solid var(--color-line)
-    padding 6px 10px
+    padding 8px 12px
     text-align left
   th
     background var(--color-active-bg)
@@ -519,6 +548,7 @@ html.theme-dark
     max-width 100%
     height auto
     display block
+    margin 1.3em auto
     border 1px solid var(--color-line)
   a
     text-decoration underline

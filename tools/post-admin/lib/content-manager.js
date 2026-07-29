@@ -320,6 +320,22 @@ function listPosts() {
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
 
+function listCategories() {
+  const categories = new Map();
+  listPosts().forEach((post) => {
+    post.categories.forEach((category) => {
+      const key = String(category);
+      if (!categories.has(key)) {
+        categories.set(key, { name: key, count: 0, posts: [] });
+      }
+      const item = categories.get(key);
+      item.count += 1;
+      item.posts.push({ slug: post.slug, title: post.title, path: post.path });
+    });
+  });
+  return Array.from(categories.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
 function postPathBySlug(slug) {
   const cleanSlug = normalizeSlug(slug);
   if (!validateSlug(cleanSlug)) throw new Error('Invalid slug');
@@ -369,6 +385,56 @@ function updatePost(slug, fields) {
     slug: data.slug,
     title: data.title,
     post: path.relative(PROJECT_ROOT, postPath)
+  };
+}
+
+function renameCategory(oldName, newName, options = {}) {
+  const from = String(oldName || '').trim();
+  const to = String(newName || '').trim();
+  if (!from) throw new Error('Old category is required');
+  if (!to) throw new Error('New category is required');
+  if (from === to) throw new Error('Old category and new category are the same');
+
+  const changed = [];
+  if (!isDirectory(POSTS_DIR)) return { renamed: false, oldName: from, newName: to, changed };
+
+  fs.readdirSync(POSTS_DIR)
+    .filter((name) => name.endsWith('.md'))
+    .forEach((name) => {
+      const postPath = path.join(POSTS_DIR, name);
+      const markdown = fs.readFileSync(postPath, 'utf8');
+      const parsed = parseFrontMatter(markdown);
+      const categories = Array.isArray(parsed.data.categories) ? parsed.data.categories : [];
+      if (!categories.some((item) => String(item) === from)) return;
+
+      const nextCategories = [];
+      categories.forEach((item) => {
+        const next = String(item) === from ? to : item;
+        if (!nextCategories.some((existing) => String(existing) === String(next))) {
+          nextCategories.push(next);
+        }
+      });
+
+      changed.push({
+        slug: path.basename(postPath, '.md'),
+        title: parsed.data.title || path.basename(postPath, '.md'),
+        path: path.relative(PROJECT_ROOT, postPath),
+        before: categories,
+        after: nextCategories
+      });
+
+      if (options.yes) {
+        parsed.data.categories = nextCategories;
+        fs.writeFileSync(postPath, `${formatFrontMatter(parsed.data)}\n\n${parsed.body.trimEnd()}\n`, 'utf8');
+      }
+    });
+
+  return {
+    renamed: Boolean(options.yes),
+    oldName: from,
+    newName: to,
+    changed,
+    message: options.yes ? 'Category renamed.' : 'Dry run only. Re-run with yes=true to rename.'
   };
 }
 
@@ -459,8 +525,10 @@ module.exports = {
   PROJECT_ROOT,
   importInput,
   listPosts,
+  listCategories,
   getPost,
   updatePost,
+  renameCategory,
   deletePlan,
   deletePost,
   createPackageFromFields

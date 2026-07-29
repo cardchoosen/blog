@@ -27,7 +27,7 @@
 - **草稿**：`hexo new draft <title>` 生成草稿，存放于 `source/_drafts/`（默认不渲染）
 - **自定义页面**：`hexo new page <name>` 生成独立页面
 - **文章模板**：`scaffolds/` 下提供 `post.md` / `draft.md` / `page.md` 三种模板
-- **本机后台**：`npm run post:admin` 启动 `http://127.0.0.1:4100/`，提供文章列表、导入、新建、修改、删除、发布等操作
+- **本机后台**：`npm run post:admin` 启动 `http://127.0.0.1:4100/`，提供文章列表、导入、新建、修改、分类重命名、删除、发布等操作
 - **CLI 工具**：`npm run post:import` / `post:list` / `post:delete` 支持单篇或批量文章包导入、文章列表查看、删除到回收站
 - **文章包格式**：一篇文章一个目录，包含 `post.md` 与可选 `assets/`，格式详见 `tools/post-admin/POST_INPUT_FORMAT.md`
 - **素材管理**：图片导入到 `source/images/posts/<slug>/`，其他附件导入到 `source/files/posts/<slug>/`，Markdown 引用自动重写为站点根路径
@@ -49,8 +49,8 @@
 ### 3. 深/浅主题切换
 - **顶栏右侧切换按钮**：显示"深"/"浅"两字叠加，当前主题字放大在左（标识当前主题），另一字缩小半透明在右
 - **按钮 hover/focus 不变背景色**：避免在黑底顶栏内被全局 hover 规则覆盖导致看不清
-- **三套主题变量**：默认浅色 / `@media prefers-color-scheme: dark` / `html.theme-light` `html.theme-dark` 手动覆盖（优先级最高）
-- **优先级**：localStorage > 系统偏好 > 默认浅色
+- **三套主题变量**：默认深色 / `@media prefers-color-scheme: light` / `html.theme-light` `html.theme-dark` 手动覆盖（优先级最高）
+- **优先级**：localStorage > 系统偏好 > 默认深色
 - **防 FOUC**：`<head>` 内联脚本在 CSS 加载前根据 localStorage 或系统偏好给 `<html>` 加 class
 - **浅色主题**：白底 `#fff` + 深灰字 `#1a1a1a` + 代码块底色 `#e8e8e8`
 - **深色主题**：深灰底 `#1a1a1a` + 浅灰字 `#e0e0e0` + 代码块底色 `#0a0a0a`（比页面背景略黑）
@@ -66,6 +66,7 @@
 - `/tags/` 默认展示所有标签及文章数，点击标签进入对应文章列表
 - 自动生成 `/categories/<name>/` 与 `/tags/<name>/` 索引页
 - 文章详情页的 meta 区显示分类链接与标签链接（# 前缀）
+- post-admin 支持批量重命名分类，所有关联文章的 front-matter 会一起更新
 
 ### 6. 归档
 - 按时间归档，生成 `/archives/` 索引页
@@ -102,8 +103,9 @@
 - 纯黑白主调，无彩色强调色
 - 灰阶过渡：hover 浅灰底 `#f0f0f0`，active 中灰底 `#e0e0e0`（浅色主题）
 - 顶栏黑色色块 + 反白文字（站点标题 + 导航 + 主题切换按钮）
-- 全站等宽字体 `ui-monospace, SFMono-Regular, Menlo, Monaco, ...`
+- 顶栏、侧栏、标题使用等宽字体，正文使用系统阅读字体，降低中文长文阅读疲劳
 - 首页列表、文章正文、评论区、归档、分类、标签等主体内容在右侧内容区内居中显示，保持 780px 阅读宽度
+- 首页文章列表保持紧凑间距；正文 h2/h3 通过左侧标记和分割线增强层级
 - 无圆角 / 无阴影 / 无渐变
 - 0.12s 平滑过渡
 - `overscroll-behavior: none` 禁用弹性滚动
@@ -130,18 +132,24 @@
 - **排序字段**：新建/修改表单支持 `series_order`，可填写负数、0 或正整数
 - **写作辅助**：新建文章页的正文标题右侧显示可复制的 `&emsp;&emsp;`，用于手动段首缩进
 
-### 15. 一键部署（命令行）
+### 15. 本地后台分类管理
+- **分类列表**：列出当前所有分类、文章数量与关联文章
+- **重命名预览**：输入旧分类名和新分类名后，可先预览会影响哪些文章
+- **批量写回**：确认后统一更新所有关联文章的 front-matter `categories`
+
+### 16. 一键部署（命令行）
 - 命令：`npx hexo clean && npx hexo g && npx hexo d`
 - 流程：清理 → 生成静态站 → 推送到 `gh-pages` 分支
 - GitHub Pages 自动识别 `gh-pages` 分支并提供访问
 
-### 16. 响应式
+### 17. 响应式
 - 桌面端（>768px）：左书架 + 右内容 双栏布局
 - 移动端（≤768px）：书架堆叠到内容上方，单栏布局
 
 ## 当前内容
 
-- **文章数**：5 篇
+- **文章数**：6 篇
+  - `bilibili-bv199rlyjez2-p1.md`（CMU 10-414 课程整理文章）
   - `bilibili-bv1opafzpef9-p1.md`（B 站课程整理文章 01）
   - `bilibili-bv1knphzpera-p1.md`（B 站课程整理文章 02）
   - `my-note-260724.md`（日常随笔）
