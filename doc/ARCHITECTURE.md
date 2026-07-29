@@ -14,6 +14,7 @@
 | Markdown 渲染 | hexo-renderer-marked |
 | 代码高亮 | highlight.js（已关行号） |
 | 评论系统 | utterances（GitHub Issues，文章页按 pathname 关联评论） |
+| 阅读量统计 | Busuanzi（文章页按 URL 统计 PV） |
 | 内容生成器 | archive / category / index / tag |
 | 部署器 | hexo-deployer-git（推送静态站到 gh-pages 分支） |
 | 运行时 | Node.js（开发机 v24.6.0） |
@@ -36,6 +37,7 @@ Hexo/
 │   └── post.md
 ├── source/                  # 内容源文件
 │   ├── _posts/              #   文章 Markdown
+│   │   ├── bilibili-bv1knphzpera-p1.md # B 站课程整理文章 02
 │   │   ├── bilibili-bv1opafzpef9-p1.md # B 站课程整理文章（categories: 南京大学操作系统原理）
 │   │   ├── my-note-260724.md            # 日常随笔
 │   │   ├── my-note-260727.md            # 日常随笔
@@ -121,6 +123,16 @@ tools/post-admin/
 
 删除文章时，工具不会直接永久删除，而是移动到 `.trash/posts/<slug>-<timestamp>/`。
 
+### 系列文章排序
+
+文章 front-matter 支持可选字段 `series_order`，用于控制同一分类内的系列文章顺序。排序规则：
+
+- 有 `series_order` 的文章按数值升序排列，支持负数，负数会排在更前面
+- 没有 `series_order` 的文章排在已设置排序字段的文章之后
+- 同为未设置或数值相同时，再按日期倒序与标题兜底排序
+
+该逻辑由 `scripts/series-order.js` 注册 `sort_series_posts` helper 实现，当前用于左侧分类书架与分类详情页；首页和归档仍保持时间线排序。post-admin 的新建/修改表单支持读写该字段。
+
 ### 发布页差异机制
 
 Web 后台的"发布"页只关心博客内容与素材目录：
@@ -173,6 +185,8 @@ themes/geek-shelf/
 - `shelf.js` 同步切换 highlight.js 与 utterances 评论框主题；utterances iframe 异步出现时用 `MutationObserver` 补一次当前主题
 
 **评论系统**：`themes/geek-shelf/_config.yml` 中 `comments.provider: utterances` 启用文章页评论，`comments.ejs` 在正文后注入 utterances script，按 `pathname` 关联 GitHub Issue。仓库需要安装 utterances GitHub App 并允许在 `cardchoosen/blog` 创建 issue。
+
+**阅读量统计**：文章页 meta 行显示 `阅读 <PV>`。`article.ejs` 提供 `busuanzi_value_page_pv` 占位，`post.ejs` 仅在文章详情页加载 Busuanzi 脚本，由第三方服务按页面 URL 统计并回填阅读量。
 
 **视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变。浅色主题代码块 `#e8e8e8` 底，深色主题 `#0a0a0a` 底（比页面背景 `#1a1a1a` 略黑）。无圆角无阴影无渐变。等宽字体 `ui-monospace` 全站。整体 UI 与正文字号已放大，主体内容宽度为 `780px`。`overscroll-behavior: none` 禁用弹性滚动。
 

@@ -23,6 +23,17 @@ function splitList(value) {
     .filter(Boolean);
 }
 
+function optionalNumber(value) {
+  const text = String(value == null ? '' : value).trim();
+  return text === '' ? '' : Number(text);
+}
+
+function seriesOrderText(post) {
+  return post.series_order === undefined || post.series_order === null || post.series_order === ''
+    ? ''
+    : ` / order ${escapeHtml(post.series_order)}`;
+}
+
 function setDefaultDate() {
   const input = document.querySelector('#date');
   const d = new Date();
@@ -47,7 +58,7 @@ async function loadPosts() {
         <div class="post-title">${escapeHtml(post.title)}</div>
         <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
       </div>
-      <div class="post-meta">${escapeHtml(post.slug)}</div>
+      <div class="post-meta">${escapeHtml(post.slug)}${seriesOrderText(post)}</div>
     </div>
   `).join('');
 }
@@ -64,7 +75,7 @@ function renderEditList(posts) {
     <div class="edit-row">
       <div>
         <div class="post-title">${escapeHtml(post.title)}</div>
-        <div class="post-meta">${escapeHtml(post.date || '-')} / ${escapeHtml(post.slug)}</div>
+        <div class="post-meta">${escapeHtml(post.date || '-')} / ${escapeHtml(post.slug)}${seriesOrderText(post)}</div>
         <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
       </div>
       <button class="ghost load-edit-item" type="button" data-slug="${escapeHtml(post.slug)}">修改</button>
@@ -84,7 +95,7 @@ function renderDeleteList(posts) {
     <div class="delete-row">
       <div>
         <div class="post-title">${escapeHtml(post.title)}</div>
-        <div class="post-meta">${escapeHtml(post.date || '-')} / ${escapeHtml(post.slug)}</div>
+        <div class="post-meta">${escapeHtml(post.date || '-')} / ${escapeHtml(post.slug)}${seriesOrderText(post)}</div>
         <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
       </div>
       <div class="delete-actions">
@@ -220,6 +231,7 @@ document.querySelector('#create-post').addEventListener('click', async () => {
         date: document.querySelector('#date').value,
         categories: splitList(document.querySelector('#categories').value),
         tags: splitList(document.querySelector('#tags').value),
+        series_order: optionalNumber(document.querySelector('#series-order').value),
         excerpt: document.querySelector('#excerpt').value,
         body: document.querySelector('#body').value,
         force: document.querySelector('#create-force').checked
@@ -239,6 +251,7 @@ async function loadEditPost(slug) {
   document.querySelector('#edit-title').value = post.title || '';
   document.querySelector('#edit-slug').value = post.slug || '';
   document.querySelector('#edit-date').value = post.date || '';
+  document.querySelector('#edit-series-order').value = post.series_order === undefined || post.series_order === null ? '' : post.series_order;
   document.querySelector('#edit-categories').value = (post.categories || []).join(', ');
   document.querySelector('#edit-tags').value = (post.tags || []).join(', ');
   document.querySelector('#edit-excerpt').value = post.excerpt || '';
@@ -273,6 +286,7 @@ document.querySelector('#update-post').addEventListener('click', async () => {
         date: document.querySelector('#edit-date').value,
         categories: splitList(document.querySelector('#edit-categories').value),
         tags: splitList(document.querySelector('#edit-tags').value),
+        series_order: optionalNumber(document.querySelector('#edit-series-order').value),
         excerpt: document.querySelector('#edit-excerpt').value,
         body: document.querySelector('#edit-body').value
       }

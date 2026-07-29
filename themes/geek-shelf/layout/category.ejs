@@ -1,7 +1,7 @@
 <section class="archive">
   <% if (page.category) { %>
     <h1 class="archive-title">CATEGORY / <%= page.category %></h1>
-    <%- partial('_partial/archive-list', { dateFormat: 'YYYY-MM-DD' }) %>
+    <%- partial('_partial/archive-list', { dateFormat: 'YYYY-MM-DD', posts: sort_series_posts(page.posts) }) %>
   <% } else { %>
     <h1 class="archive-title">CATEGORY</h1>
     <div class="term-list">

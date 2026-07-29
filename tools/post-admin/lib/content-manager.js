@@ -117,6 +117,9 @@ function formatFrontMatter(data) {
     formatArray(data.tags)
   ];
 
+  if (data.series_order !== undefined && data.series_order !== null && data.series_order !== '') {
+    lines.push(`series_order: ${Number(data.series_order)}`);
+  }
   if (data.excerpt) lines.push(`excerpt: ${quoteYaml(data.excerpt)}`);
   if (data.description) lines.push(`description: ${quoteYaml(data.description)}`);
   if (data.keywords) {
@@ -127,9 +130,20 @@ function formatFrontMatter(data) {
   return lines.filter((line) => line !== '').join('\n');
 }
 
+function normalizeSeriesOrder(value, errors) {
+  if (value === undefined || value === null || value === '') return undefined;
+  const number = Number(value);
+  if (!Number.isInteger(number)) {
+    errors.push('series_order must be an integer');
+    return undefined;
+  }
+  return number;
+}
+
 function validatePostData(data, sourceLabel) {
   const errors = [];
   const slug = normalizeSlug(data.slug);
+  const seriesOrder = normalizeSeriesOrder(data.series_order, errors);
 
   if (!data.title || !String(data.title).trim()) errors.push('title is required');
   if (!slug) errors.push('slug is required');
@@ -148,7 +162,8 @@ function validatePostData(data, sourceLabel) {
     title: String(data.title).trim(),
     date: String(data.date).trim(),
     categories: data.categories.map((item) => String(item).trim()).filter(Boolean),
-    tags: data.tags.map((item) => String(item).trim()).filter(Boolean)
+    tags: data.tags.map((item) => String(item).trim()).filter(Boolean),
+    series_order: seriesOrder
   };
 }
 
@@ -291,6 +306,7 @@ function readPost(filePath) {
     date: parsed.data.date || '',
     categories: Array.isArray(parsed.data.categories) ? parsed.data.categories : [],
     tags: Array.isArray(parsed.data.tags) ? parsed.data.tags : [],
+    series_order: parsed.data.series_order === undefined ? '' : parsed.data.series_order,
     excerpt: parsed.data.excerpt || '',
     path: path.relative(PROJECT_ROOT, filePath)
   };
@@ -325,6 +341,7 @@ function getPost(slug) {
     date: data.date || '',
     categories: Array.isArray(data.categories) ? data.categories : [],
     tags: Array.isArray(data.tags) ? data.tags : [],
+    series_order: data.series_order === undefined ? '' : data.series_order,
     excerpt: data.excerpt || '',
     body: parsed.body.trimEnd(),
     path: path.relative(PROJECT_ROOT, postPath)
@@ -341,6 +358,7 @@ function updatePost(slug, fields) {
     date: fields.date,
     categories: fields.categories,
     tags: fields.tags,
+    series_order: fields.series_order,
     excerpt: fields.excerpt
   }, 'edit form');
 
@@ -426,6 +444,7 @@ function createPackageFromFields(fields) {
     date: fields.date,
     categories: fields.categories,
     tags: fields.tags,
+    series_order: fields.series_order,
     excerpt: fields.excerpt
   }, 'web form');
 

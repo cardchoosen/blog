@@ -32,6 +32,7 @@
 - **文章包格式**：一篇文章一个目录，包含 `post.md` 与可选 `assets/`，格式详见 `tools/post-admin/POST_INPUT_FORMAT.md`
 - **素材管理**：图片导入到 `source/images/posts/<slug>/`，其他附件导入到 `source/files/posts/<slug>/`，Markdown 引用自动重写为站点根路径
 - **段落排版**：文章普通正文段落自动首行缩进 `2em`，引用块内段落不缩进
+- **系列排序**：文章可选 `series_order`，同分类内按该数字升序排列，支持负数；未设置时保留日期倒序兜底
 
 ### 2. 左侧分类书架（核心交互）
 - **数据源**：文章 front-matter 的 `categories` 字段
@@ -43,6 +44,7 @@
   - 再次点击已展开分类 → 收起
 - **状态持久化**：展开状态存于 localStorage，跨页面保持。用户在 A 页面手动展开多个分类后，跳转到文章页时这些展开状态不丢失
 - **当前文章定位**：进入文章详情页时，EJS 服务端渲染即给当前文章所在分类的按钮加 `active` 状态、列表加 `open` 状态、文章链接加 `current` 高亮——无 JS 后加 class 导致的闪烁
+- **系列文章排序**：分类下文章优先按 `series_order` 升序排列；适合课程笔记的 `01/02/03` 顺序展示
 
 ### 3. 深/浅主题切换
 - **顶栏右侧切换按钮**：显示"深"/"浅"两字叠加，当前主题字放大在左（标识当前主题），另一字缩小半透明在右
@@ -91,7 +93,12 @@
 - 深/浅主题切换时，评论框主题同步切换为 `github-light` / `github-dark`
 - 生效前置条件：`cardchoosen/blog` 仓库需要安装 utterances GitHub App，并允许创建 issue
 
-### 10. 视觉风格（极客黑白）
+### 10. 阅读量统计
+- 文章详情页 meta 行显示阅读量，位置在日期、分类、标签之后
+- 统计使用 Busuanzi，根据当前页面 URL 记录和回填 `page_pv`
+- 线上访问时累计阅读量；如果第三方服务不可用，页面保留 `阅读 -` 占位
+
+### 11. 视觉风格（极客黑白）
 - 纯黑白主调，无彩色强调色
 - 灰阶过渡：hover 浅灰底 `#f0f0f0`，active 中灰底 `#e0e0e0`（浅色主题）
 - 顶栏黑色色块 + 反白文字（站点标题 + 导航 + 主题切换按钮）
@@ -101,12 +108,12 @@
 - 0.12s 平滑过渡
 - `overscroll-behavior: none` 禁用弹性滚动
 
-### 11. 本地预览
+### 12. 本地预览
 - `npm run server` 启动本地服务，访问 `http://localhost:4000/`
 - 监听 source/ 和 themes/ 文件变化自动重载
 - 注意：改 `_config.yml` 站点配置后需重启 server
 
-### 12. 本地后台发布
+### 13. 本地后台发布
 - **发布入口**：post-admin 的"发布"页提供"仅构建检查"与"构建并发布"两个按钮
 - **构建检查**：执行 `npm run build`，用于发布前确认 Hexo 能正常生成静态站
 - **构建并发布**：依次执行 `npm run clean` → `npm run build` → `npm run deploy`
@@ -115,26 +122,28 @@
 - **发布快照**：发布成功后记录 `.tmp/post-admin/published-content.json`，刷新后不再显示已发布内容差异；后续只有再次修改文章或素材才显示新差异
 - **部署凭据**：`_config.yml` 的 deploy repo 使用 SSH 地址 `git@github.com:cardchoosen/blog.git`，依赖本机 GitHub SSH key
 
-### 13. 本地后台修改文章
+### 14. 本地后台修改文章
 - **修改入口**：post-admin 的"修改"页列出当前所有文章
 - **加载文章**：点击"修改"后读取 `source/_posts/<slug>.md`，回填标题、日期、分类、标签、摘要与正文 Markdown
 - **保存修改**：保存后直接写回原 Markdown 文件，并刷新文章列表与发布差异
 - **Slug 策略**：修改页的 slug 只读，不做文章文件改名或素材路径迁移
+- **排序字段**：新建/修改表单支持 `series_order`，可填写负数、0 或正整数
 - **写作辅助**：新建文章页的正文标题右侧显示可复制的 `&emsp;&emsp;`，用于手动段首缩进
 
-### 14. 一键部署（命令行）
+### 15. 一键部署（命令行）
 - 命令：`npx hexo clean && npx hexo g && npx hexo d`
 - 流程：清理 → 生成静态站 → 推送到 `gh-pages` 分支
 - GitHub Pages 自动识别 `gh-pages` 分支并提供访问
 
-### 15. 响应式
+### 16. 响应式
 - 桌面端（>768px）：左书架 + 右内容 双栏布局
 - 移动端（≤768px）：书架堆叠到内容上方，单栏布局
 
 ## 当前内容
 
-- **文章数**：4 篇
-  - `bilibili-bv1opafzpef9-p1.md`（B 站课程整理文章，含 9 张截图素材）
+- **文章数**：5 篇
+  - `bilibili-bv1opafzpef9-p1.md`（B 站课程整理文章 01）
+  - `bilibili-bv1knphzpera-p1.md`（B 站课程整理文章 02）
   - `my-note-260724.md`（日常随笔）
   - `my-note-260727.md`（日常随笔）
   - `my-note-260728.md`（日常随笔）

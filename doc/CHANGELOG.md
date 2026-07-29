@@ -468,3 +468,50 @@
 - `doc/ARCHITECTURE.md`：更新 post-admin、主题评论系统、文章结构、命令与 CSS 机制
 - `doc/FEATURES.md`：更新后台修改文章、评论、段落缩进、当前内容与视觉宽度
 - `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-07-29 00:00 · （本次提交）· feat: 增加系列排序和阅读量统计
+
+> 本条目对应本次提交，给课程系列文章增加可控排序字段，并在文章 meta 区展示阅读量。
+
+### 系列排序
+
+- 新增 `scripts/series-order.js`，注册 `sort_series_posts` helper
+- 左侧分类书架使用 `series_order` 升序展示分类内文章
+- 分类详情页使用同一排序规则展示文章列表
+- `series_order` 支持负数；未设置该字段的文章按日期倒序兜底
+- 当前课程文章设置：
+  - `bilibili-bv1opafzpef9-p1.md`：`series_order: 1`
+  - `bilibili-bv1knphzpera-p1.md`：`series_order: 2`
+
+### Post Admin
+
+- 新建文章表单新增"排序"字段
+- 修改文章表单新增"排序"字段
+- `content-manager` 支持读取、校验和写入 `series_order`
+
+### 阅读量统计
+
+- 文章 meta 行新增 `阅读 <PV>` 展示
+- 文章页加载 Busuanzi 脚本，按当前页面 URL 统计 page PV
+- 阅读量字段保持不换行
+
+### 内容更新
+
+- 新增 `source/_posts/bilibili-bv1knphzpera-p1.md`
+- 新增 `source/images/posts/bilibili-bv1knphzpera-p1/` 文章图片素材
+- 当前文章数从 4 篇变为 5 篇
+
+### 验证
+
+- `node --check scripts/series-order.js` 成功
+- `node --check tools/post-admin/web/app.js` 成功
+- `node --check tools/post-admin/lib/content-manager.js` 成功
+- `npm run build` 成功
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：补充系列排序 helper、阅读量统计、当前文章结构
+- `doc/FEATURES.md`：补充系列排序、阅读量统计、post-admin 排序字段与当前文章数
+- `doc/CHANGELOG.md`：追加本次条目

@@ -7,7 +7,9 @@ categories:
 tags:
   - NJU
   - "操作系统"
+series_order: 1
 ---
+
 
 
 > 本文根据 [原视频](https://www.bilibili.com/video/BV1opAfzpEf9) 整理，内容来源：UP 主 绿导师原谅你了。

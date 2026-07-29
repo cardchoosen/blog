@@ -34,7 +34,7 @@
           <span class="cat-count"><%= cat.posts.length %></span>
         </button>
         <ul class="shelf-posts<%= isActive ? ' open' : '' %>">
-          <% cat.posts.sort('date', -1).each(function(post) { %>
+          <% sort_series_posts(cat.posts).forEach(function(post) { %>
             <% var isCurrent = (post.path === page.path); %>
             <li><a href="<%- url_for(post.path) %>" class="post-link<%= isCurrent ? ' current' : '' %>"><%= post.title || post.slug %></a></li>
           <% }) %>
