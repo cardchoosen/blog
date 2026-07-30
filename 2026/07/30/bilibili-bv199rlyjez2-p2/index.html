@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script>
+    // 防 FOUC：CSS 加载前根据 localStorage 或系统偏好设置主题 class
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
+        document.documentElement.className = 'theme-' + theme;
+      } catch (e) {}
+    })();
+  </script>
+  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 2 - ML Refresher / Softmax Regression</title>
+<meta name="description" content="">
+
+
+  <link rel="icon" href="/favicon.ico">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-light.min.css" media="(prefers-color-scheme: light)" class="hljs-theme-light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)" class="hljs-theme-dark">
+<meta name="description" content="本文根据 原视频 整理，内容来源：UP 主 Mindofuture。  课程概览与机器学习基础课程介绍与问题引入欢迎来到深度学习系统课程的第二讲。这门课的代码是 10-414&#x2F;10-714，2021 年秋季学期。我假设在座的同学都已经具备了一定的机器学习基础。如果你对这些内容完全陌生，你可能需要先去修一些更基础的机器学习课程，再来挑战这门更偏系统和进阶实现的课。 今天我们会做两件事：先">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lecture 2 - ML Refresher &#x2F; Softmax Regression">
+<meta property="og:url" content="https://anemone.wiki/2026/07/30/bilibili-bv199rlyjez2-p2/index.html">
+<meta property="og:site_name" content="Anemone&#39;s Blog">
+<meta property="og:description" content="本文根据 原视频 整理，内容来源：UP 主 Mindofuture。  课程概览与机器学习基础课程介绍与问题引入欢迎来到深度学习系统课程的第二讲。这门课的代码是 10-414&#x2F;10-714，2021 年秋季学期。我假设在座的同学都已经具备了一定的机器学习基础。如果你对这些内容完全陌生，你可能需要先去修一些更基础的机器学习课程，再来挑战这门更偏系统和进阶实现的课。 今天我们会做两件事：先">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p2/screenshot_0130_03.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p2/screenshot_1506_03.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p2/screenshot_1840_03.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p2/screenshot_2209_03.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p2/screenshot_2401_01.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p2/screenshot_2836_02.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p2/screenshot_4408_01.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p2/screenshot_4846_01.png">
+<meta property="article:published_time" content="2026-07-30T07:58:20.000Z">
+<meta property="article:modified_time" content="2026-07-30T07:59:19.347Z">
+<meta property="article:author" content="nannnzhang">
+<meta property="article:tag" content="CMU">
+<meta property="article:tag" content="CMU 10-414">
+<meta property="article:tag" content="DeepLearning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p2/screenshot_0130_03.png">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+  <a href="/" class="brand-title">Anemone&#39;s Blog</a>
+  
+</div>
+
+<nav class="topnav">
+  
+    <a href="/" class="nav-item">首页</a>
+  
+    <a href="/archives" class="nav-item">归档</a>
+  
+    <a href="/categories/" class="nav-item">CATEGORY</a>
+  
+    <a href="/tags/" class="nav-item">TAG</a>
+  
+</nav>
+
+<button class="theme-toggle" type="button" aria-label="切换主题" title="切换深/浅主题">
+  <span class="theme-stack">
+    <span class="theme-char" data-char="深">深</span>
+    <span class="theme-char" data-char="浅">浅</span>
+  </span>
+</button>
+
+  </header>
+
+  <div class="main-layout">
+    
+<aside class="shelf">
+  <div class="shelf-head">目录</div>
+  <ul class="shelf-list">
+    
+      
+      <li class="shelf-item" data-cat="CMU 10-414: Deep Learning Systems">
+        <button class="shelf-cat active" type="button">
+          <span class="cat-name">CMU 10-414: Deep Learning Systems</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts open">
+          
+            
+            <li><a href="/2026/07/30/bilibili-bv199rlyjez2-p2/" class="post-link current">Lecture 2 - ML Refresher / Softmax Regression</a></li>
+          
+            
+            <li><a href="/2026/07/29/bilibili-bv199rlyjez2-p1/" class="post-link">Lecture 1 - Introduction and Logistics</a></li>
+          
+        </ul>
+      </li>
+    
+      
+      <li class="shelf-item" data-cat="【2026】南京大学操作系统原理">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name">【2026】南京大学操作系统原理</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts">
+          
+            
+            <li><a href="/2026/07/27/bilibili-bv1opafzpef9-p1/" class="post-link">01 - Agentic AI 时代的操作系统课：绪论</a></li>
+          
+            
+            <li><a href="/2026/07/28/bilibili-bv1knphzpera-p1/" class="post-link">02 - 应用视角的操作系统</a></li>
+          
+        </ul>
+      </li>
+    
+  </ul>
+</aside>
+
+    <main class="content">
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">Lecture 2 - ML Refresher / Softmax Regression</h1>
+    <div class="post-meta">
+      <time class="post-date" datetime="2026-07-30T15:58:20">
+        2026-07-30
+      </time>
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-categories">
+  
+    
+    <a href="/categories/CMU-10-414-Deep-Learning-Systems/" class="category-link">CMU 10-414: Deep Learning Systems</a>
+  
+</span>
+
+      
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-tags">
+  
+    
+    <a href="/tags/CMU/" class="tag-link">#CMU</a>
+  
+    , 
+    <a href="/tags/CMU-10-414/" class="tag-link">#CMU 10-414</a>
+  
+    , 
+    <a href="/tags/DeepLearning/" class="tag-link">#DeepLearning</a>
+  
+</span>
+
+      
+      <span class="meta-sep">/</span>
+      <span class="post-views" id="busuanzi_container_page_pv">
+        阅读 <span id="busuanzi_value_page_pv">-</span>
+      </span>
+    </div>
+  </header>
+  <div class="post-body">
+    <blockquote>
+<p>本文根据 <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV199rLYjEZ2?p=2">原视频</a> 整理，内容来源：UP 主 Mindofuture。</p>
+</blockquote>
+<h2 id="课程概览与机器学习基础"><a href="#课程概览与机器学习基础" class="headerlink" title="课程概览与机器学习基础"></a>课程概览与机器学习基础</h2><h3 id="课程介绍与问题引入"><a href="#课程介绍与问题引入" class="headerlink" title="课程介绍与问题引入"></a>课程介绍与问题引入</h3><p>欢迎来到深度学习系统课程的第二讲。这门课的代码是 10-414&#x2F;10-714，2021 年秋季学期。我假设在座的同学都已经具备了一定的机器学习基础。如果你对这些内容完全陌生，你可能需要先去修一些更基础的机器学习课程，再来挑战这门更偏系统和进阶实现的课。</p>
+<p>今天我们会做两件事：先快速回顾机器学习的基础知识，然后用 Softmax 回归作为具体例子，把这些概念串联起来。</p>
+<p>让我们从手写数字识别这个经典问题开始。给定一张图片，比如右边显示的手写数字，我们需要把它分到 0 到 9 这十个类别中的某一个。传统的编程思路是什么？我们会尝试用规则来定义每个数字。比如，0 可能是一个圈，1 可能是一条竖线。你需要在像素层面把这些逻辑一条条写出来——如何定义“3”的形状？如何处理不同人的笔迹变化？如何从像素值转换到一个有意义的预测？即便我自认为是一个相当不错的学生，面对这个任务我也会觉得几乎不可能做到完美。因为人眼看到的是形状和笔画，而计算机看到的是像素矩阵，这两者之间的鸿沟太大了。手动编写这些规则，对我来说是不现实的。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p2/screenshot_0130_03.png" alt="手写数字识别问题示例，展示MNIST风格的数字图片"></p>
+<p>这就是机器学习要解决的问题。机器学习换了一种完全不同的思路：它不去手动编写规则，而是从数据中拟合一个函数来做预测。具体来说，我们给算法提供大量的数据和对应的标签，这个过程叫训练。训练完成后，模型不仅要在训练时见过的例子上表现好，更重要的是，对于全新的、没见过的输入，它也必须能做出正确的预测。当然，前提是我们把模型调得足够好。</p>
+<p>关于训练集、测试集和验证集的划分，我们会在后面的课程中详细展开，这里先不深入。今天我想重点解释的是，机器学习算法这个黑箱里面到底装了什么。</p>
+<h3 id="机器学习三要素框架"><a href="#机器学习三要素框架" class="headerlink" title="机器学习三要素框架"></a>机器学习三要素框架</h3><p>事实上，所有机器学习算法——至少是所有监督学习算法，其实无监督学习也基本适用——都可以被拆解成三个不同的组成部分。即便机器学习算法有成百上千种，你不可能也没必要一个一个去死记硬背。真正重要的是理解这个统一框架：每个算法都由这三个部分组成。</p>
+<p>第一个组成部分是假设类。它定义了如何将输入映射到输出，也就是我们用什么函数形式来做预测。第二个组成部分是损失函数。它衡量我们的预测结果与真实标签相比有多“好”或者多“坏”。第三个组成部分是优化方法。它的任务是最小化这个损失，或者最大化某个目标函数。</p>
+<p>今天我们会用 Softmax 回归作为具体实例，把这三个组成部分套进去，展示它们是如何协同工作的。理解了这个统一视角，你就掌握了理解任何机器学习算法的钥匙。在下一讲，我们会保持损失函数和优化方法不变，只把线性假设类替换成神经网络，看看会带来什么变化。</p>
+<h2 id="线性假设类与矩阵批量符号"><a href="#线性假设类与矩阵批量符号" class="headerlink" title="线性假设类与矩阵批量符号"></a>线性假设类与矩阵批量符号</h2><h3 id="线性假设函数（Linear-Hypothesis-Function）"><a href="#线性假设函数（Linear-Hypothesis-Function）" class="headerlink" title="线性假设函数（Linear Hypothesis Function）"></a>线性假设函数（Linear Hypothesis Function）</h3><p>我们先来看假设函数。在Softmax回归中，我们使用的假设函数形式是 $h_\theta(x) &#x3D; \theta^T x$。这里的 $\theta$ 是一个 $n \times k$ 的矩阵，其中 $n$ 是输入维度，$k$ 是输出类别数。以MNIST为例，输入是28x28像素的图像，每个像素有一个0到1之间的浮点值，所以 $n &#x3D; 784$。输出有10个类别，对应数字0到9，所以 $k &#x3D; 10$。训练集包含60,000个样本，$m &#x3D; 60000$。</p>
+<p>为什么是 $\theta^T x$ 这个形式？我们把向量视为列向量，$x$ 是 $n \times 1$ 的，$\theta$ 是 $n \times k$ 的，那么 $\theta^T$ 就是 $k \times n$ 的。两者相乘得到一个 $k \times 1$ 的向量，正好是我们想要的 $k$ 维输出。这实际上是从 $n$ 维输入到 $k$ 维输出之间最简单的线性变换，也是你能拥有的最直接的映射方式之一。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p2/screenshot_1506_03.png" alt="线性假设函数公式 h_θ(x) &#x3D; θ^T x，展示矩阵维度关系"></p>
+<p>关于输出向量 $h(x)$ 的含义，我需要谨慎措辞。这个向量的第 $i$ 个分量 $h_i(x)$ 给出的是关于输入属于类别 $i$ 的某种指示。我在这里用“可能”或“置信度”这类词时是加了很大引号的，因为它们还不是概率。我们稍后会讨论概率性的解释，但现在你应当把它们仅仅理解为对“输出是类别 $i$”这件事的置信度，而不是严格的概率值。</p>
+<p>我使用 $h_\theta$ 这个符号是有意的。$h$ 不仅是输入 $x$ 的函数，同时也是参数 $\theta$ 的函数——它的行为依赖于我们选择的参数值。写成 $h_\theta$ 能清楚地表达这种依赖关系。</p>
+<h3 id="矩阵批量符号（Matrix-Batch-Notation）"><a href="#矩阵批量符号（Matrix-Batch-Notation）" class="headerlink" title="矩阵批量符号（Matrix Batch Notation）"></a>矩阵批量符号（Matrix Batch Notation）</h3><p>在继续讨论损失函数之前，我想先绕一个小弯，介绍矩阵批量符号。前面我们把假设函数写成单个样本的形式，但在实际中，一次处理多个样本会方便得多。这不仅仅是一种数学上的美观，当你高效实现这些操作时，它变得极其重要。</p>
+<p>矩阵运算比执行许多独立的向量运算要高效得多——无论是在GPU上还是在CPU上。所以矩阵批量符号不只是符号上的便利，尽管用习惯了确实很好用，它实际上也是让代码跑得更快的关键。你需要熟悉的不仅是怎样用一堆for循环来写这些东西，而是如何真正把它们写成高效的矩阵运算。</p>
+<p>我们定义批量矩阵大写 $X$，维度是 $m \times n$。这个矩阵就是训练集中所有样本的堆叠。具体来说，第一行是第一个样本 $x_1$ 的转置，第二行是 $x_2$ 的转置，一直到第 $m$ 行是 $x_m$ 的转置。因为我们的惯例是把向量当作列向量，要把它变成行向量堆进矩阵里，就需要转置。这就是我们的设计矩阵，包含了训练集中的所有样本。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p2/screenshot_1840_03.png" alt="批量矩阵 X 的结构示意图，展示 m×n 设计矩阵的行堆叠方式"></p>
+<p>对目标输出我们也做类似的处理。每个输出 $y$ 是标量值，取值为1到 $k$ 之间的离散类别。我们把所有标签堆叠成一个 $m$ 维向量 $y$，第一个元素是 $y_1$，第二个是 $y_2$，一直到 $y_m$。</p>
+<p>这套符号的好处在于，我们可以把假设函数一次性应用到整个数据集上。对于单个样本，假设函数是 $h_\theta(x) &#x3D; \theta^T x$。如果要对整个批量操作，我们直接写成 $h_\theta(X) &#x3D; X \theta$。这里 $X$ 是 $m \times n$，$\theta$ 是 $n \times k$，乘积结果是 $m \times k$ 的矩阵。矩阵的每一行对应一个样本的 $k$ 维输出向量。这种紧凑的写法不仅是数学表达上的简洁，更直接对应到高效的矩阵乘法实现。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p2/screenshot_2209_03.png" alt="批量假设函数 h_θ(X) &#x3D; Xθ 的矩阵乘法推导"></p>
+<h2 id="损失函数：从分类误差到交叉熵"><a href="#损失函数：从分类误差到交叉熵" class="headerlink" title="损失函数：从分类误差到交叉熵"></a>损失函数：从分类误差到交叉熵</h2><p>现在我们来讨论机器学习三要素中的第二个要素：损失函数。损失函数的作用是评估我们预测的质量。对于分类问题，最直观的评估方式就是看预测是否正确。这就是所谓的分类器误差，也是大家最自然能想到的损失函数。我们把它写出来：给定一个样本 $x$ 和它的真实标签 $y$，我们的损失 $\ell$ 定义为：</p>
+<p>$$<br>\ell(h_\theta(x), y) &#x3D;<br>\begin{cases}<br>0 &amp; \text{if } \arg\max_i h_i(x) &#x3D; y \<br>1 &amp; \text{otherwise}<br>\end{cases}<br>$$</p>
+<p>这个定义很直白。如果假设函数输出向量中最大值的索引正好等于真实类别 $y$，损失就是零；否则损失就是一。实际上，这就是我们在报告分类器误差或准确率时所用的标准——准确率等于一减去平均误差。可以说，这个损失函数太自然了，以至于我们平时甚至不会专门去定义它。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p2/screenshot_2401_01.png" alt="0-1损失函数的分段定义公式"></p>
+<h3 id="0-1损失与优化困境"><a href="#0-1损失与优化困境" class="headerlink" title="0-1损失与优化困境"></a>0-1损失与优化困境</h3><p>问题在于，0-1损失虽然直观，对于优化来说却非常糟糕。从计算复杂度的角度讲，即使只针对线性分类器，要找到一组能最小化0-1损失的参数也是一个NP难问题。但更根本的障碍在于它不可微。如果我们稍微调整参数 $\theta$，假设函数的输出会连续变化，但0-1损失的值通常完全不变——除非你恰好站在某个决策边界上，而在边界点处损失又会从零跳到一，同样不可微。</p>
+<p>这一点至关重要，因为在深度学习中，我们几乎总是通过基于梯度的方法来优化参数。基于梯度的方法需要损失函数关于参数可微，能够提供梯度信息来指导参数更新的方向。0-1损失提供了零信息：它告诉我们预测错了，却不告诉我们错得有多离谱，也不告诉我们该往哪个方向调整参数才能改善。因此，我们需要一个不同的损失函数来实际训练模型。</p>
+<h3 id="Softmax操作与概率转换"><a href="#Softmax操作与概率转换" class="headerlink" title="Softmax操作与概率转换"></a>Softmax操作与概率转换</h3><p>为了构建适合优化的损失函数，我们首先需要对假设函数的输出做一个转换。假设函数 $h_\theta(x)$ 输出的是 $k$ 个实数值，这些值可以是正的也可以是负的，总和也不为一。它们表示的是对各类别的置信度，但不是概率。我们想把它转换成看起来更像概率的东西——一个所有分量都为正且总和为一的向量。</p>
+<p>转换分两步。第一步，对每个分量取指数。无论原来的值是正还是负，取指数后一定为正，这就解决了正性的问题。第二步，用所有分量的指数和来做归一化。对类别 $i$，我们定义：</p>
+<p>$$<br>z_i &#x3D; \frac{\exp(h_i(x))}{\sum_{j&#x3D;1}^{k} \exp(h_j(x))}<br>$$</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p2/screenshot_2836_02.png" alt="Softmax操作的两步转换过程：指数化与归一化"></p>
+<p>写成向量形式就是：</p>
+<p>$$<br>z &#x3D; \text{normalize}(\exp(h(x)))<br>$$</p>
+<p>这里的 $\exp$ 作用于向量时，意思是对向量的每个元素分别取指数——这种标量函数作用于向量的记法在深度学习中会反复出现。normalize函数则把整个向量缩放到总和为一。这个操作就是大家熟悉的softmax操作符。现在，$z$ 是一个合法的概率向量：每个分量都为正，且所有分量之和为一。</p>
+<h3 id="交叉熵损失（Cross-Entropy-Loss）"><a href="#交叉熵损失（Cross-Entropy-Loss）" class="headerlink" title="交叉熵损失（Cross-Entropy Loss）"></a>交叉熵损失（Cross-Entropy Loss）</h3><p>有了softmax转换之后，我们就可以定义交叉熵损失了。这个损失函数如今已经成为大多数机器学习中的标准。它的想法很简单：既然 $z$ 是模型预测的概率分布，那么真实类别 $y$ 对应的概率 $z_y$ 应该尽可能高。交叉熵损失直接取这个概率的负对数：</p>
+<p>$$<br>\ell_{\text{ce}}(h_\theta(x), y) &#x3D; -\log z_y &#x3D; -\log \left( \frac{\exp(h_y(x))}{\sum_{j&#x3D;1}^{k} \exp(h_j(x))} \right)<br>$$</p>
+<p>如果模型对正确类别分配的概率接近一，损失就接近零；如果分配的概率很小，损失就会很大。而且这个函数是光滑可微的，梯度可以告诉我们如何调整参数来增加 $z_y$。</p>
+<p>这里有一个重要的概念细节需要注意。在定义和使用交叉熵损失时，我们应当把softmax操作视为损失函数的一部分，而不是假设函数的输出。假设函数 $h_\theta(x) &#x3D; \theta^T x$ 的输出就是那些原始的实数值，而softmax加上负对数似然共同构成了损失函数。这种划分在数值计算上也有实际意义，因为直接把softmax和交叉熵合并计算可以避免一些数值稳定性问题。在后续推导梯度时，我们也会看到这种划分带来的便利。</p>
+<p>总结一下，我们放弃了不可微的0-1损失，转而使用交叉熵损失。它通过softmax将假设函数的输出转化为概率，再用负对数似然来衡量预测质量。这个损失函数光滑、可微，为基于梯度的优化铺平了道路。</p>
+<h2 id="优化方法：梯度下降与随机梯度下降"><a href="#优化方法：梯度下降与随机梯度下降" class="headerlink" title="优化方法：梯度下降与随机梯度下降"></a>优化方法：梯度下降与随机梯度下降</h2><h3 id="梯度与梯度下降（Gradient-Descent）"><a href="#梯度与梯度下降（Gradient-Descent）" class="headerlink" title="梯度与梯度下降（Gradient Descent）"></a>梯度与梯度下降（Gradient Descent）</h3><p>现在我们进入Softmax回归的第三个也是最后一个要素——优化问题。我们需要为参数矩阵 $\theta$ 找到好的值，使得训练集上的平均损失最小化。这个问题可以形式化地写成：</p>
+<p>$$\min_\theta \frac{1}{m} \sum_{i&#x3D;1}^m \ell(h_\theta(x^{(i)}), y^{(i)})$$</p>
+<p>这个表述实际上抓住了所有监督学习算法的核心。每一个机器学习算法，无论具体形式如何，本质上都是在解决一个类似的问题：找到一组参数，使得在训练集上预测与真实标签之间的损失总和或平均损失最小化。当然，有些算法会加上正则化项，但在深度学习中通常甚至不这么做。这个优化问题就是核心的机器学习问题。</p>
+<p>对于Softmax回归，我们把交叉熵损失和线性假设类代入，得到具体形式：</p>
+<p>$$\min_\theta \frac{1}{m} \sum_{i&#x3D;1}^m \ell_{ce}(\theta^T x^{(i)}, y^{(i)})$$</p>
+<p>其中 $\ell_{ce}$ 就是我们刚才定义的交叉熵损失。现在的问题自然是：我们如何实际找到最小化这个量的 $\theta$ 值？我们将通过梯度下降来做到这一点。</p>
+<p>在讲梯度下降之前，我需要先介绍一下梯度的概念。假设我们有一个函数，它的输入是一个矩阵，输出是一个标量。我们可以把整个优化目标看成仅仅是 $\theta$ 的一个函数。对于Softmax回归，这个函数就是从 $\theta \in \mathbb{R}^{n \times k}$ 映射到一个实数值的标量函数 $f: \mathbb{R}^{n \times k} \to \mathbb{R}$。</p>
+<p>那么梯度是什么呢？梯度是一个与 $\theta$ 形状完全相同的矩阵，它的每个元素是函数关于 $\theta$ 中对应元素的偏导数：</p>
+<p>$$\nabla_\theta f(\theta) \in \mathbb{R}^{n \times k}, \quad [\nabla_\theta f(\theta)]<em>{ij} &#x3D; \frac{\partial f(\theta)}{\partial \theta</em>{ij}}$$</p>
+<p>梯度有一个非常重要的几何直觉：它指向函数增长最快的方向。如果你站在参数空间的某个点上，梯度告诉你哪个方向往上走最快。既然我们要最小化损失函数，我们自然想往相反的方向走——也就是负梯度的方向。这就引出了梯度下降的基本更新公式：</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p2/screenshot_4408_01.png" alt="梯度指向函数增长最快方向的几何示意图"></p>
+<p>$$\theta :&#x3D; \theta - \alpha \nabla_\theta f(\theta)$$</p>
+<p>这里的 $\alpha$ 是步长，也叫学习率。这个参数对优化过程有决定性的影响。如果步长太小，收敛会非常缓慢；如果步长太大，你可能会在最小值附近来回震荡，甚至发散。选择合适的学习率本身就是一门艺术，我们后面会详细讨论。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p2/screenshot_4846_01.png" alt="不同学习率对梯度下降收敛效果的影响对比图"></p>
+<h3 id="随机梯度下降（Stochastic-Gradient-Descent）"><a href="#随机梯度下降（Stochastic-Gradient-Descent）" class="headerlink" title="随机梯度下降（Stochastic Gradient Descent）"></a>随机梯度下降（Stochastic Gradient Descent）</h3><p>现在有一个实际的问题。注意我们的优化目标是对整个训练集的平均损失：</p>
+<p>$$f(\theta) &#x3D; \frac{1}{m} \sum_{i&#x3D;1}^m \ell(h_\theta(x^{(i)}), y^{(i)})$$</p>
+<p>要计算这个函数的梯度，我们需要遍历整个数据集中的每一个样本。当训练集很大时——在深度学习中，$m$ 可能是百万甚至十亿级别——这个计算代价是巨大的。而且，即使你算出了精确的梯度，在参数空间中走一步之后，你又需要重新遍历整个数据集来算下一步的梯度。这在计算和内存上都是不可接受的。</p>
+<p>随机梯度下降（Stochastic Gradient Descent，SGD）解决了这个问题。它的核心思想很简单：与其在整个数据集上计算精确梯度，不如在一个小批量（mini-batch）数据上近似梯度，然后快速更新参数。</p>
+<p>具体来说，我们从训练集中随机抽取一个小批量样本 $B$，大小通常取 $32$、$64$ 或 $128$。然后我们在这个小批量上计算平均损失的梯度：</p>
+<p>$$\nabla_\theta f(\theta) \approx \frac{1}{|B|} \sum_{i \in B} \nabla_\theta \ell(h_\theta(x^{(i)}), y^{(i)})$$</p>
+<p>这个近似梯度的期望等于真实梯度，所以虽然每一步的方向都有噪声，但从统计意义上它指向了正确的方向。更重要的是，我们现在可以在每个小批量上快速迭代，而不是等遍历完整个数据集才更新一次参数。</p>
+<p>SGD就是驱动现代深度学习的基础算法。几乎所有的深度学习模型，无论多么复杂，最终都是用某种形式的SGD或其变体来训练的。这个简单的想法——用小批量数据近似梯度——让大规模神经网络的训练成为可能。</p>
+<h2 id="梯度计算：手动推导与“标量假设”技巧"><a href="#梯度计算：手动推导与“标量假设”技巧" class="headerlink" title="梯度计算：手动推导与“标量假设”技巧"></a>梯度计算：手动推导与“标量假设”技巧</h2><p>对于一个标量函数 $f(\theta)$，其中参数 $\theta$ 本身是一个 $n \times k$ 的矩阵，我们如何开始最小化它？答案是利用梯度。梯度定义为由该函数所有偏导数构成的矩阵，维度与 $\theta$ 完全相同。我把它写作 $\nabla_\theta f(\theta)$，这个倒三角符号后面跟着一个下标 $\theta$。矩阵中的每个元素都是 $f$ 对 $\theta$ 中对应位置参数的偏导数：第一行第一列是 $\frac{\partial f}{\partial \theta_{11}}$，第一行最后一列是 $\frac{\partial f}{\partial \theta_{1k}}$，依此类推，最后一行最后一列是 $\frac{\partial f}{\partial \theta_{nk}}$。</p>
+<p>偏导数的含义很简单：当你对某个特定的 $\theta_{ij}$ 求偏导时，你把 $\theta$ 中所有其他元素都当作常数来处理。它们被视为与 $\theta_{ij}$ 无关的量，只有 $\theta_{ij}$ 本身在变化。</p>
+<p>我得花一点时间吐槽一下这个梯度符号。它确实很糟糕，但这是整个领域通用的写法，我们只能适应。糟糕在哪里？这里的 $\theta$ 出现了两次，但含义不同。下标中的 $\theta$ 是在声明“我们要对哪个参数求导”——如果一个函数有多个参数，你需要一种方式来指定求导目标。而括号里的 $\theta$ 则是求导时参数的实际取值，也就是我们计算梯度的那个点。这两个 $\theta$ 的混用确实会造成困惑，但这就是现状。有些人在下标中用数字索引来区分不同参数，那种记法客观上更清晰，但不常见。所以我坚持使用这种常见但糟糕的符号，你们也只能习惯一下。</p>
+<p>现在来看梯度的几何意义。回忆一维微积分，导数等于函数的斜率。这个直觉在高维空间同样成立。假设我们有一个函数曲面，某个位置是最小值点，其他位置函数值越来越大。梯度本身是一个矩阵——或者当函数输入是向量时，梯度就是一个向量——它指向函数值增长最快的方向，至少是局部增长最快的方向。也就是说，在你计算梯度的那个参数点上，梯度向量告诉你，沿着哪个方向走，函数值会上升得最快。</p>
+<p>这是一个极其强大的概念。你不需要以某种方式穷举搜索 $f$ 的所有可能取值，去找到那个能让它增长最多的方向。通过一点微积分，你在局部意义上立刻就知道参数空间中哪个方向能让函数增长最快。这几乎有点神奇。而且我们通常有非常高效的方法来计算梯度——这将是后面关于自动求导的整整一节课要讲的内容。正因为可以高效计算梯度，我们才能很容易地搞清楚该如何调整、如何优化参数 $\theta$。</p>
+<p>那么具体怎么做？这直接引出了可以说是几乎所有机器学习的核心算法。梯度指向最大增长的方向，而我们要最小化损失函数，所以很自然的做法是沿着梯度的反方向走。参数更新公式为：</p>
+<p>$$\theta :&#x3D; \theta - \alpha \nabla_\theta f(\theta)$$</p>
+<p>这里的 $\alpha$ 被称为步长或者学习率，是一个小的正数。我们减去梯度的一个小倍数，维度上完全匹配：$\theta$ 是 $n \times k$，梯度也是 $n \times k$，乘以标量 $\alpha$ 只是缩放整个矩阵，所以这是一个完全合法的更新操作。核心思想就是：因为梯度指向最大增长方向，而我们想最小化函数，所以减去一小部分梯度就能让函数值下降。</p>
+<p>在深入细节之前，我想强调一下这个方法的威力。毫不夸张地说，梯度下降的基本思想驱动了所有的深度学习。也许不是全部——偶尔有人用无梯度方法——但 99% 的深度学习都建立在梯度下降之上。而因为深度学习如此普遍，可以说你看到的 90% 甚至更多的 AI 应用都是如此。上节课展示的那些狗狗教授图像、大型语言模型、AlphaFold，它们基本上都是用这一行数学构建起来的。出于某种原因，这个算法仍然没有在本科第一门基础课程中被充分讲授，我觉得这很不可思议。梯度下降对机器学习领域、甚至对整个世界产生的巨大影响，真的很难被夸大。当然，我说梯度下降的时候，指的是梯度下降及其变体，任何基于梯度的优化技术。</p>
+<p>你看到这个更新公式，可能会立刻产生一个大问题——即使你变得很有机器学习经验，这个问题可能依然存在——那就是 $\alpha$ 应该选什么值？我们要迈多大的步长？我们会在课程中花很多时间讨论这个问题。$\alpha$ 的选择极大地影响着这种方法的性能。想象一个简单的二维函数，蓝色的线是它的水平集。如果取很小的步长，你会沿着一条缓慢的路径，一步一步稳稳地走向最优点。如果取更大的步长，你会取得相当迅速的进展，更快地接近最优点。但如果步长太大，你就会开始来回弹跳，不再稳定。步长再进一步增大，你可能会迈出如此大的一步，以至于直接越过最优点，并且每次更新都让函数值增加，最终发散到无穷远。步长的选择在优化过程中真的非常非常重要。作为对几节课后内容的快速预览，如果你听说过 Adam 或者带动量的梯度下降这类优化方法，它们本质上就是在解决如何更好地选择步长和更新方向的问题。</p>
+<p>在实际的深度学习训练中，我们并不会直接使用刚才描述的经典梯度下降算法。原因在于损失函数的结构。我们的优化目标是在参数 theta 上最小化所有训练样本损失的平均值。这个总目标的梯度等于所有单个样本梯度的总和，也就是从 i 等于 1 到 m，对每个样本的损失项关于 theta 的梯度求和。</p>
+<p>这里的问题在于，随着数据量 m 的增长，每一步梯度计算所需的工作量也会线性增长。在拥有海量数据的极限情况下，我们可能永远困在计算一步梯度的过程中，这显然不合理。另一个更现实的瓶颈是内存：在深度学习中，你根本不可能把所有数据同时塞进内存，更不用说还要存储计算梯度所需的中间结果了。</p>
+<p>因此，深度学习真正依赖的不是经典梯度下降，而是它的一个变体，叫做随机梯度下降（Stochastic Gradient Descent，SGD）。从理论上讲，SGD 可以被理解为一种随机最小化过程：你用一个随机变量来近似真实的梯度，这个随机变量的期望等于真实梯度，但本身带有一定方差。在实践中，SGD 的做法非常直接——你把整个数据集切分成若干个小块，这些小块被称为小批量（mini-batch）。</p>
+<p>每个小批量就是数据集的一个大小为 B 的子集，这里的 B 称为批量大小或小批量大小。SGD 的工作方式是：先采样一个小批量，或者更常见的做法是，把整个数据集划分成若干个大小为 B 的互斥子集，然后循环遍历这些子集。对于每一个大小为 B 的子集，取出这 B 个样本的输入矩阵和对应的标签，然后把这 B 个样本当作整个训练集，计算其上的损失并执行一步参数更新。</p>
+<p>你可以这样理解：SGD 的每一步都是用一小部分数据对真实梯度做出的粗略近似，但因为数据量小得多，这一步可以非常快地完成。有趣的是，这种近似带来的噪声在深度学习中有时反而是有益的。我们实际优化的目标是对理想目标的一种带噪声的近似，但它的计算速度要快得多。与其对全部 M 个样本求和，我们只对 B 个样本求和，B 可能只有 100，而不是潜在的数百万。</p>
+<p>我可以明确地说，正是这个算法以及它的一些微小变体，驱动了近年来深度学习领域几乎所有的进展。我们训练每一个深度学习模型，本质上用的都是这个算法，后面我们还会讨论动量法、Adam 等更常见的改进版本。</p>
+<h2 id="损失对输出的梯度推导"><a href="#损失对输出的梯度推导" class="headerlink" title="损失对输出的梯度推导"></a>损失对输出的梯度推导</h2><p>优化过程是 softmax 回归算法三个组成部分中的最后一个，但要真正完成它，还需要解决一个问题：如何实际计算损失函数关于参数 theta 的梯度。总损失是所有单个样本损失项的和，如果我们能计算出其中一项的梯度，把它们加起来就得到了总梯度。</p>
+<p>计算这个梯度不算特别难，但也不轻松。在我学习机器学习的年代，我们的做法就是设计一个新的目标函数，然后手动推导出所有的梯度。现在我们生活在更好的时代了——大多数时候你不需要亲自做这件事，这就是自动微分的意义所在。自动微分是一种算法方法，你只需要定义假设函数和损失函数，程序就会自动为你生成梯度。我们会在几节课后详细讨论它。</p>
+<p>但在这节课和下节课，我还是要带你们回顾一下过去我们是怎么做机器学习的，也就是手动推导梯度。要编写自动微分工具，你至少需要理解一些梯度的计算过程。我们就从相对简单的部分开始。</p>
+<p>计算整个损失关于 theta 的梯度确实有些繁琐，涉及矩阵和向量的链式法则。让我们先解决一个更简单的问题：暂时不把 h 看作假设函数的输出，而是把它当作一个任意的向量，计算交叉熵损失关于这个向量 h 的梯度。这实际上是我们完整推导过程中的一个关键步骤。</p>
+<p>梯度的元素就是偏导数，所以我们要计算损失关于 h 的每个分量 h_i 的偏导数。先把交叉熵损失的定义写出来：对于单个样本，损失等于负的 h_y 加上 log 对所有类别的指数求和，即</p>
+<p>$$<br>\ell &#x3D; -h_y + \log\left(\sum_{j&#x3D;1}^{k} \exp(h_j)\right)<br>$$</p>
+<p>现在对 h_i 求偏导。第一项 -h_y 的导数很简单：如果 i 等于真实类别 y，导数就是 -1；否则是 0。这可以写成一个指示函数的形式：负的 i 等于 y 的指示函数。</p>
+<h3 id="“标量假设”与维度调整技巧"><a href="#“标量假设”与维度调整技巧" class="headerlink" title="“标量假设”与维度调整技巧"></a>“标量假设”与维度调整技巧</h3><p>但我们要的并不是损失对假设函数输出 h 的梯度，而是损失对参数矩阵 θ 的梯度。这里立刻就遇到了维度问题。h 是向量，θ 是矩阵，对矩阵求导会引入张量运算，如果严格使用矩阵微分学来处理，需要借助克罗内克积和向量化操作，形式上非常繁琐。即便是线性假设函数这种最简单的情形，推导过程也很快会变得难以管理。</p>
+<p>因此我在这里要介绍一种在深度学习实践中被广泛使用的方法。它不严谨，甚至可以说相当“骇人听闻”，但它确实是过去很多人实际在做的事情，而且能让你极快地得到正确结果。这个方法的核心思路是：在求导时先把所有变量都当成标量，用普通的链式法则进行计算，最后再通过转置和调整乘法顺序让结果的维度匹配。整个过程就像在维度问题上做一种事后修补。</p>
+<p>我之所以要强调它的“惊恐”程度，是因为从数学推导的角度看，这完全是在作弊。但它的实用性惊人，在绝大多数情况下都能给出正确结果。不过有一条铁律必须遵守：用这种方法得到的梯度公式，一定要用数值方法进行验证。在后续课程中我们会展示如何进行数值梯度检查，你们在第二次作业中也会亲自动手实践。在太多地方可能出错，事后验证是唯一能让你安心的方式。</p>
+<p>那么具体怎么操作呢？我们要计算的是交叉熵损失对 θ 的梯度。现在假装所有量都是标量，θ 是标量，x 是标量，h 是标量。应用链式法则，可以把梯度拆成两项的乘积：第一项是损失函数对其输入（也就是假设函数输出）的导数，第二项是假设函数输出对 θ 的导数。</p>
+<p>第一项我们刚刚已经推导过了。它就是交叉熵损失关于 h 的梯度，结果等于 z 减去 e_y，其中 z 是对 h 做 softmax 得到的概率向量，e_y 是真实类别位置为 1 的单位基向量。在标量假设下，这个结果仍然成立，只不过现在我们把它当成一个标量值来用。</p>
+<p>第二项是 h 对 θ 的导数。在标量假设下，h 等于 θ 乘以 x（转置在这种假设下没有意义，但标量总是可以随意转置），所以 h 对 θ 的导数就是 x。</p>
+<p>把两项乘起来，在标量世界里我们就得到了损失对 θ 的导数：它等于 x 乘以 (z 减去 e_y)。这是标量形式的结果。</p>
+<h2 id="最终梯度公式与算法实现"><a href="#最终梯度公式与算法实现" class="headerlink" title="最终梯度公式与算法实现"></a>最终梯度公式与算法实现</h2><p>在标量假设的框架下，我们先把所有东西都当成标量来处理。假设函数是 $\theta^T x$，当 $\theta$ 和 $x$ 都是标量时，$\theta x$ 对 $\theta$ 的导数就是 $x$。这个很简单。现在我们需要回到矩阵的世界，讨论这些量的维度。</p>
+<p>$z$ 和 $e_y$ 都是 $k$ 维向量，也就是 $k \times 1$ 的矩阵。而 $x$ 是 $n$ 维向量，即 $n \times 1$ 的矩阵。我们想要的梯度 $\nabla_\theta \ell$ 是 $n \times k$ 的矩阵。那么，如何排列 $x$ 和 $(z - e_y)$ 这两项，才能得到一个 $n \times k$ 的输出？唯一能做的就是取 $x$ 乘以 $(z - e_y)$ 的转置：</p>
+<p>$$\nabla_\theta \ell(x, y) &#x3D; x (z - e_y)^T$$</p>
+<p>这个外积运算恰好生成一个 $n \times k$ 的矩阵，而这正是我们需要的正确梯度。我必须承认，这个过程确实有些尴尬——把变量先假设成标量求导，再通过转置和调整乘法顺序把维度凑对，缺乏严格的数学美感。但这就是过去做机器学习的人都在用的技巧。</p>
+<p>这个技巧甚至对批量情况也适用。对于整个小批量数据，损失函数作用在假设函数的批量输出 $X\theta$ 上。求损失关于 $\theta$ 的梯度时，过程完全类似。先求交叉熵损失对 $X\theta$ 的偏导数，再乘上 $X\theta$ 对 $\theta$ 的导数。第一项的结果是一个矩阵，我把它写成 $Z - I_y$。这里大写的 $Z$ 是对假设函数输出矩阵 $X\theta$ 按行做 softmax 归一化得到的概率矩阵，维度是 $m \times k$，每一行是对应样本的 softmax 概率向量。$I_y$ 则是真实类别的独热编码矩阵，同样 $m \times k$，每一行是对应样本的 $e_y$。</p>
+<p>现在我们来做同样的事情。$X$ 是 $m \times n$ 的，$Z - I_y$ 是 $m \times k$ 的。最终梯度仍然需要是 $n \times k$。那么我们必须取 $X$ 的转置，得到 $n \times m$ 的矩阵，再乘以 $(Z - I_y)$：</p>
+<p>$$\nabla_\theta \ell(X, y) &#x3D; X^T (Z - I_y)$$</p>
+<p>你可能会好奇，为什么这里转置的顺序和单样本情况看起来相反。这是因为我们的大矩阵 $X$，它的每一行已经是各个样本 $x$ 的转置形式。具体如何转置取决于你如何设置这些矩阵，但只要推导出来之后，你可以通过数值方法来验证这个梯度是否正确。这就是我们最终要得到的批量梯度公式，总共也就十来个字符。</p>
+<p>我想再次强调这页幻灯片的标题——“我们这样做确实相当尴尬”。在本课程中，你将完全不必这样做，因为我们会构建自动微分工具来替你完成这些计算。但这曾经是每个做机器学习的人都掌握的技巧，也许没人真正公开谈论过它，但现在你也知道这个秘密了。</p>
+<p>在使用这个技巧时，有一件事非常容易出错，那就是维度。如果你不小心选择了 $k$ 等于 $n$，就很容易把维度搞混。所以你必须尽可能选择不同的维度，让一切能够正常工作。</p>
+<p>尽管推导过程相当复杂，但 Softmax 回归最终得到的结论却极其简单。我真的想强调这种简单性。最终的算法是什么样的？你把数据分割成批次，迭代这些大小为 $B$ 的批次，对每个批次，你只需根据梯度规则 $\theta :&#x3D; \theta - \alpha \cdot X^T (Z - I_y)$ 更新参数。当然你需要先计算 $Z$ 是什么，但这总共也就五六行 Python 代码。你刚才看到的所有那些推导，最终都转化成了极其简单直接的算法实现。你将在第一次作业中实际实现它。</p>
+<h2 id="课程总结与下节预告"><a href="#课程总结与下节预告" class="headerlink" title="课程总结与下节预告"></a>课程总结与下节预告</h2><p>这就是 Softmax 回归算法的全部内容。尽管达成这个结论需要一些不平凡的数学，你应该认识到这些推导并非完全平凡，即使我们某种程度上绕过了推导中最困难的部分，最终算法本身只是一种单行描述，你可以再用几行 Python 代码实现它。如果你在 MNIST 数据集上实现，你会得到略低于 8% 的错误率。这是一个十类分类问题，使用线性分类器能达到 8% 的错误率，这可能比我手工分类能做到的还要好，真的非常令人印象深刻。</p>
+<p>下节课我们要做的是，基本上以完全相同的方式做同样的事情。唯一的区别是，我们将使用神经网络，但这仅仅意味着一个更复杂的假设函数类。我们将使用相同的基本损失函数，即交叉熵损失；使用相同的优化过程，即随机梯度下降。只是计算梯度会稍微复杂一些，但过程是一样的。从某种意义上说，对于深度学习或神经网络，唯一的区别就是我们使用一个更复杂的非线性假设函数类，而不是 Softmax 回归的线性假设函数类。</p>
+<p>在下一次课上，我们将用老式的繁琐方法来讲解神经网络的梯度推导。在那之后，我们将用更好的方法来处理——届时你就可以忘记手动求梯度了，让你编写的自动微分工具以正确的方式为你完成所有这些数学计算。</p>
+
+  </div>
+</article>
+
+
+
+  <section
+    class="post-comments"
+    data-comment-provider="utterances"
+    data-comment-light-theme="github-light"
+    data-comment-dark-theme="github-dark"
+  >
+    <h2 class="comments-title">COMMENTS</h2>
+    <script>
+      (function () {
+        var container = document.currentScript.parentElement;
+        var isDark = document.documentElement.classList.contains('theme-dark');
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.setAttribute('repo', 'cardchoosen/blog');
+        script.setAttribute('issue-term', 'pathname');
+        script.setAttribute('label', 'comment');
+        script.setAttribute('theme', isDark ? 'github-dark' : 'github-light');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      })();
+    </script>
+  </section>
+
+
+
+  <nav class="post-nav">
+    <div class="post-nav-cell">
+      
+        <span class="nav-label">OLDER</span>
+        <a href="/2026/07/29/bilibili-bv199rlyjez2-p1/" class="nav-link">Lecture 1 - Introduction and Logistics</a>
+      
+    </div>
+    <div class="post-nav-cell right">
+      
+    </div>
+  </nav>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 nannnzhang</span>
+    <span class="footer-sep">|</span>
+    <span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+  </div>
+</footer>
+
+  
+<script src="/js/shelf.js"></script>
+
+</body>
+</html>
