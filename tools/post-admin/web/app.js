@@ -35,6 +35,10 @@ function seriesOrderText(post) {
     : ` / order ${escapeHtml(post.series_order)}`;
 }
 
+function visibilityText(post) {
+  return post.published === false ? ' / hidden' : '';
+}
+
 function setDefaultDate() {
   const input = document.querySelector('#date');
   const d = new Date();
@@ -57,7 +61,7 @@ async function loadPosts() {
       <div class="post-meta">${post.date || '-'}</div>
       <div>
         <div class="post-title">${escapeHtml(post.title)}</div>
-        <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
+        <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}${visibilityText(post)}</div>
       </div>
       <div class="post-meta">${escapeHtml(post.slug)}${seriesOrderText(post)}</div>
     </div>
@@ -78,15 +82,24 @@ function renderCategoryList(categories) {
     return;
   }
 
-  list.innerHTML = categories.map((category) => `
+  list.innerHTML = categories.map((category) => {
+    const state = category.hidden ? '隐藏' : (category.partialHidden ? '部分隐藏' : '公开');
+    const action = category.hidden ? '公开' : '隐藏';
+    const hidden = category.hidden ? 'false' : 'true';
+    return `
     <div class="category-row">
       <div>
         <div class="post-title">${escapeHtml(category.name)}</div>
-        <div class="post-meta">${category.count} 篇文章</div>
+        <div class="post-meta">${category.count} 篇文章 / ${state} / 公开 ${category.publicCount} / 隐藏 ${category.hiddenCount}</div>
       </div>
-      <button class="ghost use-category-item" type="button" data-name="${escapeHtml(category.name)}">选择</button>
+      <div class="category-actions">
+        <button class="ghost use-category-item" type="button" data-name="${escapeHtml(category.name)}">选择</button>
+        <button class="ghost preview-category-visibility" type="button" data-name="${escapeHtml(category.name)}" data-hidden="${hidden}">预览${action}</button>
+        <button class="danger run-category-visibility" type="button" data-name="${escapeHtml(category.name)}" data-hidden="${hidden}">${action}</button>
+      </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function renderEditList(posts) {
@@ -102,7 +115,7 @@ function renderEditList(posts) {
       <div>
         <div class="post-title">${escapeHtml(post.title)}</div>
         <div class="post-meta">${escapeHtml(post.date || '-')} / ${escapeHtml(post.slug)}${seriesOrderText(post)}</div>
-        <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
+        <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}${visibilityText(post)}</div>
       </div>
       <button class="ghost load-edit-item" type="button" data-slug="${escapeHtml(post.slug)}">修改</button>
     </div>
@@ -122,7 +135,7 @@ function renderDeleteList(posts) {
       <div>
         <div class="post-title">${escapeHtml(post.title)}</div>
         <div class="post-meta">${escapeHtml(post.date || '-')} / ${escapeHtml(post.slug)}${seriesOrderText(post)}</div>
-        <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}</div>
+        <div class="post-meta">${escapeHtml(post.categories.join(', '))} / ${escapeHtml(post.tags.join(', '))}${visibilityText(post)}</div>
       </div>
       <div class="delete-actions">
         <button class="ghost preview-delete-item" type="button" data-slug="${escapeHtml(post.slug)}">清单</button>
@@ -335,10 +348,36 @@ document.querySelector('#update-post').addEventListener('click', async () => {
 });
 
 document.querySelector('#category-list').addEventListener('click', (event) => {
-  const button = event.target.closest('button[data-name]');
+  const button = event.target.closest('.use-category-item[data-name]');
   if (!button) return;
   document.querySelector('#category-old-name').value = button.dataset.name;
   document.querySelector('#category-new-name').focus();
+});
+
+document.querySelector('#category-list').addEventListener('click', async (event) => {
+  const button = event.target.closest('.preview-category-visibility, .run-category-visibility');
+  if (!button) return;
+
+  const name = button.dataset.name;
+  const hidden = button.dataset.hidden === 'true';
+  const isRun = button.classList.contains('run-category-visibility');
+  const action = hidden ? '隐藏' : '公开';
+  if (isRun && !window.confirm(`确认${action}分类 "${name}" 下的关联文章吗？`)) return;
+
+  try {
+    const data = await api('/api/category/visibility', {
+      method: 'POST',
+      body: { name, hidden, yes: isRun }
+    });
+    show(data);
+    if (isRun) {
+      await loadPosts();
+      await loadCategories();
+      await loadWorktree();
+    }
+  } catch (err) {
+    show(`ERROR: ${err.message}`);
+  }
 });
 
 document.querySelector('#preview-category-rename').addEventListener('click', async () => {
@@ -462,6 +501,19 @@ document.querySelector('#run-publish').addEventListener('click', async () => {
   try {
     show('正在发布，请等待命令完成...');
     const data = await api('/api/publish', { method: 'POST', body: {} });
+    if (data.requiresConfirm) {
+      const ok = window.confirm(`${data.warning}\n\n继续发布可能导致 anemone.wiki 变成空站或 404。确认继续吗？`);
+      if (!ok) {
+        show(`${formatCommandResults(data)}\n\n发布已取消：${data.warning}`);
+        await loadWorktree();
+        return;
+      }
+      show('已确认风险，继续发布...');
+      const confirmed = await api('/api/publish', { method: 'POST', body: { allowEmptySite: true } });
+      show(formatCommandResults(confirmed));
+      await loadWorktree();
+      return;
+    }
     show(formatCommandResults(data));
     await loadWorktree();
   } catch (err) {

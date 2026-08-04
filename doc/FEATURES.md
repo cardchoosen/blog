@@ -33,6 +33,7 @@
 - **素材管理**：图片导入到 `source/images/posts/<slug>/`，其他附件导入到 `source/files/posts/<slug>/`，Markdown 引用自动重写为站点根路径
 - **段落排版**：文章普通正文段落自动首行缩进 `2em`，引用块内段落不缩进
 - **系列排序**：文章可选 `series_order`，同分类内按该数字升序排列，支持负数；未设置时保留日期倒序兜底
+- **公开控制**：文章可通过 `published: false` 隐藏，不对外生成；post-admin 支持按分类批量隐藏/公开
 
 ### 2. 左侧分类书架（核心交互）
 - **数据源**：文章 front-matter 的 `categories` 字段
@@ -91,7 +92,7 @@
 ### 9. 评论
 - 文章详情页正文下方提供 `COMMENTS` 评论区
 - 评论系统使用 utterances，按页面 `pathname` 将文章评论映射到 GitHub Issue
-- 深/浅主题切换时，评论框主题同步切换为 `github-light` / `github-dark`
+- 评论框首次加载时按当前页面主题初始化，深/浅主题切换时同步切换为 `github-light` / `github-dark`
 - 生效前置条件：`cardchoosen/blog` 仓库需要安装 utterances GitHub App，并允许创建 issue
 
 ### 10. 阅读量统计
@@ -119,6 +120,7 @@
 - **发布入口**：post-admin 的"发布"页提供"仅构建检查"与"构建并发布"两个按钮
 - **构建检查**：执行 `npm run build`，用于发布前确认 Hexo 能正常生成静态站
 - **构建并发布**：依次执行 `npm run clean` → `npm run build` → `npm run deploy`
+- **空站保护**：构建后如果没有公开文章或缺少 `public/index.html`，发布前会要求二次确认；命令行需显式传 `--allow-empty-site`
 - **差异可视化**：只展示博客内容相关目录的变化：`source/_posts/`、`source/images/posts/`、`source/files/posts/`
 - **内容变更列表**：以"目录 + 文件名 + 新增/删除行数或 binary"方式展示，贴合站点黑白等宽风格
 - **发布快照**：发布成功后记录 `.tmp/post-admin/published-content.json`，刷新后不再显示已发布内容差异；后续只有再次修改文章或素材才显示新差异
@@ -136,6 +138,8 @@
 - **分类列表**：列出当前所有分类、文章数量与关联文章
 - **重命名预览**：输入旧分类名和新分类名后，可先预览会影响哪些文章
 - **批量写回**：确认后统一更新所有关联文章的 front-matter `categories`
+- **安全写出**：分类名包含冒号、中文或特殊字符时自动加引号，避免 YAML 解析成对象
+- **隐藏/公开**：可按分类预览并批量写入或移除 `published: false`，隐藏文章不会对外生成
 
 ### 16. 一键部署（命令行）
 - 命令：`npx hexo clean && npx hexo g && npx hexo d`

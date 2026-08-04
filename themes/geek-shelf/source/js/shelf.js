@@ -101,15 +101,26 @@
       }, 'https://utteranc.es');
     }
 
+    function bindCommentFrameTheme(theme) {
+      var frame = document.querySelector('.utterances-frame');
+      if (!frame || frame.dataset.themeBound === 'true') return;
+      frame.dataset.themeBound = 'true';
+      frame.addEventListener('load', function () {
+        applyCommentTheme(currentTheme);
+      });
+      applyCommentTheme(theme);
+    }
+
     var html = document.documentElement;
     var initialTheme = html.classList.contains('theme-dark') ? 'dark' : 'light';
     var currentTheme = initialTheme;
     applyHljsTheme(initialTheme);
     applyCommentTheme(initialTheme);
+    bindCommentFrameTheme(initialTheme);
 
     if (window.MutationObserver && document.querySelector('.post-comments[data-comment-provider="utterances"]')) {
       var observer = new MutationObserver(function () {
-        applyCommentTheme(currentTheme);
+        bindCommentFrameTheme(currentTheme);
       });
       observer.observe(document.body, { childList: true, subtree: true });
     }

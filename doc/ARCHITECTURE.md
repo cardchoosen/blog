@@ -128,6 +128,10 @@ tools/post-admin/
 
 post-admin 的"分类"页支持把某个分类名批量改为新名称。该能力会扫描 `source/_posts/*.md`，精确匹配 front-matter 里的 `categories` 项，并把所有关联文章一起更新；执行前可先预览受影响文章，确认后再写回 Markdown。
 
+front-matter 写回统一经过 `quoteYaml()`：分类名、标签、标题等字段只在明确安全时使用 YAML plain scalar；包含冒号、`#`、中文或其他特殊字符时自动写成双引号字符串，避免 Hexo/YAML 把 `CMU 10-414: Deep Learning Systems` 这类分类解析成对象。
+
+post-admin 的分类列表还支持按分类隐藏/公开文章。隐藏分类会给所有关联文章写入 `published: false`；Hexo 原生会在生成时排除这些文章，不生成公开文章页，也不进入首页、归档、分类、标签、左侧书架等公开索引。重新公开时会移除该字段。隐藏后需要执行 clean/build/deploy 才能从线上清掉旧静态页面；post-admin 的"构建并发布"已包含 clean。
+
 ### 系列文章排序
 
 文章 front-matter 支持可选字段 `series_order`，用于控制同一分类内的系列文章顺序。排序规则：
@@ -149,6 +153,8 @@ source/files/posts/
 ```
 
 它不展示项目代码、配置、工具自身等差异。差异基准不是 git 工作区，而是 `.tmp/post-admin/published-content.json` 中记录的"上次成功发布内容快照"。执行"构建并发布"且 `clean → build → deploy` 全部成功后，工具自动更新该快照；因此发布成功后刷新页面不会继续显示已发布文章差异。
+
+发布前保护：Web 后台在 `clean → build` 后、`deploy` 前检查当前公开文章数与 `public/index.html`。如果公开文章数为 0，或构建产物缺少首页，会返回二次确认提示；用户确认后才会继续 deploy。命令行 `npm run deploy` 也会做同样检查，除非显式传 `npm run deploy -- --allow-empty-site`。
 
 ## 主题结构（themes/geek-shelf/）
 
@@ -189,7 +195,7 @@ themes/geek-shelf/
 - 优先级：localStorage > 系统偏好 > 默认深色
 - `shelf.js` 同步切换 highlight.js 与 utterances 评论框主题；utterances iframe 异步出现时用 `MutationObserver` 补一次当前主题
 
-**评论系统**：`themes/geek-shelf/_config.yml` 中 `comments.provider: utterances` 启用文章页评论，`comments.ejs` 在正文后注入 utterances script，按 `pathname` 关联 GitHub Issue。仓库需要安装 utterances GitHub App 并允许在 `cardchoosen/blog` 创建 issue。
+**评论系统**：`themes/geek-shelf/_config.yml` 中 `comments.provider: utterances` 启用文章页评论，`comments.ejs` 在正文后按当前 `<html>` 主题动态注入 utterances script，按 `pathname` 关联 GitHub Issue。仓库需要安装 utterances GitHub App 并允许在 `cardchoosen/blog` 创建 issue。`shelf.js` 会在 iframe 加载与主题切换时同步评论框深/浅主题。
 
 **阅读量统计**：文章页 meta 行显示 `阅读 <PV>`。`article.ejs` 提供 `busuanzi_value_page_pv` 占位，`post.ejs` 仅在文章详情页加载 Busuanzi 脚本，由第三方服务按页面 URL 统计并回填阅读量。
 
@@ -236,6 +242,7 @@ npm run clean    # = hexo clean，清理 public/、db.json、.deploy_git/
 npm run server   # = hexo server，本地预览 http://localhost:4000/
 npm run deploy   # = node tools/post-admin/cli.js deploy，执行 hexo deploy 并更新发布快照
 npm run post:admin              # 启动本地文章后台 http://127.0.0.1:4100/
+npm run post:admin:restart      # 结束同端口旧后台进程并重新启动
 open http://127.0.0.1:4100/     # 在浏览器打开本地文章后台
 npm run post:list               # 列出 source/_posts 下文章
 npm run post:import -- <path>   # 导入单篇文章包或批量文章包

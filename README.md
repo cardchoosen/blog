@@ -19,6 +19,9 @@ npm run deploy
 # 启动本地文章管理后台（http://127.0.0.1:4100/）
 npm run post:admin
 
+# 结束 4100 上一次 post-admin 服务并重新启动
+npm run post:admin:restart
+
 # 在浏览器打开本地文章管理后台页面（需要先运行 npm run post:admin）
 open http://127.0.0.1:4100/
 

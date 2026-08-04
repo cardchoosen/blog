@@ -312,6 +312,13 @@ button.danger {
   align-items: center;
 }
 
+.category-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .edit-empty,
 .category-empty,
 .delete-empty {
@@ -460,7 +467,8 @@ code {
     grid-template-columns: 1fr;
   }
 
-  .delete-actions {
+  .delete-actions,
+  .category-actions {
     justify-content: flex-start;
   }
 }

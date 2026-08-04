@@ -50,6 +50,8 @@ function validateSlug(slug) {
 function parseScalar(raw) {
   const value = raw.trim();
   if (!value) return '';
+  if (value === 'true') return true;
+  if (value === 'false') return false;
   if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
     return value.slice(1, -1);
   }
@@ -96,7 +98,11 @@ function parseFrontMatter(markdown) {
 
 function quoteYaml(value) {
   const text = String(value == null ? '' : value);
-  if (/^[A-Za-z0-9_\-./: ]+$/.test(text) && !text.includes('#')) return text;
+  const isPlainSafe = /^[A-Za-z0-9_\-./ ]+$/.test(text)
+    && text.trim() === text
+    && text !== ''
+    && !/^(true|false|null|undefined|nan|inf|-inf)$/i.test(text);
+  if (isPlainSafe) return text;
   return JSON.stringify(text);
 }
 
@@ -110,12 +116,19 @@ function formatFrontMatter(data) {
     '---',
     `title: ${quoteYaml(data.title)}`,
     `slug: ${quoteYaml(data.slug)}`,
-    `date: ${quoteYaml(data.date)}`,
+    `date: ${quoteYaml(data.date)}`
+  ];
+
+  if (data.published === false || data.published === 'false') {
+    lines.push('published: false');
+  }
+
+  lines.push(
     'categories:',
     formatArray(data.categories),
     'tags:',
     formatArray(data.tags)
-  ];
+  );
 
   if (data.series_order !== undefined && data.series_order !== null && data.series_order !== '') {
     lines.push(`series_order: ${Number(data.series_order)}`);
@@ -138,6 +151,11 @@ function normalizeSeriesOrder(value, errors) {
     return undefined;
   }
   return number;
+}
+
+function normalizePublished(value) {
+  if (value === false || value === 'false') return false;
+  return true;
 }
 
 function validatePostData(data, sourceLabel) {
@@ -163,7 +181,8 @@ function validatePostData(data, sourceLabel) {
     date: String(data.date).trim(),
     categories: data.categories.map((item) => String(item).trim()).filter(Boolean),
     tags: data.tags.map((item) => String(item).trim()).filter(Boolean),
-    series_order: seriesOrder
+    series_order: seriesOrder,
+    published: normalizePublished(data.published)
   };
 }
 
@@ -307,6 +326,7 @@ function readPost(filePath) {
     categories: Array.isArray(parsed.data.categories) ? parsed.data.categories : [],
     tags: Array.isArray(parsed.data.tags) ? parsed.data.tags : [],
     series_order: parsed.data.series_order === undefined ? '' : parsed.data.series_order,
+    published: normalizePublished(parsed.data.published),
     excerpt: parsed.data.excerpt || '',
     path: path.relative(PROJECT_ROOT, filePath)
   };
@@ -330,10 +350,20 @@ function listCategories() {
       }
       const item = categories.get(key);
       item.count += 1;
-      item.posts.push({ slug: post.slug, title: post.title, path: post.path });
+      if (post.published) item.publicCount = (item.publicCount || 0) + 1;
+      else item.hiddenCount = (item.hiddenCount || 0) + 1;
+      item.posts.push({ slug: post.slug, title: post.title, path: post.path, published: post.published });
     });
   });
-  return Array.from(categories.values()).sort((a, b) => a.name.localeCompare(b.name));
+  return Array.from(categories.values())
+    .map((item) => ({
+      ...item,
+      publicCount: item.publicCount || 0,
+      hiddenCount: item.hiddenCount || 0,
+      hidden: item.count > 0 && (item.hiddenCount || 0) === item.count,
+      partialHidden: (item.hiddenCount || 0) > 0 && (item.hiddenCount || 0) < item.count
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function postPathBySlug(slug) {
@@ -358,6 +388,7 @@ function getPost(slug) {
     categories: Array.isArray(data.categories) ? data.categories : [],
     tags: Array.isArray(data.tags) ? data.tags : [],
     series_order: data.series_order === undefined ? '' : data.series_order,
+    published: normalizePublished(data.published),
     excerpt: data.excerpt || '',
     body: parsed.body.trimEnd(),
     path: path.relative(PROJECT_ROOT, postPath)
@@ -367,6 +398,7 @@ function getPost(slug) {
 function updatePost(slug, fields) {
   const postPath = postPathBySlug(slug);
   if (!isFile(postPath)) throw new Error(`Post "${slug}" was not found`);
+  const current = parseFrontMatter(fs.readFileSync(postPath, 'utf8')).data;
 
   const data = validatePostData({
     title: fields.title,
@@ -375,7 +407,8 @@ function updatePost(slug, fields) {
     categories: fields.categories,
     tags: fields.tags,
     series_order: fields.series_order,
-    excerpt: fields.excerpt
+    excerpt: fields.excerpt,
+    published: current.published
   }, 'edit form');
 
   const markdown = `${formatFrontMatter(data)}\n\n${String(fields.body || '').trimEnd()}\n`;
@@ -435,6 +468,50 @@ function renameCategory(oldName, newName, options = {}) {
     newName: to,
     changed,
     message: options.yes ? 'Category renamed.' : 'Dry run only. Re-run with yes=true to rename.'
+  };
+}
+
+function setCategoryVisibility(categoryName, hidden, options = {}) {
+  const category = String(categoryName || '').trim();
+  if (!category) throw new Error('Category is required');
+
+  const nextPublished = !Boolean(hidden);
+  const changed = [];
+  if (!isDirectory(POSTS_DIR)) return { updated: false, category, hidden: Boolean(hidden), changed };
+
+  fs.readdirSync(POSTS_DIR)
+    .filter((name) => name.endsWith('.md'))
+    .forEach((name) => {
+      const postPath = path.join(POSTS_DIR, name);
+      const markdown = fs.readFileSync(postPath, 'utf8');
+      const parsed = parseFrontMatter(markdown);
+      const categories = Array.isArray(parsed.data.categories) ? parsed.data.categories : [];
+      if (!categories.some((item) => String(item) === category)) return;
+
+      const beforePublished = normalizePublished(parsed.data.published);
+      if (beforePublished === nextPublished) return;
+
+      changed.push({
+        slug: path.basename(postPath, '.md'),
+        title: parsed.data.title || path.basename(postPath, '.md'),
+        path: path.relative(PROJECT_ROOT, postPath),
+        before: beforePublished ? 'public' : 'hidden',
+        after: nextPublished ? 'public' : 'hidden'
+      });
+
+      if (options.yes) {
+        if (nextPublished) delete parsed.data.published;
+        else parsed.data.published = false;
+        fs.writeFileSync(postPath, `${formatFrontMatter(parsed.data)}\n\n${parsed.body.trimEnd()}\n`, 'utf8');
+      }
+    });
+
+  return {
+    updated: Boolean(options.yes),
+    category,
+    hidden: Boolean(hidden),
+    changed,
+    message: options.yes ? 'Category visibility updated.' : 'Dry run only. Re-run with yes=true to update visibility.'
   };
 }
 
@@ -529,6 +606,7 @@ module.exports = {
   getPost,
   updatePost,
   renameCategory,
+  setCategoryVisibility,
   deletePlan,
   deletePost,
   createPackageFromFields

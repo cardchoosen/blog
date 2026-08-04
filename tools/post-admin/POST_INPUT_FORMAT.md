@@ -33,6 +33,8 @@ tags:
   - React
   - Hexo
 excerpt: "Optional short summary"
+# Optional. Set false when the post should stay local and not be generated publicly.
+published: false
 ---
 
 Article body in Markdown.
@@ -51,6 +53,7 @@ Article body in Markdown.
 | `categories` | Yes | list | At least one category. |
 | `tags` | Yes | list | At least one tag. |
 | `excerpt` | No | string | Optional summary. |
+| `published` | No | boolean | Set to `false` to keep the post local and exclude it from public generation. |
 
 ## Slug Rules
 

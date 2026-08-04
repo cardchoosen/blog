@@ -562,3 +562,115 @@
 - `doc/ARCHITECTURE.md`：补充分类重命名、主题默认策略、阅读样式与新增文章
 - `doc/FEATURES.md`：补充分类管理、主题默认策略、视觉风格与当前文章数
 - `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-07-29 00:00 · （本次提交）· fix: 修复分类名 YAML 安全写出
+
+> 本条目对应本次提交，修复分类名包含冒号时被 Hexo/YAML 解析为对象的问题。
+
+### 修复
+
+- `quoteYaml()` 不再把包含冒号的字符串当作 plain scalar 写出
+- 标题、slug、日期、分类、标签、摘要等 front-matter 字段统一经过更保守的 YAML 安全写出
+- 分类名包含冒号、中文、`#`、空值或 YAML 保留字时自动写成双引号字符串
+- 重新构建并发布站点，线上 `[object Object]` 分类已恢复为正确分类名
+
+### 验证
+
+- `node --check tools/post-admin/lib/content-manager.js` 成功
+- `npm run build` 成功
+- `npm run deploy` 成功
+- 线上 `https://anemone.wiki/` 已不再包含 `[object Object]`
+- 线上 `https://anemone.wiki/categories/CMU-10-414-Deep-Learning-Systems/` 返回 200
+- 线上 `https://anemone.wiki/categories/object-Object/` 返回 404
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：补充 front-matter 安全写出机制
+- `doc/FEATURES.md`：补充分类管理的安全写出行为
+- `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-07-29 00:00 · （本次提交）· fix: 修复评论框首次主题不同步
+
+> 本条目对应本次提交，修复文章页 utterances 评论框首次进入时未跟随当前深/浅主题的问题。
+
+### 修复
+
+- `comments.ejs` 不再固定以 `github-light` 初始化 utterances
+- 评论脚本改为根据当前 `<html class="theme-dark/theme-light">` 动态创建，并传入对应 utterances 主题
+- `shelf.js` 在 utterances iframe `load` 后再次同步当前主题，避免 iframe 异步加载时漏掉首次消息
+- 手动切换主题时仍继续同步评论框主题
+
+### 验证
+
+- `npm run build` 成功
+
+---
+
+## 2026-07-30 00:00 · （本次提交）· feat: 支持按分类隐藏公开文章
+
+> 本条目对应本次提交，给 post-admin 增加分类级公开控制。
+
+### Post Admin
+
+- 分类列表显示公开/隐藏/部分隐藏状态
+- 分类列表显示公开文章数与隐藏文章数
+- 支持预览按分类隐藏或公开会影响哪些文章
+- 支持确认后批量写入 `published: false` 或移除该字段
+- 文章列表、修改列表、删除列表标记隐藏文章
+- 修改文章时保留已有 `published: false` 状态
+
+### 生成行为
+
+- 使用 Hexo 原生 `published: false` 能力隐藏文章
+- 隐藏文章不会生成公开文章页，也不会进入首页、归档、分类、标签、左侧书架等公开入口
+- 隐藏后通过 post-admin 的"构建并发布"执行 clean/build/deploy，可清理线上旧静态页面
+
+### 文档同步
+
+- `tools/post-admin/POST_INPUT_FORMAT.md`：补充可选 `published` 字段
+- `doc/ARCHITECTURE.md`：补充分类隐藏机制与发布注意事项
+- `doc/FEATURES.md`：补充公开控制与分类隐藏能力
+- `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-07-30 00:00 · （本次提交）· fix: 增加空站发布保护
+
+> 本条目对应本次提交，避免所有文章都隐藏或删除时误发布空站，导致线上根路径 404。
+
+### 修复
+
+- post-admin 的"构建并发布"在 build 后、deploy 前检查公开文章数与 `public/index.html`
+- 若公开文章数为 0，或构建产物缺少首页，Web 后台会弹出二次确认
+- 用户取消后不会执行 deploy，避免把线上站点打空
+- 命令行 `npm run deploy` 默认阻止高风险发布
+- 如确实要发布空站点，可显式执行 `npm run deploy -- --allow-empty-site`
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：补充发布前保护机制
+- `doc/FEATURES.md`：补充空站保护行为
+- `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-08-04 00:00 · （本次提交）· chore: 增加 post-admin 快速重启脚本
+
+> 本条目对应本次提交，补充本地后台的一键重启入口。
+
+### 改动
+
+- 新增 `npm run post:admin:restart`
+- CLI 新增 `restart` 命令
+- 重启时会先查找指定端口上的监听进程并发送 `SIGTERM`
+- 默认端口仍为 `4100`，也支持 `-- --port <port>`
+
+### 文档同步
+
+- `README.md`：补充快速重启命令
+- `doc/ARCHITECTURE.md`：补充常用命令
+- `doc/CHANGELOG.md`：追加本次条目

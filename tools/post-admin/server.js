@@ -9,6 +9,7 @@ const manager = require('./lib/content-manager');
 const PUBLIC_DIR = path.join(__dirname, 'web');
 const CONTENT_PATHS = ['source/_posts', 'source/images/posts', 'source/files/posts'];
 const SNAPSHOT_PATH = path.join(manager.PROJECT_ROOT, '.tmp/post-admin/published-content.json');
+const SITE_INDEX_PATH = path.join(manager.PROJECT_ROOT, 'public/index.html');
 
 function send(res, status, headers, body) {
   res.writeHead(status, headers);
@@ -83,6 +84,26 @@ async function runSequence(steps) {
     if (result.code !== 0) break;
   }
   return results;
+}
+
+function inspectPublishRisk() {
+  const publicPosts = manager.listPosts().filter((post) => post.published !== false);
+  const hasIndex = fs.existsSync(SITE_INDEX_PATH);
+  const warnings = [];
+
+  if (publicPosts.length === 0) {
+    warnings.push('当前没有公开文章：所有文章都被删除或标记为 published: false。');
+  }
+  if (!hasIndex) {
+    warnings.push('构建产物缺少 public/index.html，发布后 anemone.wiki 根路径可能 404。');
+  }
+
+  return {
+    ok: warnings.length === 0,
+    warnings,
+    publicPostCount: publicPosts.length,
+    hasIndex
+  };
 }
 
 async function readWorktreeStatus() {
@@ -307,6 +328,13 @@ async function handleApi(req, res, pathname) {
       return;
     }
 
+    if (req.method === 'POST' && pathname === '/api/category/visibility') {
+      const body = await readJson(req);
+      const result = manager.setCategoryVisibility(body.name, Boolean(body.hidden), { yes: Boolean(body.yes) });
+      sendJson(res, 200, result);
+      return;
+    }
+
     if (req.method === 'POST' && pathname === '/api/delete') {
       const body = await readJson(req);
       const result = manager.deletePost(body.slug, { yes: Boolean(body.yes) });
@@ -325,16 +353,44 @@ async function handleApi(req, res, pathname) {
     }
 
     if (req.method === 'POST' && pathname === '/api/publish') {
-      const results = await runSequence([
-        ['npm', 'run', 'clean'],
-        ['npm', 'run', 'build'],
-        ['npm', 'run', 'deploy']
-      ]);
+      const body = await readJson(req);
+      const results = [];
+      const clean = await runCommand('npm', ['run', 'clean']);
+      results.push(clean);
+      if (clean.code !== 0) {
+        sendJson(res, 200, { results, publishedSnapshot: null });
+        return;
+      }
+
+      const build = await runCommand('npm', ['run', 'build']);
+      results.push(build);
+      if (build.code !== 0) {
+        sendJson(res, 200, { results, publishedSnapshot: null });
+        return;
+      }
+
+      const risk = inspectPublishRisk();
+      if (!risk.ok && !body.allowEmptySite) {
+        sendJson(res, 200, {
+          results,
+          publishedSnapshot: null,
+          requiresConfirm: true,
+          warning: risk.warnings.join('\n'),
+          risk
+        });
+        return;
+      }
+
+      const deployArgs = ['run', 'deploy'];
+      if (body.allowEmptySite) deployArgs.push('--', '--allow-empty-site');
+      const deploy = await runCommand('npm', deployArgs);
+      results.push(deploy);
       const ok = results.every((item) => item.code === 0);
       const snapshot = ok ? writePublishedSnapshot() : null;
       sendJson(res, 200, {
         results,
-        publishedSnapshot: snapshot ? snapshot.publishedAt : null
+        publishedSnapshot: snapshot ? snapshot.publishedAt : null,
+        risk
       });
       return;
     }

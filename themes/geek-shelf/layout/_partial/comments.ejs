@@ -14,14 +14,20 @@
     data-comment-dark-theme="<%= darkTheme %>"
   >
     <h2 class="comments-title">COMMENTS</h2>
-    <script
-      src="https://utteranc.es/client.js"
-      repo="<%= comments.repo %>"
-      issue-term="<%= issueTerm %>"
-      label="<%= label %>"
-      theme="<%= lightTheme %>"
-      crossorigin="anonymous"
-      async>
+    <script>
+      (function () {
+        var container = document.currentScript.parentElement;
+        var isDark = document.documentElement.classList.contains('theme-dark');
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.setAttribute('repo', '<%= comments.repo %>');
+        script.setAttribute('issue-term', '<%= issueTerm %>');
+        script.setAttribute('label', '<%= label %>');
+        script.setAttribute('theme', isDark ? '<%= darkTheme %>' : '<%= lightTheme %>');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      })();
     </script>
   </section>
 <% } %>
