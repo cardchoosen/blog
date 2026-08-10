@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script>
+    // 防 FOUC：CSS 加载前根据 localStorage 或系统偏好设置主题 class
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
+        document.documentElement.className = 'theme-' + theme;
+      } catch (e) {}
+    })();
+  </script>
+  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 1 - Introduction and Logistics</title>
+<meta name="description" content="">
+
+
+  <link rel="icon" href="/favicon.ico">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-light.min.css" media="(prefers-color-scheme: light)" class="hljs-theme-light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)" class="hljs-theme-dark">
+<meta name="description" content="本文根据 原视频 整理，内容来源：UP 主 Mindofuture。  课程定位《深度学习系统：算法与实现》是一门公开在线课程，与卡内基梅隆大学同期校内课程共享教学内容和资料。课程关注的不是如何调用现成框架，而是现代深度学习系统在内部如何运转：自动微分怎样组织计算与求导，优化算法怎样更新参数，常见神经网络架构怎样落到具体实现，以及这些计算怎样借助 GPU 等现代硬件高效执行。 除导论以课程介绍和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lecture 1 - Introduction and Logistics">
+<meta property="og:url" content="https://anemone.wiki/2026/08/10/bilibili-bv199rlyjez2-p1/index.html">
+<meta property="og:site_name" content="Anemone&#39;s Blog">
+<meta property="og:description" content="本文根据 原视频 整理，内容来源：UP 主 Mindofuture。  课程定位《深度学习系统：算法与实现》是一门公开在线课程，与卡内基梅隆大学同期校内课程共享教学内容和资料。课程关注的不是如何调用现成框架，而是现代深度学习系统在内部如何运转：自动微分怎样组织计算与求导，优化算法怎样更新参数，常见神经网络架构怎样落到具体实现，以及这些计算怎样借助 GPU 等现代硬件高效执行。 除导论以课程介绍和">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_0600_03.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_1010_03.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_1417_02.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_2009_02.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_2608_01.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_3542_02.png">
+<meta property="og:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_3734_02.png">
+<meta property="article:published_time" content="2026-08-10T11:16:22.000Z">
+<meta property="article:modified_time" content="2026-08-10T11:19:58.115Z">
+<meta property="article:author" content="nannnzhang">
+<meta property="article:tag" content="CMU">
+<meta property="article:tag" content="CMU 10-414">
+<meta property="article:tag" content="DeepLearning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://anemone.wiki/images/posts/bilibili-bv199rlyjez2-p1/screenshot_0600_03.png">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+  <a href="/" class="brand-title">Anemone&#39;s Blog</a>
+  
+</div>
+
+<nav class="topnav">
+  
+    <a href="/" class="nav-item">首页</a>
+  
+    <a href="/archives" class="nav-item">归档</a>
+  
+    <a href="/categories/" class="nav-item">CATEGORY</a>
+  
+    <a href="/tags/" class="nav-item">TAG</a>
+  
+</nav>
+
+<button class="theme-toggle" type="button" aria-label="切换主题" title="切换深/浅主题">
+  <span class="theme-stack">
+    <span class="theme-char" data-char="深">深</span>
+    <span class="theme-char" data-char="浅">浅</span>
+  </span>
+</button>
+
+  </header>
+
+  <div class="main-layout">
+    
+<aside class="shelf">
+  <div class="shelf-head">目录</div>
+  <ul class="shelf-list">
+    
+      
+      <li class="shelf-item" data-cat="CMU 10-414: Deep Learning Systems">
+        <button class="shelf-cat active" type="button">
+          <span class="cat-name">CMU 10-414: Deep Learning Systems</span>
+          <span class="cat-count">1</span>
+        </button>
+        <ul class="shelf-posts open">
+          
+            
+            <li><a href="/2026/08/10/bilibili-bv199rlyjez2-p1/" class="post-link current">Lecture 1 - Introduction and Logistics</a></li>
+          
+        </ul>
+      </li>
+    
+  </ul>
+</aside>
+
+    <main class="content">
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">Lecture 1 - Introduction and Logistics</h1>
+    <div class="post-meta">
+      <time class="post-date" datetime="2026-08-10T19:16:22">
+        2026-08-10
+      </time>
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-categories">
+  
+    
+    <a href="/categories/CMU-10-414-Deep-Learning-Systems/" class="category-link">CMU 10-414: Deep Learning Systems</a>
+  
+</span>
+
+      
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-tags">
+  
+    
+    <a href="/tags/CMU/" class="tag-link">#CMU</a>
+  
+    , 
+    <a href="/tags/CMU-10-414/" class="tag-link">#CMU 10-414</a>
+  
+    , 
+    <a href="/tags/DeepLearning/" class="tag-link">#DeepLearning</a>
+  
+</span>
+
+      
+      <span class="meta-sep">/</span>
+      <span class="post-views" id="busuanzi_container_page_pv">
+        阅读 <span id="busuanzi_value_page_pv">-</span>
+      </span>
+    </div>
+  </header>
+  <div class="post-body">
+    <blockquote>
+<p>本文根据 <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV199rLYjEZ2">原视频</a> 整理，内容来源：UP 主 Mindofuture。</p>
+</blockquote>
+<h2 id="课程定位"><a href="#课程定位" class="headerlink" title="课程定位"></a>课程定位</h2><p>《深度学习系统：算法与实现》是一门公开在线课程，与卡内基梅隆大学同期校内课程共享教学内容和资料。课程关注的不是如何调用现成框架，而是现代深度学习系统在内部如何运转：自动微分怎样组织计算与求导，优化算法怎样更新参数，常见神经网络架构怎样落到具体实现，以及这些计算怎样借助 GPU 等现代硬件高效执行。</p>
+<p>除导论以课程介绍和安排为主，后续内容会深入数学原理、算法机制与代码实现。整门课的核心实践是从头开发 Needle。Needle 全称为 Necessary Elements of Deep Learning，其接口和能力大致类似 PyTorch；随着作业推进，我们会逐步补齐常见网络架构及深度学习库所需的关键功能，以实现过程反向理解成熟框架。</p>
+<h3 id="授课团队"><a href="#授课团队" class="headerlink" title="授课团队"></a>授课团队</h3><p>课程由 CMU 教师 Zico Kolter 与陈天奇共同讲授。导论由 Zico Kolter 主讲，陈天奇负责后续部分内容。在线版本会公开课程资料，使校外学习者也能沿着与 CMU 校内课程相近的路径学习深度学习系统。</p>
+<h2 id="深度学习进展"><a href="#深度学习进展" class="headerlink" title="深度学习进展"></a>深度学习进展</h2><p>理解深度学习系统为何值得学习，可以先从深度学习能力的演进看起。这些案例并非为了梳理完整历史或争论某项技术最早应归功于谁，而是用几个标志性成果说明：深度学习已经在视觉、博弈、语言、生物科学和生成模型中改变了原有的能力边界。</p>
+<p>2012 年的 AlexNet 是这一转折的重要标志。它在 ImageNet 图像分类挑战中，需要把输入图像判定为一千个类别之一，最终取得了远超当时标准计算机视觉方法的成绩。无论从研究热度、工程实用性还是公众认知来看，AlexNet 都让深度学习的能力获得了集中展示。</p>
+<p>2016 年出现的 AlphaGo 则把这种突破带到了计算机博弈领域。围棋每个局面可选择的落子数量极多，搜索空间远大于国际象棋，传统棋类程序中常用的方法难以直接奏效。DeepMind 将深度学习引入围棋系统后，先击败了世界顶尖棋手之一，随后又战胜了最强的一批人类棋手。突破发生得如此迅速，明显超出了当时许多研究者对计算机围棋发展速度的判断。</p>
+<p>StyleGAN 展示了生成模型在视觉真实性上的跃迁。它生成的人脸并不对应现实中的人物，却能呈现出接近真实照片的细节。今天，虚构人脸已经常见到容易被视为理所当然；但在这些结果刚出现时，即使熟悉深度学习的研究者，也可能误以为展示的是训练集中的真实照片，而不是生成对抗网络合成的图像。这种认知反差说明，生成模型在短短几年内跨过了一个明显的质量门槛。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p1/screenshot_0600_03.png" alt="AlexNet、AlphaGo 与 StyleGAN 代表性成果总览"></p>
+<p>GPT-3 展示的则是语言生成能力。它的基本生成过程可以概括为自回归预测：给定此前已经出现的所有 token，模型预测下一个 token 的概率分布，从中确定后续 token，再把它追加到上下文中并重复这一过程。若已有序列为 $x_1,\ldots,x_t$，模型学习的是：</p>
+<p>$$<br>P(x_{t+1}\mid x_1,x_2,\ldots,x_t)<br>$$</p>
+<p>令 $x_{&lt;t}&#x3D;(x_1,\ldots,x_{t-1})$，完整文本的联合概率可以进一步分解为：</p>
+<h1 id="P-x-1-ldots-x-T"><a href="#P-x-1-ldots-x-T" class="headerlink" title="$$P(x_1,\ldots,x_T)"></a>$$<br>P(x_1,\ldots,x_T)</h1><p>\prod_{t&#x3D;1}^{T}P(x_t\mid x_{&lt;t})<br>$$</p>
+<p>单步预测机制看起来并不复杂，但连续执行后却能生成结构完整、语义连贯的长文本。课程还用 GPT-3 生成过一段课程简介：这段文字很像一门普通深度学习课程的介绍，却错误地声称课程会重点讨论无监督学习和强化学习。这个例子同时体现了语言模型的两面性——它能生成形式和语气都很合理的内容，却不保证内容准确对应具体课程。</p>
+<p>AlphaFold 与 AlphaFold 2 把深度学习的影响延伸到了生物科学。蛋白质由氨基酸序列折叠成三维结构，而其结构又直接关系到蛋白质在人体内承担的功能。仅根据氨基酸序列预测三维结构，长期以来一直是生物学中的重大难题。在相关蛋白质结构预测竞赛中，DeepMind 的 AlphaFold 系统在约四年内显著提高了预测质量与准确率；至少在部分受限条件下，这一长期难题已经接近得到解决。</p>
+<p>到 2022 年，文本生成图像又成为新的代表性进展。Stable Diffusion 发布后，能够接收自然语言提示，生成与描述相符、在许多情况下颇为逼真的画作或图像。它与 DALL·E、DALL·E 2 及更早的相关研究共同表明：模型不仅能复现训练数据中常见的视觉概念，还能组合可能从未被人以同样方式设想过的文本描述，并将其转化为连贯的视觉内容。</p>
+<p>“一只打扮成大学教授的狗，在开课前十分钟紧张地准备本学期的第一堂课”，再加上“布面油画”的风格约束，就能生成一幅语义与质感都相当贴合的图像：教授装束、备课场景和略显紧张的神态都被呈现出来，画面也具有油画般的笔触。这类结果说明，生成模型不仅能识别提示词中的对象，还能组合身份、动作、时间氛围与艺术风格等多重条件。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p1/screenshot_1010_03.png" alt="GPT-3、AlphaFold 2 与 Stable Diffusion 示例总览"></p>
+<h3 id="个体与社区贡献"><a href="#个体与社区贡献" class="headerlink" title="个体与社区贡献"></a>个体与社区贡献</h3><p>前面的代表性成果大多由资源雄厚的公司完成，Stable Diffusion 背后也有商业机构投入。不过，深度学习并不是只有大公司才能参与的领域。早期代表性论文与 Stable Diffusion 恰好构成了一组跨越发展阶段的例子：只要方法足够巧妙，小团队仍可能取得影响广泛的成果。</p>
+<p>DeOldify 基本由两个人起步，在资源有限的情况下，把黑白老照片着色做到了当时领先的视觉效果。图像着色并不是一个新课题，此前已经积累了长期研究，但这个小型项目生成的彩色照片在自然度和观感上依然十分突出。它表明，成熟问题也可能因新的工程组合和方法设计而获得明显突破。</p>
+<p>计算机视觉领域常用的 PyTorch Image Models，即 <code>timm</code>，最初则主要由 Ross Wightman 一人开发。他系统实现了大量论文中的图像分类模型，并在标准基准上逐一验证：能够取得论文预训练权重时就复用权重，缺少权重时则自行从头训练。这个项目后来逐渐吸引更多贡献者，并成为学术界构建视觉系统时占主导地位的模型库之一。</p>
+<p>类似案例还包括许多由社区共同维护的库、框架和大型代码项目。它们未必由单个机构统一推动，却通过持续实现论文、修复问题、适配硬件和共享模型，把研究成果沉淀成整个领域都能复用的基础设施。个人、小团队与开源社区因此不仅是技术的使用者，也能直接改变深度学习系统的发展方向。</p>
+<h2 id="系统推动普及"><a href="#系统推动普及" class="headerlink" title="系统推动普及"></a>系统推动普及</h2><p>深度学习能力令人瞩目，但这还不足以解释为什么要专门学习支撑它的系统架构。观察近十余年“深度学习”一词的 Google Trends 变化，可以看到研究突破与技术普及之间并不完全同步。</p>
+<p>2000 年代后期，深度学习已经在学术界逐渐形成独立方向，NeurIPS 等会议每年都会出现不少相关论文，但社会关注度仍然很低。当时它看起来只是诸多学术潮流之一，并不能保证最终会成为主流。神经网络和深度学习的数学基础当然远早于这一时期，许多关键思想在 20 世纪 80 年代已经形成，甚至可以追溯到 70 年代；这里关注的是较近阶段的传播与采用，而不是争论某项技术究竟由谁最早提出。</p>
+<p>2012 年发布的 AlexNet 在图像分类上取得了当时领先的性能，也带来了一定关注，但趋势图并未立即出现爆发式增长。真正明显的上升更接近 2015 至 2016 年前后 Keras、TensorFlow 和 PyTorch 等框架相继出现的时间，而不是与某一篇公认的重要论文严格重合。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p1/screenshot_1417_02.png" alt="深度学习关注度 Google Trends 趋势图"></p>
+<p>由此可以得到一个略带争议、但很有解释力的判断：推动深度学习大规模采用的关键因素之一，是易用的自动微分库得到普及。自动微分本身可以追溯到 20 世纪 70 年代，并非新发明，现代深度学习系统也远不止这一项技术；真正改变使用门槛的，是它被整合进了容易获取、容易编程、能够支持快速实验的框架。</p>
+<p>PyTorch 之前已经存在 Torch，但使用者必须额外学习 Lua，语言和工具链的转换提高了试验成本。后来基于 Python 的框架让研究者可以直接在熟悉的生态中搭建模型、修改网络结构并快速验证想法。算法创新固然决定了模型能做什么，系统工具则决定了多少人能够方便地把算法真正运行起来。</p>
+<p>趋势图末端如果出现“深度学习”关注度下降，也不能直接解释为技术热度衰退。一方面，Google Trends 的最新区间可能存在数据不稳定；另一方面，相关讨论如今常被归入更宽泛的“AI”标签，人们未必继续使用“深度学习”这个更具体的词。搜索术语的迁移会改变曲线，却不等于底层技术的重要性下降。</p>
+<h3 id="开发效率跃迁"><a href="#开发效率跃迁" class="headerlink" title="开发效率跃迁"></a>开发效率跃迁</h3><p>陈天奇老师早期的开发经历进一步展示了系统工具带来的数量级变化。2012 年前后，他曾为卷积神经网络编写 GPU 加速代码。那个时期正值 AlexNet 等模型兴起，要针对 ImageNet 实现一套真正可用的图像分类卷积网络，大约需要编写 4.4 万行代码，并投入六个月。即使由经验和能力都很强的程序员完成，模型结构、GPU 计算、训练流程以及各类底层细节仍会消耗大量时间。</p>
+<p>使用 PyTorch、TensorFlow 或后来的 JAX 完成相近任务，代码规模可以缩减到约 100 行，原型开发时间也可能从半年降至数小时。框架把自动求导、张量运算、硬件调度和常用网络组件封装为可组合接口，使研究者能够把主要精力放在模型结构与实验设计上。这不只是代码写得更短，而是把原本只有少数系统专家能够承担的开发工作，转化成了大量研究者都能快速迭代的日常流程。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p1/screenshot_2009_02.png" alt="十年前开发卷积网络需要约 4.4 万行代码和六个月的示意"></p>
+<p>深度学习系统带来的不只是单次运行加速，更关键的是缩短了“提出想法—实现模型—验证效果”的迭代周期。即使大型模型的完整训练仍然昂贵，成熟框架也能显著提高开发与实验速度。不过，框架足够好用并不意味着我们只需停留在调用 API 的层面；理解这些系统的内部机制，仍然会直接影响系统开发和模型研究的能力。</p>
+<h2 id="学习系统的价值"><a href="#学习系统的价值" class="headerlink" title="学习系统的价值"></a>学习系统的价值</h2><p>学习深度学习系统大致有三个层面的价值：开发或改进框架、更高效地实现模型，以及理解一套看似庞大却相当精炼的核心算法。即使我们已经能够熟练使用 PyTorch、TensorFlow 或 JAX，这些理由仍然成立。</p>
+<h3 id="框架演进空间"><a href="#框架演进空间" class="headerlink" title="框架演进空间"></a>框架演进空间</h3><p>如果目标是开发深度学习系统，理解框架的工作原理自然是基本前提。更重要的是，现有框架并未形成深度学习系统的最终形态。TensorFlow 和 PyTorch 虽然建立了广泛采用的接口与开发范式，但 JAX 在近几年迅速成为许多研究工作的主要工具，已经说明这个领域仍在持续变化。</p>
+<p>未来仍有大量系统问题可以探索，例如面向特定硬件、特定模型类型或不同计算范式的专用框架。我们目前甚至无法确定深度学习系统最终会采用怎样的抽象、执行机制和编程接口。</p>
+<p>主流框架大多开源，因此理解其内部结构后，不必从头构建完整系统，也可以直接阅读源代码、实现新功能或参与社区贡献。课程训练配合进一步的工程实践，可以为开发新框架或扩展现有框架建立必要基础。</p>
+<h3 id="高效模型开发"><a href="#高效模型开发" class="headerlink" title="高效模型开发"></a>高效模型开发</h3><p>对更多深度学习实践者而言，学习系统原理的直接收益，是能够更有效地使用现有框架。可扩展性、执行效率和 GPU 利用率并不会仅靠调用高级接口自动获得。我们需要理解一段网络结构描述如何转化为实际计算：哪些算子会在硬件上执行，数据如何组织与传输，训练过程如何记录计算关系，梯度如何产生，参数又如何据此更新。</p>
+<p>这些机制决定了代码能否充分利用硬件，也解释了为什么语义相近的两种模型实现可能具有截然不同的运行速度和内存开销。掌握从高级模型描述到底层执行之间的转换过程，能够帮助我们更准确地定位性能瓶颈，并写出更高效、更具扩展性的实现。</p>
+<p>这种能力对深度学习研究尤其有用。研究新型层、网络架构或计算结构时，工作往往超出了框架预设模块的边界。理解自动微分、算子实现和硬件执行逻辑后，我们才能判断新结构应如何表达、怎样求导，以及如何避免低效的计算与数据移动。Zico Kolter 老师将这种能力称为一种“超能力”：研究目标即使不是构建系统，系统知识仍能显著提升实现研究想法的效率。</p>
+<h3 id="核心算法之美"><a href="#核心算法之美" class="headerlink" title="核心算法之美"></a>核心算法之美</h3><p>PyTorch 和 TensorFlow 已经发展成拥有数百万行代码的大型工程，但一个具备实用能力的深度学习系统，其核心思想并没有同等复杂。现代模型取得的大量进展，从算法和数学层面看，主要建立在两个基础之上：自动微分（Automatic Differentiation）与基于梯度的优化（Gradient-Based Optimization）。</p>
+<p>实现层面的基础同样集中，核心是高效线性代数，尤其是 GPU 上的矩阵乘法。卷积网络、循环神经网络和 Transformer 表面结构不同，底层最终仍会分解为一组张量运算，再通过自动微分获得梯度并完成参数优化。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p1/screenshot_2608_01.png" alt="深度学习系统核心算法与紧凑实现说明"></p>
+<p>这与构建操作系统形成了鲜明对比。一个稍具功能的操作系统也需要处理大量彼此不同的底层机制，教学项目通常只能实现较基础的版本，却依然需要可观的代码量。深度学习系统则可以用不到约两千行的紧凑代码实现一个实用框架，同时支持 GPU 运算、自动微分、卷积、卷积神经网络、循环神经网络乃至 Transformer。成熟框架庞大的代码规模更多来自性能优化、设备支持、兼容性和工程完备性，而不是因为核心算法本身难以掌握。</p>
+<p>自动微分最能体现这套系统的精巧之处。传统机器学习开发新模型时，常常需要手工推导大量梯度公式；表达式一旦复杂，推导和实现都会消耗大量时间。借助自动微分，我们可以用代码构造复杂表达式，自动获得它的梯度，再用这个梯度构造新的表达式并继续求导。即使复合表达式已经复杂到难以手算，系统仍能按照计算关系完成微分。亲手实现一次这样的机制，能让我们真正理解现代深度学习框架为何可以支撑如此快速的模型实验。</p>
+<p>Zico Kolter 老师的研究背景也解释了课程为何同时重视算法与系统实现。他长期研究对抗鲁棒性，尤其关注针对对抗攻击的认证防御与可证明防御；另一项主要研究方向是隐式层（Implicit Layers）。这类层不依靠简单堆叠传统算子定义，而是通过求解优化问题、不动点方程等复杂算子得到输出，再对求解结果进行解析微分。如果课程进度允许，后续还会使用课程中构建的框架实现隐式层。老师也是 PyTorch 的早期采用者，这些研究与工程经历共同构成了课程设计的技术背景。</p>
+<p>Zico Kolter 老师所在的研究组也是 PyTorch 的早期采用者，并发布了最早的一批 PyTorch 第三方库。研究组曾开发一种可微优化层，把二次规划等优化问题嵌入深度网络，作为网络中的一层直接求解。为实现其中的优化求解器，Kolter 老师编写过 CUDA 内核，用批处理方式并行求解多组线性方程。</p>
+<p>这段经历也留下了一个颇具警示意味的工程案例：内核输出没有按照 PyTorch 预期的矩阵步幅（stride）进行标准化，进而在 PyTorch 的线性求解器中引入了一个隐蔽缺陷。这个问题持续了大约一年，表现为求解器偶发、近似随机的崩溃，因此长期令使用者难以定位原因。这个略带自嘲的“光荣事迹”恰好说明，深度学习系统的正确性不仅取决于数学算法；张量的内存布局、步幅约定和底层接口契约同样会直接影响上层算子的稳定性。</p>
+<blockquote>
+<p><strong>难点注释｜矩阵步幅（stride）</strong>：步幅描述张量某一维的索引增加 1 时，底层数据地址需要跨过多少个存储位置。它与张量的形状有关，却不由形状单独决定：同样形状的数据可以采用不同的内存布局，转置等操作后也可能不再按连续顺序存放。因此，CUDA 内核即使算出了数值正确的矩阵，只要输出布局没有满足上层算子约定，后续线性求解器仍可能按错误地址读取数据。这里的“标准化”正是要让内核输出的布局和 PyTorch 预期一致；该案例说明，检查数学结果之外，还必须核对形状、步幅与连续性等接口契约。</p>
+</blockquote>
+<p>陈天奇老师则在机器学习系统领域长期参与多个重要项目。课程用一个带有调侃意味的说法概括当时的生态：主要参与者似乎可以分成发布 TensorFlow、JAX 等系统的 Google，开发 PyTorch 及 Prophet 等工具的 Facebook，以及凭一己之力出现在多个关键项目中的陈天奇。</p>
+<p>他最初开发了 XGBoost。它是应用最广泛的梯度提升库之一，尤其常见于表格数据任务。此后，他又成为 MXNet 的主要开发者；MXNet 与 PyTorch、TensorFlow 类似，是一套完整的深度学习框架。之后，他参与创建并持续开发 Apache TVM，将研究重点推进到机器学习模型编译与硬件优化层面。这些横跨传统机器学习、深度学习框架和模型编译器的经历，也解释了课程为何同时强调算法原理、框架实现与硬件执行。</p>
+<h3 id="发布状态"><a href="#发布状态" class="headerlink" title="发布状态"></a>发布状态</h3><p>这是课程第一次以公开在线形式开设。在线材料并非已经稳定运行多轮的成品，特别是实现难度最高的编程作业，正在依据上一版课程进行大幅改编。CMU 校内课程也在使用和测试这些新版作业，完成初步验证后才会逐步向在线学员发布。</p>
+<p>因此，讲义和作业中可能存在代码或内容缺陷，课程组织与运营环节也可能出现问题。课程免费公开，是为了让更多人能够学习并使用这些材料，但整套在线课程由教学团队自行组织和制作，首轮发布不可避免地带有 Beta 测试性质。课程中的玩笑是“一分钱一分货，而这门课恰好免费”；这并不是降低质量预期，而是提前说明首次公开运行的现实风险。</p>
+<p>教学团队会尽力修复发现的问题。如果缺陷实际影响了作业完成，也会视情况延长截止日期。首批在线学员不仅是在使用课程，也会通过遇到的问题帮助材料逐渐稳定。</p>
+<h2 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h2><p>完整学习课程、完成全部作业和期末项目后，我们应当能够解释现代深度学习库的基本工作机制，并从零实现其中的核心部分。这里的“从零”有严格含义：实现不能把 PyTorch 或 TensorFlow 当作底层依赖，而要从原生 Python 和自行构建的后端出发，亲手完成自动微分、基于梯度的优化以及模型执行所需的基础设施。</p>
+<h3 id="算法与架构"><a href="#算法与架构" class="headerlink" title="算法与架构"></a>算法与架构</h3><p>算法层面的重点包括自动微分和基于梯度的优化。目标不只是会调用现成接口，而是理解计算图怎样记录运算、梯度怎样沿图反向传播，以及优化器怎样利用梯度更新参数，并能将这些机制写成可运行的代码。</p>
+<p>在此基础上，我们还会原生实现多层感知机（MLP）、卷积神经网络（ConvNet）、循环神经网络（RNN）、长短期记忆网络（LSTM）、其他循环结构以及 Transformer。课程由框架底层逐步推进到标准网络架构，使这些模型不再只是高层模块名称，而能落实为张量算子、求导规则和参数更新过程。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p1/screenshot_3542_02.png" alt="课程学习目标与待实现网络架构总览"></p>
+<h3 id="硬件加速"><a href="#硬件加速" class="headerlink" title="硬件加速"></a>硬件加速</h3><p>课程还要求理解硬件加速的底层机制，并编写能够高效执行的底层代码。最终系统可以在 GPU 上运行，支持自动微分、优化器和中等规模网络训练。不过，这个教学框架不会接近 PyTorch 或 TensorFlow 的性能：成熟框架积累了大量高水平代码优化，而课程实现的重点是建立完整机制并理解优化边界，不是刷新速度纪录。</p>
+<p>尽管如此，成品并非只能运行玩具示例。它应当能够处理 CIFAR 一类中型数据集，也能承载规模合理的网络架构。换句话说，我们最终得到的是一个功能真实、规模受控的深度学习库：从底层实现到 GPU 执行都由自己完成，同时保持足以训练中型模型的实用性。</p>
+<h3 id="教学组织"><a href="#教学组织" class="headerlink" title="教学组织"></a>教学组织</h3><p>课程网站会发布全部讲座、主题安排和对应日期。在线版整体遵循 CMU 校内课程的结构，但发布进度大约比校内版晚两周；由于参与和组织方式不同，导论课的幻灯片会有所区别，其余讲座则基本保持一致。</p>
+<p>内容安排包含机器学习基础复习、自动微分以及不同网络架构等主题。许多主题由算法课与实现课配对组成：算法课集中推导解决问题所需的方法和技术，实现课则把其中一部分真正写成代码，通过现场编程展示抽象方法如何落到数据结构、算子和执行流程上。两类课程共同完成从“为什么这样计算”到“系统具体怎样运行”的连接。</p>
+<p><img src="/images/posts/bilibili-bv199rlyjez2-p1/screenshot_3734_02.png" alt="课程讲座主题与时间安排表"></p>
+<h2 id="先修要求"><a href="#先修要求" class="headerlink" title="先修要求"></a>先修要求</h2><p>课程需要一定的系统编程、线性代数和微积分基础。缺少部分背景并不意味着完全无法学习，但如果需要一边跟课一边补齐这些知识，投入的时间和精力会明显增加。</p>
+<p>系统编程方面，应当了解 C++，并知道如何编译程序。这里的“编译”不是运行 Python 脚本，而是把源代码构建为能够在硬件上原生执行的程序。后续实现会进入 Python 高层接口以下的区域，因此只熟悉框架调用还不够。</p>
+<p>线性代数可能是最关键的数学要求。后续推导会频繁使用向量和矩阵记号，处理多个矩阵、向量相乘的表达式，并进一步计算这些表达式的梯度。我们需要能够读懂这些记号，理解矩阵运算的维度关系及其导数含义。</p>
+<p>微积分主要用于求导，而不是积分。概率论相关内容中可能偶尔出现积分，但深度学习算法本身更依赖导数、偏导数和梯度。看到梯度符号时，至少应当理解它描述了哪个量相对于哪个变量的变化。课程可以提供复习资料和背景链接，但如果线性代数与求导概念完全陌生，仅靠临时补充材料会使后续学习相当吃力。</p>
+<h3 id="编程基础"><a href="#编程基础" class="headerlink" title="编程基础"></a>编程基础</h3><p>课程对 C++ 的要求并不高，不会涉及 <code>unique_ptr</code> 等高级特性，也不依赖 C++11、C++20 一类现代标准。实际使用方式更接近“带有少量类机制的 C”：Python 负责框架的大部分上层结构，C++ 主要承担底层计算实现。</p>
+<p>不过，“不需要高级 C++”并不意味着只要看得懂语法即可。典型任务会提供一个矩阵乘法模板，参数包括若干 <code>float*</code>、<code>const float*</code> 以及矩阵尺寸。这些指针直接指向矩阵底层的连续数据，我们需要根据维度和存储方式正确计算索引，并完成两个矩阵的乘法。</p>
+<p>这类代码最常见的问题是数组越界。C++ 不会自动提供安全的索引检查，一旦下标或步幅计算错误，程序就可能触发段错误（segmentation fault）。因此，至少要能借助调试器或 <code>printf</code> 定位错误，并修复错误的指针访问和索引计算。</p>
+<p>Python 方面则需要熟悉类、对象以及基本的模块组织，因为 Needle 的大部分框架结构都会用 Python 编写。课程会讲解所需的 CUDA 知识，不要求提前学过 CUDA，也不要求掌握现代 C++ 的高级特性。</p>
+<p>机器学习经验同样是必要基础。如果此前完全没有接触过机器学习，更合适的路径是先完成一门基础机器学习课程。已经熟悉机器学习，尤其是了解深度学习基本模型后，再来追踪自动微分、算子实现和硬件执行过程，更容易把课程内容与已有知识连接起来。</p>
+<h3 id="基础自测"><a href="#基础自测" class="headerlink" title="基础自测"></a>基础自测</h3><p>判断自己的基础是否匹配课程，可以参考导论之后的三讲以及作业 0。作业 0 会复习较传统的模型实现方法，包括 softmax 回归和简单的两层神经网络，其中需要手动实现反向传播，还包含一项使用 C&#x2F;C++ 后端的基础任务。</p>
+<p>这些内容原则上应当是我们以前接触过、稍加复习便能完成的知识。如果 softmax 回归、两层网络的手动反向传播以及简单的底层矩阵代码仍然非常困难，先补充机器学习和系统编程基础会更稳妥；如果它们本身比较熟悉，或复习后很快恢复手感，那么课程难度大体与现有水平相符。</p>
+<h2 id="Needle-实践"><a href="#Needle-实践" class="headerlink" title="Needle 实践"></a>Needle 实践</h2><p>课程的核心实践是逐步构建 Needle。它是一个极简的 Python 深度学习框架，名字来自 Necessary Elements of Deep Learning，目标不是只实现某个孤立模型，而是让我们亲手搭起一个现代深度学习库所需的关键组件。</p>
+<h3 id="递进式作业"><a href="#递进式作业" class="headerlink" title="递进式作业"></a>递进式作业</h3><p>除相对独立、用于基础复习的作业 0 外，课程还有四次彼此依赖的编程作业：</p>
+<ol>
+<li>作业 1 为 Needle 建立自动微分框架。</li>
+<li>作业 2 在自动微分之上实现神经网络库，包括网络模块、优化方法和数据加载等组件。</li>
+<li>作业 3 实现面向 CPU 与 GPU 的线性代数后端。</li>
+<li>作业 4 使用已经完成的框架实现卷积神经网络、循环神经网络，以及可能涉及的 Transformer。</li>
+</ol>
+<p>四次作业必须按顺序完成，因为后续实现会直接建立在前一次作业的代码之上。这个逐层构建框架的过程构成了课程的实践主线，也是理解自动微分、模型组件与底层计算如何衔接的主要途径。</p>
+<h3 id="自动评分"><a href="#自动评分" class="headerlink" title="自动评分"></a>自动评分</h3><p>所有作业都是纯编程任务，不设置独立的理论推导题。数学推导仍然隐含在实现过程中：只有把公式转化为能够运行并通过测试的代码，才能验证我们是否真正理解了算法。</p>
+<p>讲座可以由任何人公开观看，但作业提交只对正式注册的在线学员开放。注册后会获得自动评分系统账户，用于提交和评测代码。这种全部由代码和自动测试完成的评分方式也用于 CMU 校内版课程；课程采用自建的自动评分系统，其具体工作机制会在后续进一步介绍。</p>
+<h2 id="课程参与"><a href="#课程参与" class="headerlink" title="课程参与"></a>课程参与</h2><p>完整课程由四部分组成：视频讲座、编程作业、小组期末项目以及课程论坛互动。四者承担不同作用，不能简单地把没有直接出现在作业中的讲座内容视为可选知识；论坛虽然不属于强制学习材料，但与其他学员讨论问题、比较思路和互相答疑，能够补足独自实现时容易遗漏的理解。</p>
+<p>在线公开课独立于 CMU 校内课程。即使完成课程并取得良好成绩，也不会获得 CMU 学分；公开课保留的是同类学习内容与实践要求，而不是校内学籍和学分体系。</p>
+<h3 id="视频讲座"><a href="#视频讲座" class="headerlink" title="视频讲座"></a>视频讲座</h3><p>视频会按照课程进度发布到 YouTube 等公开平台，并尽量覆盖多个视频网站，以方便不同地区访问。观看讲座不要求注册，因此没有正式报名的学习者也可以跟随公开视频学习；注册的必要性主要体现在作业提交与课程认证环节。</p>
+<p>除导论主要使用幻灯片外，后续讲座还会包含数学笔记、公式推导和现场编程，以便把抽象算法与实际代码对应起来。视频基本采用一次完整录制、少量剪辑的方式，只会处理开头、结尾或确实影响观看的严重问题。真实课堂中偶尔出现的小失误通常会保留下来，因此整体体验更接近公开的课堂实录，而不是经过大量切分和重录的录播课程。</p>
+<h3 id="结业认证"><a href="#结业认证" class="headerlink" title="结业认证"></a>结业认证</h3><p>在线课程不授予 CMU 学分，但满足以下条件的正式学员可以获得实名结业证书：</p>
+<ul>
+<li>完成全部作业；</li>
+<li>作业平均成绩达到 80% 或以上；</li>
+<li>提交期末项目。</li>
+</ul>
+<p>证书会与学员姓名绑定，并计划通过网站或正式链接提供可验证的完成记录。课程需要投入大量时间完成连续作业和系统项目，因此这份认证用于证明学员确实参与并完成了公开版课程，而不是替代大学学分。</p>
+<p>自动评分采用“本地执行、提交结果”的机制：代码在本地环境或 Colab 中运行，评分系统只接收运行结果，并与参考答案核对。这样可以避免评分服务器与本地开发环境不一致造成的依赖、配置和调试问题，同时提升提交与校验速度。课程还会通过单独的视频演示环境配置、提交步骤和推荐的作业流程。</p>
+<p>目前全部作业原则上都能在 Colab 中完成，包括代码执行和自动评分。不过 Colab 的环境持续更新，后续仍可能出现兼容性问题或临时故障。</p>
+<h3 id="期末项目"><a href="#期末项目" class="headerlink" title="期末项目"></a>期末项目</h3><p>家庭作业要求独立完成，期末项目则以小组协作为主，在线学员建议三人一组，也允许单独完成或组成规模更大的团队。论坛会提供组队渠道。</p>
+<p>项目可以理解为在作业 0 至作业 4 之后自行设计一次“作业 5”：目标不是单纯复现某种模型架构，更不能只用 PyTorch 或 TensorFlow 实现一个网络，而是必须为 Needle 增加新的功能或能力。</p>
+<p>由于课程中的 GPU 后端采用 CUDA，项目可以尝试开发 OpenCL 后端，或针对 Apple M1 等硬件设计优化方案；也可以深入执行层，为融合算子实现算子融合等系统优化。具体选题还会继续发布，但判断项目是否合格的核心标准始终是：成果必须真正扩展 Needle。</p>
+<h3 id="论坛协作"><a href="#论坛协作" class="headerlink" title="论坛协作"></a>论坛协作</h3><p>课程论坛仅向正式注册的学员开放，注册后会收到加入邀请。论坛既用于讨论课程内容和作业问题，也承担在线学员组队与互助协作的功能。</p>
+<p>教师和助教受时间与精力限制，无法逐一回答全部帖子。遇到自己同样关心、认为具有普遍性的问题时，可以通过点赞提高其优先级；教学团队会尽量集中处理高票问题。论坛也不应只是单向提问区，我们能够解答其他同学的问题时，也应主动参与。社区参与越充分，重复问题越容易沉淀为共享经验。</p>
+<p>讨论中可以发布必要的代码片段，但应控制范围，具体规则以论坛置顶说明为准。公开完整作业答案会削弱亲自实现带来的学习效果，也可能让其他人被动接触解答或直接复制，因此不应在公共论坛逐字贴出完整代码。合适的做法是提供最小复现片段、报错信息、关键接口或局部实现，以便定位问题，同时保留作业的独立完成空间。</p>
+<p>课程公开后，教学团队希望它不仅服务于正式注册者，也能成为深度学习系统乃至整个深度学习领域的长期学习资源。反馈可能无法在本轮课程中立即转化为调整，但会帮助后续材料和教学流程继续完善。</p>
+<p>导论完成了课程定位、学习路径和参与方式的说明。下一讲开始进入机器学习基础，随后将很快转向自动微分等核心技术内容。</p>
+
+  </div>
+</article>
+
+
+
+  <section
+    class="post-comments"
+    data-comment-provider="utterances"
+    data-comment-light-theme="github-light"
+    data-comment-dark-theme="github-dark"
+  >
+    <h2 class="comments-title">COMMENTS</h2>
+    <script>
+      (function () {
+        var container = document.currentScript.parentElement;
+        var isDark = document.documentElement.classList.contains('theme-dark');
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.setAttribute('repo', 'cardchoosen/blog');
+        script.setAttribute('issue-term', 'pathname');
+        script.setAttribute('label', 'comment');
+        script.setAttribute('theme', isDark ? 'github-dark' : 'github-light');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      })();
+    </script>
+  </section>
+
+
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 nannnzhang</span>
+    <span class="footer-sep">|</span>
+    <span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+  </div>
+</footer>
+
+  
+<script src="/js/shelf.js"></script>
+
+</body>
+</html>
