@@ -157,9 +157,17 @@
 <p>StyleGAN 展示了生成模型在视觉真实性上的跃迁。它生成的人脸并不对应现实中的人物，却能呈现出接近真实照片的细节。今天，虚构人脸已经常见到容易被视为理所当然；但在这些结果刚出现时，即使熟悉深度学习的研究者，也可能误以为展示的是训练集中的真实照片，而不是生成对抗网络合成的图像。这种认知反差说明，生成模型在短短几年内跨过了一个明显的质量门槛。</p>
 <p><img src="/images/posts/bilibili-bv199rlyjez2-p1/screenshot_0600_03.png" alt="AlexNet、AlphaGo 与 StyleGAN 代表性成果总览"></p>
 <p>GPT-3 展示的则是语言生成能力。它的基本生成过程可以概括为自回归预测：给定此前已经出现的所有 token，模型预测下一个 token 的概率分布，从中确定后续 token，再把它追加到上下文中并重复这一过程。若已有序列为 $x_1,\ldots,x_t$，模型学习的是：</p>
-<p>$$<br>P(x_{t+1}\mid x_1,x_2,\ldots,x_t)<br>$$</p>
+<div class="math-display">\[
+P(x_{t+1}\mid x_1,x_2,\ldots,x_t)
+\]</div>
+
 <p>令 $x_{&lt;t}&#x3D;(x_1,\ldots,x_{t-1})$，完整文本的联合概率可以进一步分解为：</p>
-<h1 id="P-x-1-ldots-x-T"><a href="#P-x-1-ldots-x-T" class="headerlink" title="$$P(x_1,\ldots,x_T)"></a>$$<br>P(x_1,\ldots,x_T)</h1><p>\prod_{t&#x3D;1}^{T}P(x_t\mid x_{&lt;t})<br>$$</p>
+<div class="math-display">\[
+P(x_1,\ldots,x_T)
+=
+\prod_{t=1}^{T}P(x_t\mid x_{&lt;t})
+\]</div>
+
 <p>单步预测机制看起来并不复杂，但连续执行后却能生成结构完整、语义连贯的长文本。课程还用 GPT-3 生成过一段课程简介：这段文字很像一门普通深度学习课程的介绍，却错误地声称课程会重点讨论无监督学习和强化学习。这个例子同时体现了语言模型的两面性——它能生成形式和语气都很合理的内容，却不保证内容准确对应具体课程。</p>
 <p>AlphaFold 与 AlphaFold 2 把深度学习的影响延伸到了生物科学。蛋白质由氨基酸序列折叠成三维结构，而其结构又直接关系到蛋白质在人体内承担的功能。仅根据氨基酸序列预测三维结构，长期以来一直是生物学中的重大难题。在相关蛋白质结构预测竞赛中，DeepMind 的 AlphaFold 系统在约四年内显著提高了预测质量与准确率；至少在部分受限条件下，这一长期难题已经接近得到解决。</p>
 <p>到 2022 年，文本生成图像又成为新的代表性进展。Stable Diffusion 发布后，能够接收自然语言提示，生成与描述相符、在许多情况下颇为逼真的画作或图像。它与 DALL·E、DALL·E 2 及更早的相关研究共同表明：模型不仅能复现训练数据中常见的视觉概念，还能组合可能从未被人以同样方式设想过的文本描述，并将其转化为连贯的视觉内容。</p>
@@ -301,6 +309,22 @@
   </div>
 </footer>
 
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      startup: {
+        typeset: true
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
   
 <script src="/js/shelf.js"></script>
 
