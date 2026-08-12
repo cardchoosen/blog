@@ -544,6 +544,18 @@ html.theme-dark
       padding 0
     tr:hover td
       background transparent
+  .math-display
+    margin 1.15em 0
+    overflow-x auto
+    overflow-y visible
+    text-align center
+    text-indent 0
+  mjx-container
+    max-width 100%
+    overflow-x auto
+    overflow-y visible
+  mjx-container[display="true"]
+    margin 1em 0 !important
   img
     max-width 100%
     height auto
@@ -682,6 +694,51 @@ html.theme-dark
   font-size 13px
   opacity 0.6
   flex-shrink 0
+
+// ---- 404 ----
+.not-found
+  max-width 780px
+  margin-left auto
+  margin-right auto
+  padding-top 36px
+
+.not-found-code
+  font-size 72px
+  line-height 1
+  font-weight bold
+  letter-spacing 0.08em
+  margin-bottom 18px
+
+.not-found-title
+  font-size 26px
+  margin-bottom 16px
+
+.not-found-desc
+  font-family font-reading
+  font-size 18px
+  line-height 1.8
+  color var(--color-text)
+  opacity 0.78
+  padding-bottom 22px
+  border-bottom 2px solid var(--color-line)
+
+.not-found-actions
+  display flex
+  flex-wrap wrap
+  gap 12px
+  margin-top 24px
+  a
+    display inline-block
+    padding 8px 12px
+    border 1px solid var(--color-line)
+    text-decoration none
+    font-weight bold
+    hover-soft()
+
+.not-found-tip
+  margin-top 18px
+  font-size 13px
+  opacity 0.6
 
 // ---- footer ----
 .site-footer

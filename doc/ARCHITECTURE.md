@@ -12,6 +12,7 @@
 | 模板引擎 | EJS（hexo-renderer-ejs） |
 | 样式 | Stylus（hexo-renderer-stylus），含 mixin 抽象 |
 | Markdown 渲染 | hexo-renderer-marked |
+| 数学公式 | MathJax 3（CDN），`scripts/math-blocks.js` 保护块级公式 |
 | 代码高亮 | highlight.js（已关行号） |
 | 评论系统 | utterances（GitHub Issues，文章页按 pathname 关联评论） |
 | 阅读量统计 | Busuanzi（文章页按 URL 统计 PV） |
@@ -47,6 +48,7 @@ Hexo/
 │   ├── files/posts/             #   文章附件资源（按 slug 分目录，由 post-admin 导入）
 │   ├── categories/index.md      #   分类总览页入口（layout: category）
 │   ├── tags/index.md            #   标签总览页入口（layout: tag）
+│   ├── 404.md                   #   GitHub Pages 自定义 404 页面入口（permalink: 404.html）
 │   └── CNAME                   # GitHub Pages 自定义域名绑定（内容：anemone.wiki）
 ├── themes/
 │   ├── .gitkeep             # 占位（已无用但保留）
@@ -58,6 +60,10 @@ Hexo/
 ├── CODEBUDDY.md             # AI 协作规则（每次对话自动加载）
 ├── tools/
 │   └── post-admin/           # 本地文章管理工具（CLI + Web UI + 输入格式文档）
+├── scripts/
+│   ├── math-blocks.js        #   构建前保护 $$...$$ 块级公式，避免 Markdown 误解析
+│   ├── post-admin-snapshot.js #  post-admin 发布差异基准
+│   └── series-order.js       #   分类内 series_order 排序 helper
 └── doc/                     # 项目文档目录
     ├── ARCHITECTURE.md      #   本文档：代码工程结构
     ├── FEATURES.md          #   产品功能文档
@@ -169,6 +175,7 @@ themes/geek-shelf/
 │   ├── archive.ejs                # 归档（按年分组）
 │   ├── category.ejs               # 分类总览 + 分类文章列表（引入 archive-list）
 │   ├── tag.ejs                    # 标签总览 + 标签文章列表（引入 archive-list）
+│   ├── not-found.ejs              # 自定义 404 页面（删除/隐藏/旧链接提示）
 │   └── _partial/
 │       ├── head.ejs               # <head>（meta/title/css/open_graph）
 │       ├── header.ejs             # 顶部色块（站点标题 + 导航 + 主题切换按钮）
@@ -198,6 +205,8 @@ themes/geek-shelf/
 **评论系统**：`themes/geek-shelf/_config.yml` 中 `comments.provider: utterances` 启用文章页评论，`comments.ejs` 在正文后按当前 `<html>` 主题动态注入 utterances script，按 `pathname` 关联 GitHub Issue。仓库需要安装 utterances GitHub App 并允许在 `cardchoosen/blog` 创建 issue。`shelf.js` 会在 iframe 加载与主题切换时同步评论框深/浅主题。
 
 **阅读量统计**：文章页 meta 行显示 `阅读 <PV>`。`article.ejs` 提供 `busuanzi_value_page_pv` 占位，`post.ejs` 仅在文章详情页加载 Busuanzi 脚本，由第三方服务按页面 URL 统计并回填阅读量。
+
+**数学公式渲染**：文章支持行内公式 `$...$` 与块级公式 `$$...$$`。`scripts/math-blocks.js` 在 Markdown 渲染前把块级公式转换为安全 HTML 容器，避免 `hexo-renderer-marked` 把公式内单独的 `=` 误解析为 Setext 标题；`layout.ejs` 全站加载 MathJax 3，将保留下来的 LaTeX 渲染为正式公式。
 
 **视觉风格**：纯黑白 + 灰阶过渡。hover/active 用浅灰底 `#f0f0f0`/`#e0e0e0` 替代黑底白字突变。浅色主题代码块 `#e8e8e8` 底，深色主题 `#0a0a0a` 底（比页面背景 `#1a1a1a` 略黑）。无圆角无阴影无渐变。顶栏、侧栏、标题保留等宽字体，正文使用系统阅读字体提升中文长文可读性。首页文章列表更紧凑，正文标题层级通过左侧标记与下边线增强区分。主体内容宽度为 `780px`。`overscroll-behavior: none` 禁用弹性滚动。
 
@@ -257,6 +266,10 @@ npm run post:delete -- <slug>   # 预览删除清单；加 --yes 移动到回收
 - `/categories/<name>/`：Hexo category generator 生成，`page.category` 有值时展示该分类下文章列表
 - `/tags/`：由 `source/tags/index.md` 触发 `layout: tag`，在 `page.tag` 为空时展示全部标签及文章数
 - `/tags/<name>/`：Hexo tag generator 生成，`page.tag` 有值时展示该标签下文章列表
+
+## 404 页面
+
+`source/404.md` 通过 `permalink: 404.html` 生成 GitHub Pages 识别的根目录 `404.html`。旧文章链接、已删除文章链接、隐藏文章链接访问时，会显示站点风格的 404 页面，提示文章可能已删除/隐藏/移动，并提供首页、分类、标签入口；页面会在 6 秒后自动回到首页。
 
 ## 完整发布流程
 

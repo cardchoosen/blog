@@ -1,0 +1,30 @@
+<section class="not-found">
+  <div class="not-found-code">404</div>
+  <h1 class="not-found-title">页面不存在</h1>
+  <p class="not-found-desc">
+    这篇文章可能已经被删除、隐藏，或者链接发生了变化。
+  </p>
+  <div class="not-found-actions">
+    <a href="<%- url_for('/') %>">回到首页</a>
+    <a href="<%- url_for('/categories/') %>">CATEGORY</a>
+    <a href="<%- url_for('/tags/') %>">TAG</a>
+  </div>
+  <p class="not-found-tip">
+    <span id="not-found-countdown">6</span> 秒后自动回到首页。
+  </p>
+</section>
+
+<script>
+  (function () {
+    var seconds = 6;
+    var target = document.getElementById('not-found-countdown');
+    var timer = window.setInterval(function () {
+      seconds -= 1;
+      if (target) target.textContent = String(seconds);
+      if (seconds <= 0) {
+        window.clearInterval(timer);
+        window.location.href = '<%- url_for('/') %>';
+      }
+    }, 1000);
+  })();
+</script>

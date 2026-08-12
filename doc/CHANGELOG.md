@@ -674,3 +674,43 @@
 - `README.md`：补充快速重启命令
 - `doc/ARCHITECTURE.md`：补充常用命令
 - `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-08-11 00:00 · （本次提交）· feat: 增加站点自定义 404 页面
+
+> 本条目对应本次提交，优化已删除文章、隐藏文章和旧链接访问体验。
+
+### 改动
+
+- 新增 `source/404.md`，生成 GitHub Pages 识别的根目录 `404.html`
+- 新增 `themes/geek-shelf/layout/not-found.ejs`
+- 404 页面提供回首页、`CATEGORY`、`TAG` 入口
+- 404 页面提示文章可能已删除、隐藏或链接变化
+- 404 页面 6 秒后自动跳回首页
+- 样式保持 geek-shelf 黑白等宽风格，并适配深/浅主题
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：补充 404 页面结构与机制
+- `doc/FEATURES.md`：补充自定义 404 页面功能
+- `doc/CHANGELOG.md`：追加本次条目
+
+---
+
+## 2026-08-11 00:00 · （本次提交）· fix: 支持数学公式渲染
+
+> 本条目对应本次提交，修复文章中的 LaTeX 公式被当作普通文本或 Markdown 标题展示的问题。
+
+### 修复
+
+- 新增 `scripts/math-blocks.js`，在 Markdown 渲染前保护 `$$...$$` 块级公式
+- 全站加载 MathJax 3，支持行内 `$...$` 与块级 `$$...$$` 公式渲染
+- 避免公式块内单独一行 `=` 被 `hexo-renderer-marked` 误解析为 Setext 标题
+- 补充公式块横向滚动样式，长公式不会撑破正文区域
+
+### 文档同步
+
+- `doc/ARCHITECTURE.md`：补充数学公式渲染机制
+- `doc/FEATURES.md`：补充数学公式能力
+- `doc/CHANGELOG.md`：追加本次条目
