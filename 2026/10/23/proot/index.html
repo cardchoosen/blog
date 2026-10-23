@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script>
+    // 防 FOUC：CSS 加载前根据 localStorage 或系统偏好设置主题 class
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
+        document.documentElement.className = 'theme-' + theme;
+      } catch (e) {}
+    })();
+  </script>
+  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRoot：不需要 root 的 chroot</title>
+<meta name="description" content="">
+
+
+  <link rel="icon" href="/favicon.ico">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-light.min.css" media="(prefers-color-scheme: light)" class="hljs-theme-light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)" class="hljs-theme-dark">
+<meta name="description" content="PRoot：不需要 root 的 chrootUser-space chroot via ptrace 在 Termux 里装个 proot-distro，一条 login debian 就能在手机上跑起完整的 Debian：有 apt、有 glibc、有 &#x2F;etc 和 &#x2F;usr 的标准目录结构，甚至能装桌面环境。手机没解锁、没刷机、没有 root，凭什么？一个普通用户权限的程序，是怎么把一个目录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PRoot：不需要 root 的 chroot">
+<meta property="og:url" content="https://anemone.wiki/2026/10/23/proot/index.html">
+<meta property="og:site_name" content="Anemone&#39;s Blog">
+<meta property="og:description" content="PRoot：不需要 root 的 chrootUser-space chroot via ptrace 在 Termux 里装个 proot-distro，一条 login debian 就能在手机上跑起完整的 Debian：有 apt、有 glibc、有 &#x2F;etc 和 &#x2F;usr 的标准目录结构，甚至能装桌面环境。手机没解锁、没刷机、没有 root，凭什么？一个普通用户权限的程序，是怎么把一个目录">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-23T06:44:44.000Z">
+<meta property="article:modified_time" content="2026-10-23T06:44:58.293Z">
+<meta property="article:author" content="nannnzhang">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="PRoot">
+<meta property="article:tag" content="Termux">
+<meta property="article:tag" content="ptrace">
+<meta name="twitter:card" content="summary">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+  <a href="/" class="brand-title">Anemone&#39;s Blog</a>
+  
+</div>
+
+<nav class="topnav">
+  
+    <a href="/" class="nav-item">首页</a>
+  
+    <a href="/archives" class="nav-item">归档</a>
+  
+    <a href="/categories/" class="nav-item">CATEGORY</a>
+  
+    <a href="/tags/" class="nav-item">TAG</a>
+  
+</nav>
+
+<button class="theme-toggle" type="button" aria-label="切换主题" title="切换深/浅主题">
+  <span class="theme-stack">
+    <span class="theme-char" data-char="深">深</span>
+    <span class="theme-char" data-char="浅">浅</span>
+  </span>
+</button>
+
+  </header>
+
+  <div class="main-layout">
+    
+<aside class="shelf">
+  <div class="shelf-head">目录</div>
+  <ul class="shelf-list">
+    
+      
+      <li class="shelf-item" data-cat="CMU 10-414: Deep Learning Systems">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name">CMU 10-414: Deep Learning Systems</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts">
+          
+            
+            <li><a href="/2026/09/08/bilibili-bv199rlyjez2-p2/" class="post-link">Lecture 2 - ML Refresher / Softmax Regression</a></li>
+          
+            
+            <li><a href="/2026/08/10/bilibili-bv199rlyjez2-p1/" class="post-link">Lecture 1 - Introduction and Logistics</a></li>
+          
+        </ul>
+      </li>
+    
+      
+      <li class="shelf-item" data-cat="操作系统原理">
+        <button class="shelf-cat active" type="button">
+          <span class="cat-name">操作系统原理</span>
+          <span class="cat-count">1</span>
+        </button>
+        <ul class="shelf-posts open">
+          
+            
+            <li><a href="/2026/10/23/proot/" class="post-link current">PRoot：不需要 root 的 chroot</a></li>
+          
+        </ul>
+      </li>
+    
+  </ul>
+</aside>
+
+    <main class="content">
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">PRoot：不需要 root 的 chroot</h1>
+    <div class="post-meta">
+      <time class="post-date" datetime="2026-10-23T14:44:44">
+        2026-10-23
+      </time>
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-categories">
+  
+    
+    <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" class="category-link">操作系统原理</a>
+  
+</span>
+
+      
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-tags">
+  
+    
+    <a href="/tags/Linux/" class="tag-link">#Linux</a>
+  
+    , 
+    <a href="/tags/PRoot/" class="tag-link">#PRoot</a>
+  
+    , 
+    <a href="/tags/Termux/" class="tag-link">#Termux</a>
+  
+    , 
+    <a href="/tags/ptrace/" class="tag-link">#ptrace</a>
+  
+</span>
+
+      
+      <span class="meta-sep">/</span>
+      <span class="post-views" id="busuanzi_container_page_pv">
+        阅读 <span id="busuanzi_value_page_pv">-</span>
+      </span>
+    </div>
+  </header>
+  <div class="post-body">
+    <h1 id="PRoot：不需要-root-的-chroot"><a href="#PRoot：不需要-root-的-chroot" class="headerlink" title="PRoot：不需要 root 的 chroot"></a>PRoot：不需要 root 的 chroot</h1><p><strong>User-space chroot via ptrace</strong></p>
+<p>在 Termux 里装个 proot-distro，一条 <code>login debian</code> 就能在手机上跑起完整的 Debian：有 apt、有 glibc、有 <code>/etc</code> 和 <code>/usr</code> 的标准目录结构，甚至能装桌面环境。手机没解锁、没刷机、没有 root，凭什么？一个普通用户权限的程序，是怎么把一个目录树伪装成整个文件系统的？这就是 PRoot 干的事。</p>
+<h2 id="先看-chroot-在干什么"><a href="#先看-chroot-在干什么" class="headerlink" title="先看 chroot 在干什么"></a>先看 chroot 在干什么</h2><p>Linux 上有个老机制叫 chroot（change root）：它让一个进程看到的”根目录”不再是真的 <code>/</code>，而是你指定的某个目录。进程从此被关在这个目录树里，路径访问出不去。跑发行版靠的就是它——把 Debian 的整个文件系统解压到一个目录里，chroot 进去，里面的程序就以为自己运行在一台正常的 Debian 机器上。</p>
+<p>问题在于 chroot 是个特权操作，需要 root 权限。同理，把宿主机的某个目录”挂”进这个假文件系统的 mount –bind，也需要特权。在 Android 上，普通应用永远拿不到这些权限；在没有 sudo 的公司服务器上同样拿不到。PRoot 的目标就是把这三件事——chroot、bind 挂载、以及跑其他 CPU 架构的程序——全部搬到不需要任何特权的用户态实现。</p>
+<h2 id="PRoot-的做法：不动内核，只做翻译"><a href="#PRoot-的做法：不动内核，只做翻译" class="headerlink" title="PRoot 的做法：不动内核，只做翻译"></a>PRoot 的做法：不动内核，只做翻译</h2><p>PRoot 用到的钥匙是 ptrace——Linux 调试器的底座。gdb 能给程序下断点、单步执行，靠的就是它：父进程通过 ptrace 可以拦下子进程的每一次系统调用，在它真正进入内核前、和内核返回后，各有一次介入机会。这个能力本身不需要特权，父子进程关系天然允许。</p>
+<p>PRoot 就当这个”翻译员”。被跟踪的程序调用 <code>open(&quot;/etc/hosts&quot;)</code>，在系统调用真正发生之前，PRoot 把路径改写成 rootfs 目录里的真实位置再放行，比如 <code>open(&quot;~/rootfs/etc/hosts&quot;)</code>；程序调用 <code>getuid()</code>，PRoot 把返回值改成 0，于是 apt 一类坚持”我必须是 root 才肯干活”的包管理器就被哄住了；程序请求 mount，PRoot 干脆不转发给内核，直接伪造一个成功的结果，然后在后续所有路径翻译里把这个”挂载”兑现。内核全程不知情，被跟踪的程序活在一个被精心维护的错觉里。</p>
+<p>这套机制还顺手解决了跨架构问题。配上 QEMU 的用户态模拟（proot 的 <code>-q</code> 参数），x86 机器上可以透明地跑 ARM 发行版：PRoot 负责翻译路径，QEMU 负责翻译指令，两台”翻译员”各管一层。交叉编译的那堆麻烦事，直接被绕开了。</p>
+<h2 id="代价都写在-ptrace-里"><a href="#代价都写在-ptrace-里" class="headerlink" title="代价都写在 ptrace 里"></a>代价都写在 ptrace 里</h2><p>理解了机制，PRoot 的短板也就一目了然。每个系统调用都要被拦下两次（进入前、返回后），路径还要过一遍翻译，纯 CPU 的活大概慢百分之几到十几，但 I&#x2F;O 密集的任务——apt 安装、解压 tar 包、大项目编译——会明显变慢，瓶颈不在 CPU 而在文件系统操作的翻译开销。</p>
+<p>还有几个结构性限制。ptrace 关系不能中途解除，PRoot 必须一直盯着子进程，所以没法在这里面启动 sshd 之类的守护进程然后退出会话，会话一关进程就得跟着走。gdb 和 strace 自己也依赖 ptrace，和 PRoot 撞在一起经常出问题。新的系统调用如果 PRoot 还没学会翻译，程序就可能撞上一些在原生环境复现不出来的诡异 bug。</p>
+<p>要分清的是，fake root 不是真 root。PRoot 只是篡改了”你是谁”这个问题的答案，实际权限一点没变：文件归属还是你的真实用户，写入受真实权限约束，设备节点、FUSE 挂载这些事照样做不了。反过来说，PRoot 也不是安全边界——它提供的是兼容性，不是隔离性，别把它当沙箱用。</p>
+<h2 id="它为什么还是无处不在"><a href="#它为什么还是无处不在" class="headerlink" title="它为什么还是无处不在"></a>它为什么还是无处不在</h2><p>把这些缺点摆完，PRoot 的生存空间反而更清楚了：它的定位不是”高性能”，也不是”安全隔离”，而是”没有 root 时，让标准 Linux 软件跑起来”。Termux 生态是最大的受益者，proot-distro 靠它支撑了十几种发行版；Ubuntu Touch 用它给受限环境补软件；在没有 sudo 的服务器上，它也能让你拥有一个自己的 Debian 环境。至于速度，编辑文件、跑脚本、SSH 到别处干活这类场景，PRoot 和原生的差距小到感觉不出来。</p>
+<p>所以下次在手机上看到一个完整的 Debian，不必惊讶——底下就是一个 ptrace 循环在做同声传译：程序要什么，翻译员就把它带到真实的位置，再把结果原样带回来。内核没被欺骗过一秒，被骗的只有程序自己。</p>
+
+  </div>
+</article>
+
+
+
+  <section
+    class="post-comments"
+    data-comment-provider="utterances"
+    data-comment-light-theme="github-light"
+    data-comment-dark-theme="github-dark"
+  >
+    <h2 class="comments-title">COMMENTS</h2>
+    <script>
+      (function () {
+        var container = document.currentScript.parentElement;
+        var isDark = document.documentElement.classList.contains('theme-dark');
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.setAttribute('repo', 'cardchoosen/blog');
+        script.setAttribute('issue-term', 'pathname');
+        script.setAttribute('label', 'comment');
+        script.setAttribute('theme', isDark ? 'github-dark' : 'github-light');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      })();
+    </script>
+  </section>
+
+
+
+  <nav class="post-nav">
+    <div class="post-nav-cell">
+      
+        <span class="nav-label">OLDER</span>
+        <a href="/2026/09/08/bilibili-bv199rlyjez2-p2/" class="nav-link">Lecture 2 - ML Refresher / Softmax Regression</a>
+      
+    </div>
+    <div class="post-nav-cell right">
+      
+    </div>
+  </nav>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 nannnzhang</span>
+    <span class="footer-sep">|</span>
+    <span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+  </div>
+</footer>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      startup: {
+        typeset: true
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+<script src="/js/shelf.js"></script>
+
+</body>
+</html>
