@@ -27,15 +27,15 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-light.min.css" media="(prefers-color-scheme: light)" class="hljs-theme-light">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)" class="hljs-theme-dark">
-<meta name="description" content="PRoot：不需要 root 的 chrootUser-space chroot via ptrace 在 Termux 里装个 proot-distro，一条 login debian 就能在手机上跑起完整的 Debian：有 apt、有 glibc、有 &#x2F;etc 和 &#x2F;usr 的标准目录结构，甚至能装桌面环境。手机没解锁、没刷机、没有 root，凭什么？一个普通用户权限的程序，是怎么把一个目录">
+<meta name="description" content="User-space chroot via ptrace 在 Termux 里装个 proot-distro，一条 login debian 就能在手机上跑起完整的 Debian：有 apt、有 glibc、有 &#x2F;etc 和 &#x2F;usr 的标准目录结构，甚至能装桌面环境。手机没解锁、没刷机、没有 root，凭什么？一个普通用户权限的程序，是怎么把一个目录树伪装成整个文件系统的？这就是 PRoot 干">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PRoot：不需要 root 的 chroot">
 <meta property="og:url" content="https://anemone.wiki/2026/10/23/proot/index.html">
 <meta property="og:site_name" content="Anemone&#39;s Blog">
-<meta property="og:description" content="PRoot：不需要 root 的 chrootUser-space chroot via ptrace 在 Termux 里装个 proot-distro，一条 login debian 就能在手机上跑起完整的 Debian：有 apt、有 glibc、有 &#x2F;etc 和 &#x2F;usr 的标准目录结构，甚至能装桌面环境。手机没解锁、没刷机、没有 root，凭什么？一个普通用户权限的程序，是怎么把一个目录">
+<meta property="og:description" content="User-space chroot via ptrace 在 Termux 里装个 proot-distro，一条 login debian 就能在手机上跑起完整的 Debian：有 apt、有 glibc、有 &#x2F;etc 和 &#x2F;usr 的标准目录结构，甚至能装桌面环境。手机没解锁、没刷机、没有 root，凭什么？一个普通用户权限的程序，是怎么把一个目录树伪装成整个文件系统的？这就是 PRoot 干">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-10-23T06:44:44.000Z">
-<meta property="article:modified_time" content="2026-10-23T06:44:58.293Z">
+<meta property="article:modified_time" content="2026-10-23T06:52:21.867Z">
 <meta property="article:author" content="nannnzhang">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="PRoot">
@@ -158,7 +158,7 @@
     </div>
   </header>
   <div class="post-body">
-    <h1 id="PRoot：不需要-root-的-chroot"><a href="#PRoot：不需要-root-的-chroot" class="headerlink" title="PRoot：不需要 root 的 chroot"></a>PRoot：不需要 root 的 chroot</h1><p><strong>User-space chroot via ptrace</strong></p>
+    <p><strong>User-space chroot via ptrace</strong></p>
 <p>在 Termux 里装个 proot-distro，一条 <code>login debian</code> 就能在手机上跑起完整的 Debian：有 apt、有 glibc、有 <code>/etc</code> 和 <code>/usr</code> 的标准目录结构，甚至能装桌面环境。手机没解锁、没刷机、没有 root，凭什么？一个普通用户权限的程序，是怎么把一个目录树伪装成整个文件系统的？这就是 PRoot 干的事。</p>
 <h2 id="先看-chroot-在干什么"><a href="#先看-chroot-在干什么" class="headerlink" title="先看 chroot 在干什么"></a>先看 chroot 在干什么</h2><p>Linux 上有个老机制叫 chroot（change root）：它让一个进程看到的”根目录”不再是真的 <code>/</code>，而是你指定的某个目录。进程从此被关在这个目录树里，路径访问出不去。跑发行版靠的就是它——把 Debian 的整个文件系统解压到一个目录里，chroot 进去，里面的程序就以为自己运行在一台正常的 Debian 机器上。</p>
 <p>问题在于 chroot 是个特权操作，需要 root 权限。同理，把宿主机的某个目录”挂”进这个假文件系统的 mount –bind，也需要特权。在 Android 上，普通应用永远拿不到这些权限；在没有 sudo 的公司服务器上同样拿不到。PRoot 的目标就是把这三件事——chroot、bind 挂载、以及跑其他 CPU 架构的程序——全部搬到不需要任何特权的用户态实现。</p>
