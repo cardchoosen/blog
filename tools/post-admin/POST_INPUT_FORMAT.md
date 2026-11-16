@@ -33,6 +33,8 @@ tags:
   - React
   - Hexo
 excerpt: "Optional short summary"
+# Optional. Signed integer; smaller values appear earlier within a category.
+series_order: -1
 # Optional. Set false when the post should stay local and not be generated publicly.
 published: false
 ---
@@ -53,6 +55,7 @@ Article body in Markdown.
 | `categories` | Yes | list | At least one category. |
 | `tags` | Yes | list | At least one tag. |
 | `excerpt` | No | string | Optional summary. |
+| `series_order` | No | integer | Category ordering; smaller values appear first, including negative values. |
 | `published` | No | boolean | Set to `false` to keep the post local and exclude it from public generation. |
 
 ## Slug Rules

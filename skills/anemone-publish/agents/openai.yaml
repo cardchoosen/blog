@@ -1,0 +1,4 @@
+interface:
+  display_name: "Anemone 文章发布"
+  short_description: "整理 Markdown 和素材，建议文章信息并确认，支持单篇与批量导入发布"
+  default_prompt: "使用 $anemone-publish 整理我提供的 Markdown 或文章包，先展示标题、分类、标签和公开状态供我确认，再按要求导入或发布。"
