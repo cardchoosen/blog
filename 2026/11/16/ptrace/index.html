@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script>
+    // 防 FOUC：CSS 加载前根据 localStorage 或系统偏好设置主题 class
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
+        document.documentElement.className = 'theme-' + theme;
+      } catch (e) {}
+    })();
+  </script>
+  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ptrace：调试器怎样控制程序</title>
+<meta name="description" content="">
+
+
+  <link rel="icon" href="/favicon.ico">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-light.min.css" media="(prefers-color-scheme: light)" class="hljs-theme-light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)" class="hljs-theme-dark">
+<meta name="description" content="Linux Process Tracing 在 GDB 里给 hello 打一个断点。程序跑到断点就停下，你可以查看变量，再让程序继续。在 Linux 上，GDB 用 ptrace 来做这件事。 下面只跟踪一次调试：让 hello 停在打印数字之前，看看这个数字，再把它打印出来。 GDB 调试示例：启动 hello#include &lt;stdio.h&gt;int main(void) &amp;#1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ptrace：调试器怎样控制程序">
+<meta property="og:url" content="https://anemone.wiki/2026/11/16/ptrace/index.html">
+<meta property="og:site_name" content="Anemone&#39;s Blog">
+<meta property="og:description" content="Linux Process Tracing 在 GDB 里给 hello 打一个断点。程序跑到断点就停下，你可以查看变量，再让程序继续。在 Linux 上，GDB 用 ptrace 来做这件事。 下面只跟踪一次调试：让 hello 停在打印数字之前，看看这个数字，再把它打印出来。 GDB 调试示例：启动 hello#include &lt;stdio.h&gt;int main(void) &amp;#1">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-16T09:24:53.000Z">
+<meta property="article:modified_time" content="2026-11-16T09:25:11.109Z">
+<meta property="article:author" content="nannnzhang">
+<meta property="article:tag" content="GDB">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="ptrace">
+<meta property="article:tag" content="strace">
+<meta property="article:tag" content="系统调用">
+<meta property="article:tag" content="进程调试">
+<meta name="twitter:card" content="summary">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+  <a href="/" class="brand-title">Anemone&#39;s Blog</a>
+  
+</div>
+
+<nav class="topnav">
+  
+    <a href="/" class="nav-item">首页</a>
+  
+    <a href="/archives" class="nav-item">归档</a>
+  
+    <a href="/categories/" class="nav-item">CATEGORY</a>
+  
+    <a href="/tags/" class="nav-item">TAG</a>
+  
+</nav>
+
+<button class="theme-toggle" type="button" aria-label="切换主题" title="切换深/浅主题">
+  <span class="theme-stack">
+    <span class="theme-char" data-char="深">深</span>
+    <span class="theme-char" data-char="浅">浅</span>
+  </span>
+</button>
+
+  </header>
+
+  <div class="main-layout">
+    
+<aside class="shelf">
+  <div class="shelf-head">目录</div>
+  <ul class="shelf-list">
+    
+      
+      <li class="shelf-item" data-cat="CMU 10-414: Deep Learning Systems">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name">CMU 10-414: Deep Learning Systems</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts">
+          
+            
+            <li><a href="/2026/09/08/bilibili-bv199rlyjez2-p2/" class="post-link">Lecture 2 - ML Refresher / Softmax Regression</a></li>
+          
+            
+            <li><a href="/2026/08/10/bilibili-bv199rlyjez2-p1/" class="post-link">Lecture 1 - Introduction and Logistics</a></li>
+          
+        </ul>
+      </li>
+    
+      
+      <li class="shelf-item" data-cat="操作系统原理">
+        <button class="shelf-cat active" type="button">
+          <span class="cat-name">操作系统原理</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts open">
+          
+            
+            <li><a href="/2026/11/16/ptrace/" class="post-link current">ptrace：调试器怎样控制程序</a></li>
+          
+            
+            <li><a href="/2026/10/23/proot/" class="post-link">PRoot：不需要 root 的 chroot</a></li>
+          
+        </ul>
+      </li>
+    
+  </ul>
+</aside>
+
+    <main class="content">
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">ptrace：调试器怎样控制程序</h1>
+    <div class="post-meta">
+      <time class="post-date" datetime="2026-11-16T17:24:53">
+        2026-11-16
+      </time>
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-categories">
+  
+    
+    <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/" class="category-link">操作系统原理</a>
+  
+</span>
+
+      
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-tags">
+  
+    
+    <a href="/tags/Linux/" class="tag-link">#Linux</a>
+  
+    , 
+    <a href="/tags/ptrace/" class="tag-link">#ptrace</a>
+  
+    , 
+    <a href="/tags/GDB/" class="tag-link">#GDB</a>
+  
+    , 
+    <a href="/tags/strace/" class="tag-link">#strace</a>
+  
+    , 
+    <a href="/tags/%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8/" class="tag-link">#系统调用</a>
+  
+    , 
+    <a href="/tags/%E8%BF%9B%E7%A8%8B%E8%B0%83%E8%AF%95/" class="tag-link">#进程调试</a>
+  
+</span>
+
+      
+      <span class="meta-sep">/</span>
+      <span class="post-views" id="busuanzi_container_page_pv">
+        阅读 <span id="busuanzi_value_page_pv">-</span>
+      </span>
+    </div>
+  </header>
+  <div class="post-body">
+    <p><strong>Linux Process Tracing</strong></p>
+<p>在 GDB 里给 <code>hello</code> 打一个断点。程序跑到断点就停下，你可以查看变量，再让程序继续。在 Linux 上，GDB 用 <code>ptrace</code> 来做这件事。</p>
+<p>下面只跟踪一次调试：让 <code>hello</code> 停在打印数字之前，看看这个数字，再把它打印出来。</p>
+<h2 id="GDB-调试示例：启动-hello"><a href="#GDB-调试示例：启动-hello" class="headerlink" title="GDB 调试示例：启动 hello"></a>GDB 调试示例：启动 hello</h2><figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> &#123;<br>    <span class="hljs-type">int</span> count = <span class="hljs-number">3</span>;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\n&quot;</span>, count);  <span class="hljs-comment">// 在这里打断点</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>将上面的代码保存为 <code>hello.c</code>。</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><code class="hljs text">$ cc -g -O0 hello.c -o hello   # 编译成 hello，保留调试信息并关闭优化<br>$ gdb ./hello                 # 启动 GDB，载入 hello<br>(gdb) break hello.c:5         # 在第 5 行的打印语句前设置断点<br>(gdb) run                     # 运行 hello，让它在断点处停下<br></code></pre></td></tr></table></figure>
+
+<p>输入 <code>run</code> 后，GDB 创建一个子进程来运行 <code>hello</code>。子进程执行 <code>hello</code>，GDB 负责调试它。</p>
+<p>在加载 <code>hello</code> 之前，子进程先向内核登记：“让我的父进程调试我。”这就是 <code>PTRACE_TRACEME</code>。接下来，子进程用 <code>execve</code> 加载 <code>hello</code>，替换自己正在运行的程序。它还是刚才那个子进程，内核已经知道它由 GDB 追踪。</p>
+<h2 id="断点处理与执行恢复"><a href="#断点处理与执行恢复" class="headerlink" title="断点处理与执行恢复"></a>断点处理与执行恢复</h2><p>源代码里的第 5 行，到了 CPU 那里就是一段机器指令。调试信息能帮 GDB 找到这行对应的指令地址。以常见的软件断点为例，GDB 在那里放一条特殊指令：CPU 执行到它时，会报告一次异常，内核就能让 <code>hello</code> 停下来。</p>
+<p>GDB 调用 <code>waitpid</code>，等内核告诉它 <code>hello</code> 是否已经停下。<code>waitpid</code> 是用来等待进程状态变化的接口，比如子进程退出，或者被调试的程序停住。GDB 收到停止报告后，再检查 <code>hello</code> 停在哪儿，判断它是不是碰到了第 5 行的断点。<code>waitpid</code> 只报告状态，不会让程序停下来。</p>
+<p>等 GDB 显示提示符时，<code>hello</code> 已经停在打印之前。现在输入 <code>print count</code>，看到的是 <code>3</code>。GDB 根据调试信息找到变量的位置，再读取目标的内存或寄存器来取值。你看到的是 C 变量，内核提供的是读取机器状态的能力。</p>
+<p>输入 <code>continue</code> 后，GDB 处理好刚命中的断点，让 <code>hello</code> 恢复执行。打印语句这时才运行，终端上才出现 <code>3</code>。这一趟里，两个程序轮流工作：<code>hello</code> 跑到断点后停着，GDB 检查现场；GDB 发出继续指令，<code>hello</code> 接着跑。</p>
+<h2 id="ptrace-与-strace-的区别"><a href="#ptrace-与-strace-的区别" class="headerlink" title="ptrace 与 strace 的区别"></a>ptrace 与 strace 的区别</h2><p><code>ptrace</code> 是 Linux 内核提供的接口。<code>strace</code> 是一个命令行工具，它用这个接口观察程序向内核发了什么请求，以及请求的结果。比如，想知道 <code>cat</code> 有没有尝试打开一个不存在的文件，可以在 Linux 上运行：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><code class="hljs sh">strace -e trace=openat <span class="hljs-built_in">cat</span> ./missing.txt<br></code></pre></td></tr></table></figure>
+
+<p>如果输出里有 <code>openat(AT_FDCWD, &quot;./missing.txt&quot;, O_RDONLY) = -1 ENOENT</code>，你就知道 <code>cat</code> 确实尝试打开那个路径，而且打开请求失败了。<code>ENOENT</code> 表示文件或路径中的某一部分不存在。</p>
+<p>这一行的信息来自两次观察。进入 <code>openat</code> 时，目标先停一次，<code>strace</code> 能看到它想打开哪个文件。等内核处理完这个请求，目标再停一次，<code>strace</code> 这才拿到结果。让目标按这种方式运行的请求叫 <code>PTRACE_SYSCALL</code>。有了入口的参数和出口的结果，<code>strace</code> 才能把一次调用写成一行。</p>
+<h2 id="进程附加与线程追踪"><a href="#进程附加与线程追踪" class="headerlink" title="进程附加与线程追踪"></a>进程附加与线程追踪</h2><p>如果 <code>hello</code> 已经跑起来，就不用从头启动。权限允许时，GDB 可以附加到它；Linux 提供的请求之一叫 <code>PTRACE_ATTACH</code>。这个请求会向目标发出停止信号。请求返回时，目标可能还没停，所以 GDB 仍要等内核报告停止状态，才能检查现场。即便两个程序属于同一个用户，Yama 等安全策略也可能不允许附加。</p>
+<p>前面的 <code>hello</code> 只有一个线程。程序有多个线程时，Linux 按线程建立追踪关系；一个线程停住，不代表其他线程也自动停住。GDB 默认会协调其他线程一起停下，所以我们平时在 GDB 里往往感觉是整个程序停了。</p>
+<h2 id="ptrace-的原理"><a href="#ptrace-的原理" class="headerlink" title="ptrace 的原理"></a>ptrace 的原理</h2><p>GDB 和 <code>hello</code> 各有自己的内存。GDB 不能像读自己的变量那样直接读 <code>hello</code> 的变量，也不能直接命令它停下。内核负责安排哪个线程能在 CPU 上运行，也能访问各个进程的内存。所以 GDB 要检查或控制 <code>hello</code>，得向内核提出请求。<strong><code>ptrace</code> 就是 Linux 提供给调试器的请求接口。</strong></p>
+<p>内核先确认 GDB 有权追踪目标，并记住这层关系。当 <code>hello</code> 命中断点，内核把那个线程停住，并把停止状态交给正在等待的 GDB。此时 <code>hello</code> 不会自己跑到下一条指令。GDB 可以慢慢检查刚才停住的现场，比如看指令执行到了哪儿、<code>count</code> 的值是多少。</p>
+<p>等你输入 <code>continue</code>，GDB 再通过 <code>ptrace</code> 请求内核恢复 <code>hello</code>。从停下来到继续跑，GDB 负责决定怎么调试，内核负责执行这些操作。</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://man7.org/linux/man-pages/man2/ptrace.2.html">Linux ptrace(2) 手册</a>、<a target="_blank" rel="noopener" href="https://sourceware.org/gdb/current/onlinedocs/gdb.html/Set-Breaks.html">GDB 断点文档</a>、<a target="_blank" rel="noopener" href="https://sourceware.org/gdb/current/onlinedocs/gdb.html/All_002dStop-Mode.html">GDB all-stop 模式</a>、<a target="_blank" rel="noopener" href="https://strace.io/">strace 项目主页</a>、<a target="_blank" rel="noopener" href="https://docs.kernel.org/admin-guide/LSM/Yama.html">Linux Yama 文档</a>。</p>
+
+  </div>
+</article>
+
+
+
+  <section
+    class="post-comments"
+    data-comment-provider="utterances"
+    data-comment-light-theme="github-light"
+    data-comment-dark-theme="github-dark"
+  >
+    <h2 class="comments-title">COMMENTS</h2>
+    <script>
+      (function () {
+        var container = document.currentScript.parentElement;
+        var isDark = document.documentElement.classList.contains('theme-dark');
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.setAttribute('repo', 'cardchoosen/blog');
+        script.setAttribute('issue-term', 'pathname');
+        script.setAttribute('label', 'comment');
+        script.setAttribute('theme', isDark ? 'github-dark' : 'github-light');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      })();
+    </script>
+  </section>
+
+
+
+  <nav class="post-nav">
+    <div class="post-nav-cell">
+      
+        <span class="nav-label">OLDER</span>
+        <a href="/2026/10/23/proot/" class="nav-link">PRoot：不需要 root 的 chroot</a>
+      
+    </div>
+    <div class="post-nav-cell right">
+      
+    </div>
+  </nav>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 nannnzhang</span>
+    <span class="footer-sep">|</span>
+    <span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+  </div>
+</footer>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      startup: {
+        typeset: true
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+<script src="/js/shelf.js"></script>
+
+</body>
+</html>
