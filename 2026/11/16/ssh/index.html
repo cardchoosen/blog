@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script>
+    // 防 FOUC：CSS 加载前根据 localStorage 或系统偏好设置主题 class
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
+        document.documentElement.className = 'theme-' + theme;
+      } catch (e) {}
+    })();
+  </script>
+  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SSH 登录原理</title>
+<meta name="description" content="">
+
+
+  <link rel="icon" href="/favicon.ico">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-light.min.css" media="(prefers-color-scheme: light)" class="hljs-theme-light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)" class="hljs-theme-dark">
+<meta name="description" content="Secure Shell 早期用 Telnet 远程登录时，会话通常不加密，路上的人可能读到你输入的密码和命令。1995 年，Tatu Ylönen 开发了 SSH，让远程登录可以在不可信的网络上进行：整个会话受到加密保护，客户端也能在登录前验证服务器身份。 第一次连一台服务器，本来是去登录的，SSH 却可能先问你要不要信任这台机器： $ ssh alice@server.example.comT">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSH 登录原理">
+<meta property="og:url" content="https://anemone.wiki/2026/11/16/ssh/index.html">
+<meta property="og:site_name" content="Anemone&#39;s Blog">
+<meta property="og:description" content="Secure Shell 早期用 Telnet 远程登录时，会话通常不加密，路上的人可能读到你输入的密码和命令。1995 年，Tatu Ylönen 开发了 SSH，让远程登录可以在不可信的网络上进行：整个会话受到加密保护，客户端也能在登录前验证服务器身份。 第一次连一台服务器，本来是去登录的，SSH 却可能先问你要不要信任这台机器： $ ssh alice@server.example.comT">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-16T12:02:19.000Z">
+<meta property="article:modified_time" content="2026-11-16T12:02:36.327Z">
+<meta property="article:author" content="nannnzhang">
+<meta property="article:tag" content="OpenSSH">
+<meta property="article:tag" content="SSH">
+<meta property="article:tag" content="公钥认证">
+<meta property="article:tag" content="密钥交换">
+<meta property="article:tag" content="计算机网络">
+<meta property="article:tag" content="远程登录">
+<meta name="twitter:card" content="summary">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+  <a href="/" class="brand-title">Anemone&#39;s Blog</a>
+  
+</div>
+
+<nav class="topnav">
+  
+    <a href="/" class="nav-item">首页</a>
+  
+    <a href="/archives" class="nav-item">归档</a>
+  
+    <a href="/categories/" class="nav-item">CATEGORY</a>
+  
+    <a href="/tags/" class="nav-item">TAG</a>
+  
+</nav>
+
+<button class="theme-toggle" type="button" aria-label="切换主题" title="切换深/浅主题">
+  <span class="theme-stack">
+    <span class="theme-char" data-char="深">深</span>
+    <span class="theme-char" data-char="浅">浅</span>
+  </span>
+</button>
+
+  </header>
+
+  <div class="main-layout">
+    
+<aside class="shelf">
+  <div class="shelf-head">目录</div>
+  <ul class="shelf-list">
+    
+      
+      <li class="shelf-item" data-cat="CMU 10-414: Deep Learning Systems">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name">CMU 10-414: Deep Learning Systems</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts">
+          
+            
+            <li><a href="/2026/09/08/bilibili-bv199rlyjez2-p2/" class="post-link">Lecture 2 - ML Refresher / Softmax Regression</a></li>
+          
+            
+            <li><a href="/2026/08/10/bilibili-bv199rlyjez2-p1/" class="post-link">Lecture 1 - Introduction and Logistics</a></li>
+          
+        </ul>
+      </li>
+    
+      
+      <li class="shelf-item" data-cat="操作系统原理">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name">操作系统原理</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts">
+          
+            
+            <li><a href="/2026/11/16/ptrace/" class="post-link">ptrace：调试器怎样控制程序</a></li>
+          
+            
+            <li><a href="/2026/10/23/proot/" class="post-link">PRoot：不需要 root 的 chroot</a></li>
+          
+        </ul>
+      </li>
+    
+      
+      <li class="shelf-item" data-cat="计算机网络">
+        <button class="shelf-cat active" type="button">
+          <span class="cat-name">计算机网络</span>
+          <span class="cat-count">1</span>
+        </button>
+        <ul class="shelf-posts open">
+          
+            
+            <li><a href="/2026/11/16/ssh/" class="post-link current">SSH 登录原理</a></li>
+          
+        </ul>
+      </li>
+    
+  </ul>
+</aside>
+
+    <main class="content">
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">SSH 登录原理</h1>
+    <div class="post-meta">
+      <time class="post-date" datetime="2026-11-16T20:02:19">
+        2026-11-16
+      </time>
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-categories">
+  
+    
+    <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" class="category-link">计算机网络</a>
+  
+</span>
+
+      
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-tags">
+  
+    
+    <a href="/tags/SSH/" class="tag-link">#SSH</a>
+  
+    , 
+    <a href="/tags/OpenSSH/" class="tag-link">#OpenSSH</a>
+  
+    , 
+    <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" class="tag-link">#计算机网络</a>
+  
+    , 
+    <a href="/tags/%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95/" class="tag-link">#远程登录</a>
+  
+    , 
+    <a href="/tags/%E5%85%AC%E9%92%A5%E8%AE%A4%E8%AF%81/" class="tag-link">#公钥认证</a>
+  
+    , 
+    <a href="/tags/%E5%AF%86%E9%92%A5%E4%BA%A4%E6%8D%A2/" class="tag-link">#密钥交换</a>
+  
+</span>
+
+      
+      <span class="meta-sep">/</span>
+      <span class="post-views" id="busuanzi_container_page_pv">
+        阅读 <span id="busuanzi_value_page_pv">-</span>
+      </span>
+    </div>
+  </header>
+  <div class="post-body">
+    <p><strong>Secure Shell</strong></p>
+<p>早期用 Telnet 远程登录时，会话通常不加密，路上的人可能读到你输入的密码和命令。1995 年，Tatu Ylönen 开发了 SSH，让远程登录可以在不可信的网络上进行：整个会话受到加密保护，客户端也能在登录前验证服务器身份。</p>
+<p>第一次连一台服务器，本来是去登录的，SSH 却可能先问你要不要信任这台机器：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><code class="hljs text">$ ssh alice@server.example.com<br>The authenticity of host &#x27;server.example.com&#x27; can&#x27;t be established.<br>ED25519 key fingerprint is SHA256:…<br>Are you sure you want to continue connecting (yes/no/[fingerprint])?<br></code></pre></td></tr></table></figure>
+
+<p>这时服务器还没检查你能不能以 <code>alice</code> 登录。是你的电脑先要确认一件事：对面真的是你想连的服务器吗？</p>
+<h2 id="主机指纹与服务器身份"><a href="#主机指纹与服务器身份" class="headerlink" title="主机指纹与服务器身份"></a>主机指纹与服务器身份</h2><p>服务器上有一对主机密钥。服务器把公钥发给客户端，并用私钥给这次握手签名。客户端用公钥验证签名，能确认对面持有对应的私钥。但光靠这一步，客户端还不知道这把公钥是不是真的属于那台服务器：另一台机器也能拿自己的私钥签名。</p>
+<p>提示中的指纹是对公钥做哈希得到的简短标识，方便人拿来比较。第一次连接时，可以请管理员从服务器上取出指纹，再和终端显示的指纹核对。这个指纹要从你已经信任的渠道拿到；如果只看当前连接自己报出的值，你拿到的仍然只是对方的一面之词。</p>
+<p>确认后，OpenSSH 会把接受的主机公钥记到本机的 <code>~/.ssh/known_hosts</code>。下次连接时，客户端可以直接拿记录核对，不必再问你。核对公钥和验证签名解决的是两件事：前者确定<strong>这把钥匙属于谁</strong>，后者确认<strong>对方真的持有配对的私钥</strong>。即使别人复制了服务器的公钥，也不能靠公钥生成有效签名。</p>
+<p>这也解释了为什么服务器重装后可能出现主机密钥变更警告：地址没变，但重装后的服务器可能生成了新的主机密钥。你需要核实新指纹，不能单凭地址相同就把新密钥当成原来那把。</p>
+<h2 id="公钥登录与账号权限"><a href="#公钥登录与账号权限" class="headerlink" title="公钥登录与账号权限"></a>公钥登录与账号权限</h2><p>轮到服务器验证登录者时，方向反过来了。你要以 <code>alice</code> 登录，服务器要确认两件事：你拿来的公钥是否被允许登录这个账号，以及你是否真的持有与它配对的私钥。</p>
+<ol>
+<li><strong>查这把公钥有没有权限。</strong> 客户端告诉服务器要登录 <code>alice</code>，并发出自己的公钥。服务器可以查远程账号的 <code>~/.ssh/authorized_keys</code>。即使文件里有这把公钥，也只说明它可以用于登录。公钥本来就可以公开，别人拿到一份副本，也能把它发给服务器。</li>
+<li><strong>用签名证明你有私钥。</strong> 客户端用私钥给登录请求签名，发给服务器的是请求和签名，私钥留在本机。服务器拿那把获准登录的公钥，核对签名是否对应这份请求。验证通过，才说明签名是用配对的私钥做出来的。</li>
+<li><strong>让这份签名只对当前连接有效。</strong> 签名时除了登录请求，还要算进当前连接的<strong>会话标识</strong>。这个标识在握手时生成，客户端和服务器都知道。服务器验签时用的是自己这条连接的标识，不由客户端指定。</li>
+</ol>
+<p>比如你上午登录了一次，那份签名对应的是“以 <code>alice</code> 登录”加上上午这条连接的标识。下午重新连同一台服务器，即使账号和公钥都没变，连接的标识也变了。如果有人把上午的请求和签名原样发到新连接上，服务器会用新连接的标识验签，旧签名就对不上。客户端需要用私钥为这次登录重新签名。</p>
+<p>因此，<strong>别人复制了你的公钥，也不能凭它登录</strong>。服务器用公钥登记登录资格，客户端必须用配对的私钥证明自己有这个资格。私钥泄露则不同：拿到私钥的人能为新连接生成有效签名。服务器上的授权名单也要保护，因为能改这份名单的人，可以把自己的公钥加进去，再用自己的私钥登录。</p>
+<p>这份权限是按账号给的。比如某把公钥在服务器上只被授权登录 <code>alice</code>，你把命令改成 <code>ssh bob@server.example.com</code>，即使还能生成有效的签名，也不能凭这把钥匙登录 <code>bob</code>。换电脑也是一样：如果新电脑用的是另一把用户密钥，远程账号得先允许那把公钥。新电脑把服务器记进自己的 <code>known_hosts</code>，并不会给它增加登录权限。</p>
+<h2 id="密码登录与公钥登录的区别"><a href="#密码登录与公钥登录的区别" class="headerlink" title="密码登录与公钥登录的区别"></a>密码登录与公钥登录的区别</h2><p><strong>两种登录方式都走加密通道。</strong> 用密码登录时，客户端把账号密码放在加密的数据包里发给服务器。路上的人看不到密码，但服务器能解开数据包，拿到你输入的密码来验证。如果你误信了一台冒充的服务器，并把账号密码输给它，加密也阻止不了它拿到密码：它就在通道的另一端。</p>
+<p>公钥登录时，客户端只发公钥和针对本次连接的签名，服务器验证签名时不需要拿到私钥。即使对方保留了这份签名，也不能拿它到另一条连接里登录。如果服务器只允许公钥认证，别人反复猜账号密码也无法通过 SSH 登录。这是公钥认证带来的保护，和网络上的数据有没有加密是两回事。</p>
+<p>公钥登录有时也会提示输入口令。如果提示让你输入某个私钥文件的 <code>passphrase</code>，它是在本机解锁私钥文件，让客户端能用它签名。<strong>私钥口令留在本机，远程账号密码则会交给服务器验证。</strong></p>
+<h2 id="SSH-加密会话的原理"><a href="#SSH-加密会话的原理" class="headerlink" title="SSH 加密会话的原理"></a>SSH 加密会话的原理</h2><p>连上服务器的 TCP 端口，只表示两端已经可以互相发送字节。此时还不能把登录请求或终端输入直接交给这条连接。SSH 先做一次握手：双方选定都支持的算法，再交换建立加密通道所需的数据。</p>
+<p>关键是，双方要算出同一个秘密，却不能直接在网络上把这个秘密发给对方。握手时，客户端和服务器各保留一份本地秘密，只把由它算出的公开数据发给对方。算法让两边各自用“自己的秘密和对方的公开数据”算出同一个<strong>共享秘密</strong>，旁观者只拿到两份公开数据，难以反推出它。这个过程叫密钥交换。双方用共享秘密生成保护这次通信的密钥。主机密钥不变，也不意味着两次独立连接会用同样的加密密钥。</p>
+<p>密钥交换和主机验证发生在同一次握手中。服务器用主机私钥为本次交换的数据签名，客户端验证签名后，才能确认自己在跟这台服务器建立通道。只做密钥交换仍可能连错对象：对面是谁和传输中有没有加密，是两个不同的问题。</p>
+<p>握手完成后，SSH 会加密后续数据，并加上接收方能验证的校验信息。旁人即使能截到数据包，也看不懂里面的输入和输出；中途改了数据，接收方也能发现。这时客户端才在受保护的通道里发起用户认证。</p>
+<p>登录成功后，客户端请求服务器启动远程 shell，也就是解释和执行命令的程序。你在本地敲 <code>pwd</code>，SSH 把输入送到服务器，远程 shell 执行命令，结果再沿原路传回。你看到的是远程 shell 的当前目录，因为命令在服务器上运行，本地终端只负责接收输入和显示结果。</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.usenix.org/legacy/publications/library/proceedings/sec96/full_papers/ylonen/ylonen.html">Tatu Ylönen 的 SSH 论文（1996）</a>、<a target="_blank" rel="noopener" href="https://www.openssh.org/history.html">OpenSSH 项目历史</a>、<a target="_blank" rel="noopener" href="https://man.openbsd.org/ssh">OpenSSH 客户端手册</a>、<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc4253">SSH 传输层规范（RFC 4253）</a>、<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc4252">SSH 用户认证规范（RFC 4252）</a>、<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc4254">SSH 会话与通道规范（RFC 4254）</a>、<a target="_blank" rel="noopener" href="https://man.openbsd.org/ssh-keygen">OpenSSH 密钥管理手册</a>。</p>
+
+  </div>
+</article>
+
+
+
+  <section
+    class="post-comments"
+    data-comment-provider="utterances"
+    data-comment-light-theme="github-light"
+    data-comment-dark-theme="github-dark"
+  >
+    <h2 class="comments-title">COMMENTS</h2>
+    <script>
+      (function () {
+        var container = document.currentScript.parentElement;
+        var isDark = document.documentElement.classList.contains('theme-dark');
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.setAttribute('repo', 'cardchoosen/blog');
+        script.setAttribute('issue-term', 'pathname');
+        script.setAttribute('label', 'comment');
+        script.setAttribute('theme', isDark ? 'github-dark' : 'github-light');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      })();
+    </script>
+  </section>
+
+
+
+  <nav class="post-nav">
+    <div class="post-nav-cell">
+      
+        <span class="nav-label">OLDER</span>
+        <a href="/2026/11/16/ptrace/" class="nav-link">ptrace：调试器怎样控制程序</a>
+      
+    </div>
+    <div class="post-nav-cell right">
+      
+    </div>
+  </nav>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 nannnzhang</span>
+    <span class="footer-sep">|</span>
+    <span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+  </div>
+</footer>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      startup: {
+        typeset: true
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+<script src="/js/shelf.js"></script>
+
+</body>
+</html>
