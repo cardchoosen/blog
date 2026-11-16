@@ -502,9 +502,9 @@ html.theme-dark .theme-char[data-char="浅"] {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   background: var(--color-code-bg);
   color: var(--color-code-text);
-  padding: 16px 18px;
+  padding: 10px 18px;
   overflow-x: auto;
-  margin: 1.25em 0;
+  margin: 0.85em 0;
   font-size: 16px;
   line-height: 1.6;
 }
@@ -521,10 +521,16 @@ html.theme-dark .theme-char[data-char="浅"] {
   color: inherit;
   padding: 0;
 }
+.post-body pre code.hljs {
+  padding: 0;
+}
 .post-body figure.highlight {
   background: var(--color-code-bg);
-  margin: 1em 0;
+  margin: 0.85em 0;
   overflow-x: auto;
+}
+.post-body figure.highlight table {
+  margin: 0;
 }
 .post-body figure.highlight:focus {
   outline: none;
@@ -542,7 +548,7 @@ html.theme-dark .theme-char[data-char="浅"] {
   display: none;
 }
 .post-body figure.highlight .code pre {
-  padding: 16px 18px;
+  padding: 10px 18px;
 }
 .post-body .hljs {
   background: var(--color-code-bg) !important;
