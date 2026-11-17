@@ -93,7 +93,7 @@ body
   font-family font-mono
   color var(--color-text)
   background var(--color-bg)
-  font-size 16px
+  font-size 17px
   line-height 1.7
   -webkit-font-smoothing antialiased
   // 禁用弹性滚动：滑动到顶/底时不再延伸出超出页面的空白区域
@@ -124,7 +124,7 @@ a
   gap 14px
 
 .brand-title
-  font-size 18px
+  font-size 19px
   font-weight bold
   letter-spacing 0.04em
   color var(--color-bar-text)
@@ -138,7 +138,7 @@ a
     text-decoration underline
 
 .brand-sub
-  font-size 13px
+  font-size 14px
   opacity 0.7
 
 .topnav
@@ -147,7 +147,7 @@ a
 
 .nav-item
   color var(--color-bar-text)
-  font-size 15px
+  font-size 16px
   text-decoration none
   letter-spacing 0.04em
   padding 6px 10px
@@ -261,7 +261,7 @@ html.theme-dark
 
 // 目录标题：加大字号、左侧粗竖线 accent bar、与下方区分
 .shelf-head
-  font-size 15px
+  font-size 16px
   font-weight bold
   letter-spacing 0.04em
   color var(--color-text)
@@ -290,7 +290,7 @@ html.theme-dark
   text-align left
   padding 16px 22px
   font-family font-mono
-  font-size 15px
+  font-size 16px
   font-weight bold
   cursor pointer
   display flex
@@ -306,7 +306,7 @@ html.theme-dark
   flex 1
 
 .cat-count
-  font-size 12px
+  font-size 13px
   font-weight normal
   opacity 0.5
   margin-left 8px
@@ -328,7 +328,7 @@ html.theme-dark
 .post-link
   display block
   padding 12px 22px 12px 36px
-  font-size 14px
+  font-size 15px
   text-decoration none
   color var(--color-text)
   hover-soft()
@@ -339,7 +339,7 @@ html.theme-dark
 
 .shelf-empty
   padding 22px
-  font-size 14px
+  font-size 15px
   opacity 0.5
 
 // ---- 右侧内容区 ----
@@ -350,7 +350,7 @@ html.theme-dark
 
 // ---- 首页文章列表 ----
 .post-list
-  max-width 780px
+  max-width 820px
   margin-left auto
   margin-right auto
 
@@ -361,13 +361,13 @@ html.theme-dark
     padding-top 0
 
 .item-date
-  font-size 12px
+  font-size 13px
   letter-spacing 0.08em
   opacity 0.6
   margin-bottom 4px
 
 .item-title
-  font-size 19px
+  font-size 21px
   font-weight bold
   line-height 1.35
   a
@@ -376,13 +376,13 @@ html.theme-dark
 
 .item-excerpt
   margin-top 6px
-  font-size 14px
+  font-size 15px
   line-height 1.55
   opacity 0.8
 
 // ---- 文章详情 ----
 .post
-  max-width 780px
+  max-width 820px
   margin-left auto
   margin-right auto
 
@@ -392,7 +392,7 @@ html.theme-dark
   margin-bottom 28px
 
 .post-title
-  font-size 28px
+  font-size 32px
   font-weight bold
   line-height 1.3
   margin-bottom 12px
@@ -401,7 +401,7 @@ html.theme-dark
     hover-soft()
 
 .post-meta
-  font-size 13px
+  font-size 14px
   opacity 0.7
 
 .meta-sep
@@ -418,7 +418,7 @@ html.theme-dark
 // ---- 文章正文 ----
 .post-body
   font-family font-reading
-  font-size 18px
+  font-size 19px
   line-height 1.84
   letter-spacing 0
   h1, h2, h3, h4, h5, h6
@@ -428,11 +428,11 @@ html.theme-dark
     letter-spacing 0
     position relative
   h1
-    font-size 27px
+    font-size 30px
     border-bottom 2px solid var(--color-line)
     padding-bottom 8px
   h2
-    font-size 24px
+    font-size 27px
     border-bottom 2px solid var(--color-line)
     padding 0 0 8px 14px
     &::before
@@ -445,7 +445,7 @@ html.theme-dark
       background var(--color-text)
       opacity 0.9
   h3
-    font-size 21px
+    font-size 23px
     padding-left 12px
     &::before
       content ''
@@ -482,10 +482,10 @@ html.theme-dark
     font-family font-mono
     background var(--color-code-bg)
     color var(--color-code-text)
-    padding 16px 18px
+    padding 10px 18px
     overflow-x auto
-    margin 1.25em 0
-    font-size 15px
+    margin 0.85em 0
+    font-size 16px
     line-height 1.6
     &:focus
       outline none
@@ -497,11 +497,15 @@ html.theme-dark
       background transparent
       color inherit
       padding 0
+      &.hljs
+        padding 0
   // Hexo highlight.js 渲染的代码块：<figure.highlight><table><td.gutter><td.code>
   figure.highlight
     background var(--color-code-bg)
-    margin 1em 0
+    margin 0.85em 0
     overflow-x auto
+    table
+      margin 0
     &:focus
       outline none
       background var(--color-code-bg)
@@ -514,7 +518,7 @@ html.theme-dark
     .gutter
       display none
     .code pre
-      padding 16px 18px
+      padding 10px 18px
       // 不设 color，让 hljs 主题 CSS 的 .hljs { color } 接管字色
   // 覆盖 highlight.js 主题 CSS 的底色（让代码块底色由 --color-code-bg 控制）
   // 不强制 color，让 hljs 主题的 token 颜色生效
@@ -568,13 +572,13 @@ html.theme-dark
 
 // ---- 评论 ----
 .post-comments
-  max-width 780px
+  max-width 820px
   margin 40px auto 0
   padding-top 18px
   border-top 1px solid var(--color-line)
 
 .comments-title
-  font-size 16px
+  font-size 17px
   font-weight bold
   letter-spacing 0.12em
   margin-bottom 16px
@@ -591,7 +595,7 @@ html.theme-dark
   margin-right auto
   padding-top 16px
   border-top 1px solid var(--color-line)
-  max-width 780px
+  max-width 820px
 
 .post-nav-cell
   flex 1
@@ -600,13 +604,13 @@ html.theme-dark
 
 .nav-label
   display block
-  font-size 11px
+  font-size 12px
   letter-spacing 0.12em
   opacity 0.6
   margin-bottom 4px
 
 .nav-link
-  font-size 15px
+  font-size 16px
   text-decoration none
   font-weight bold
   hover-soft()
@@ -620,10 +624,10 @@ html.theme-dark
   margin-right auto
   padding-top 16px
   border-top 1px solid var(--color-line)
-  max-width 780px
+  max-width 820px
 
 .pager-cell
-  font-size 14px
+  font-size 15px
   letter-spacing 0.08em
   text-decoration none
   font-weight bold
@@ -633,12 +637,12 @@ html.theme-dark
 
 // ---- 归档 ----
 .archive
-  max-width 780px
+  max-width 820px
   margin-left auto
   margin-right auto
 
 .archive-title
-  font-size 18px
+  font-size 20px
   font-weight bold
   letter-spacing 0.08em
   padding-bottom 12px
@@ -646,7 +650,7 @@ html.theme-dark
   margin-bottom 20px
 
 .archive-year
-  font-size 16px
+  font-size 17px
   font-weight bold
   margin 20px 0 8px
   padding 4px 8px
@@ -662,13 +666,13 @@ html.theme-dark
   border-bottom 1px solid var(--color-line)
 
 .archive-date
-  font-size 12px
+  font-size 13px
   opacity 0.6
   flex-shrink 0
   width 60px
 
 .archive-link
-  font-size 15px
+  font-size 16px
   text-decoration none
   hover-soft()
 
@@ -687,17 +691,17 @@ html.theme-dark
   hover-soft()
 
 .term-name
-  font-size 16px
+  font-size 17px
   font-weight bold
 
 .term-count
-  font-size 13px
+  font-size 14px
   opacity 0.6
   flex-shrink 0
 
 // ---- 404 ----
 .not-found
-  max-width 780px
+  max-width 820px
   margin-left auto
   margin-right auto
   padding-top 36px
@@ -710,12 +714,12 @@ html.theme-dark
   margin-bottom 18px
 
 .not-found-title
-  font-size 26px
+  font-size 28px
   margin-bottom 16px
 
 .not-found-desc
   font-family font-reading
-  font-size 18px
+  font-size 19px
   line-height 1.8
   color var(--color-text)
   opacity 0.78
@@ -737,7 +741,7 @@ html.theme-dark
 
 .not-found-tip
   margin-top 18px
-  font-size 13px
+  font-size 14px
   opacity 0.6
 
 // ---- footer ----
