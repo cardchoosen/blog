@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script>
+    // 防 FOUC：CSS 加载前根据 localStorage 或系统偏好设置主题 class
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
+        document.documentElement.className = 'theme-' + theme;
+      } catch (e) {}
+    })();
+  </script>
+  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>以太网的 MTU</title>
+<meta name="description" content="">
+
+
+  <link rel="icon" href="/favicon.ico">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-light.min.css" media="(prefers-color-scheme: light)" class="hljs-theme-light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)" class="hljs-theme-dark">
+<meta name="description" content="Maximum Transmission Unit 假设两台电脑接在同一台交换机上，电脑 A 要给电脑 B 传一个文件。网络不会把整个文件当成一块数据塞进网线。以常见的 TCP 文件传输为例，发送端把文件内容分成许多小段，分别封装成 IP 包，再一个包一个包地发出去。 MTU 是一段网络链路一次能承载的数据单元的大小上限。 在这里，这个数据单元就是 IP 包。电脑 A 的以太网接口如果设为 MTU">
+<meta property="og:type" content="article">
+<meta property="og:title" content="以太网的 MTU">
+<meta property="og:url" content="https://anemone.wiki/2026/11/18/ethernet-mtu/index.html">
+<meta property="og:site_name" content="Anemone&#39;s Blog">
+<meta property="og:description" content="Maximum Transmission Unit 假设两台电脑接在同一台交换机上，电脑 A 要给电脑 B 传一个文件。网络不会把整个文件当成一块数据塞进网线。以常见的 TCP 文件传输为例，发送端把文件内容分成许多小段，分别封装成 IP 包，再一个包一个包地发出去。 MTU 是一段网络链路一次能承载的数据单元的大小上限。 在这里，这个数据单元就是 IP 包。电脑 A 的以太网接口如果设为 MTU">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-18T02:48:09.000Z">
+<meta property="article:modified_time" content="2026-11-18T02:48:09.702Z">
+<meta property="article:author" content="nannnzhang">
+<meta property="article:tag" content="MTU">
+<meta property="article:tag" content="交换机">
+<meta property="article:tag" content="以太网">
+<meta property="article:tag" content="路径 MTU">
+<meta name="twitter:card" content="summary">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+  <a href="/" class="brand-title">Anemone&#39;s Blog</a>
+  
+</div>
+
+<nav class="topnav">
+  
+    <a href="/" class="nav-item">首页</a>
+  
+    <a href="/archives" class="nav-item">归档</a>
+  
+    <a href="/categories/" class="nav-item">CATEGORY</a>
+  
+    <a href="/tags/" class="nav-item">TAG</a>
+  
+</nav>
+
+<button class="theme-toggle" type="button" aria-label="切换主题" title="切换深/浅主题">
+  <span class="theme-stack">
+    <span class="theme-char" data-char="深">深</span>
+    <span class="theme-char" data-char="浅">浅</span>
+  </span>
+</button>
+
+  </header>
+
+  <div class="main-layout">
+    
+<aside class="shelf">
+  <div class="shelf-head">目录</div>
+  <ul class="shelf-list">
+    
+      
+      <li class="shelf-item" data-cat="CMU 10-414: Deep Learning Systems">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name">CMU 10-414: Deep Learning Systems</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts">
+          
+            
+            <li><a href="/2026/09/08/bilibili-bv199rlyjez2-p2/" class="post-link">Lecture 2 - ML Refresher / Softmax Regression</a></li>
+          
+            
+            <li><a href="/2026/08/10/bilibili-bv199rlyjez2-p1/" class="post-link">Lecture 1 - Introduction and Logistics</a></li>
+          
+        </ul>
+      </li>
+    
+      
+      <li class="shelf-item" data-cat="操作系统原理">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name">操作系统原理</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts">
+          
+            
+            <li><a href="/2026/11/16/ptrace/" class="post-link">ptrace：调试器怎样控制程序</a></li>
+          
+            
+            <li><a href="/2026/10/23/proot/" class="post-link">PRoot：不需要 root 的 chroot</a></li>
+          
+        </ul>
+      </li>
+    
+      
+      <li class="shelf-item" data-cat="计算机网络">
+        <button class="shelf-cat active" type="button">
+          <span class="cat-name">计算机网络</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts open">
+          
+            
+            <li><a href="/2026/11/18/ethernet-mtu/" class="post-link current">以太网的 MTU</a></li>
+          
+            
+            <li><a href="/2026/11/16/ssh/" class="post-link">SSH 登录原理</a></li>
+          
+        </ul>
+      </li>
+    
+  </ul>
+</aside>
+
+    <main class="content">
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">以太网的 MTU</h1>
+    <div class="post-meta">
+      <time class="post-date" datetime="2026-11-18T10:48:09">
+        2026-11-18
+      </time>
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-categories">
+  
+    
+    <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" class="category-link">计算机网络</a>
+  
+</span>
+
+      
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-tags">
+  
+    
+    <a href="/tags/%E4%BB%A5%E5%A4%AA%E7%BD%91/" class="tag-link">#以太网</a>
+  
+    , 
+    <a href="/tags/MTU/" class="tag-link">#MTU</a>
+  
+    , 
+    <a href="/tags/%E4%BA%A4%E6%8D%A2%E6%9C%BA/" class="tag-link">#交换机</a>
+  
+    , 
+    <a href="/tags/%E8%B7%AF%E5%BE%84-MTU/" class="tag-link">#路径 MTU</a>
+  
+</span>
+
+      
+      <span class="meta-sep">/</span>
+      <span class="post-views" id="busuanzi_container_page_pv">
+        阅读 <span id="busuanzi_value_page_pv">-</span>
+      </span>
+    </div>
+  </header>
+  <div class="post-body">
+    <p><strong>Maximum Transmission Unit</strong></p>
+<p>假设两台电脑接在同一台交换机上，电脑 A 要给电脑 B 传一个文件。网络不会把整个文件当成一块数据塞进网线。以常见的 TCP 文件传输为例，发送端把文件内容分成许多小段，分别封装成 IP 包，再一个包一个包地发出去。</p>
+<p><strong>MTU 是一段网络链路一次能承载的数据单元的大小上限。</strong> 在这里，这个数据单元就是 IP 包。电脑 A 的以太网接口如果设为 MTU 1500，就表示它通过这个接口发送的单个 IP 包最多可以有 1500 字节。文件可以比这大得多，因为它会用多个包来传。MTU 也不是网速：网速说的是一秒能传多少数据，MTU 说的是每个包最多能有多大。</p>
+<h2 id="MTU-与以太网帧长度"><a href="#MTU-与以太网帧长度" class="headerlink" title="MTU 与以太网帧长度"></a>MTU 与以太网帧长度</h2><p>IP 包带着源 IP、目的 IP 等信息，但网线上实际传输的是<strong>以太网帧</strong>。发送端把 IP 包放进帧的数据区，再在外面加上以太网自己的信息。比如帧头有目的 MAC 地址，用来告诉局域网这一帧要交给哪个设备；帧尾有校验值，用来检查帧在传输中有没有出错。</p>
+<p>拿一个正好 1500 字节的 IP 包来说。先只看最简单的以太网帧，不加区分虚拟局域网的 VLAN 标签。IP 包装进去以后是这样的：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><code class="hljs text">| 以太网帧头 14 字节 | IP 包 1500 字节 | 帧校验 4 字节 |<br>|&lt;---------------- 完整帧 1518 字节 ----------------&gt;|<br></code></pre></td></tr></table></figure>
+
+<p>1500 是帧里面的 IP 包长度，1518 是加上帧头和帧尾后的长度。两个数字量的是不同的东西。<strong>IP 头也算在这 1500 字节里。</strong> 如果里面装的是 TCP 数据，TCP 头同样要占空间。以没有额外选项的 IPv4 和 TCP 为例，两个头各占 20 字节，单个满载 IP 包就能装下 1460 字节的 TCP 数据。</p>
+<h2 id="局域网里的帧转发"><a href="#局域网里的帧转发" class="headerlink" title="局域网里的帧转发"></a>局域网里的帧转发</h2><p>回到电脑 A 给电脑 B 发数据的例子。假设两台电脑在同一个以太网局域网里，A 把 B 的 MAC 地址写进帧头。交换机收到帧后，用目的 MAC 地址查自己的转发表。如果表里已经记录了 B 接在哪个端口，就把帧往这个端口发。它不需要打开里面的 IP 包来决定往哪儿转发，也不会替两台电脑把一个太大的 IP 包切成几个小包。</p>
+<p>这就解释了为什么开了<strong>巨帧</strong>，也就是允许比标准以太网帧更大的帧，不能只看两端的网卡。比如 A 和 B 的网卡都能处理装有 9000 字节 IP 包的帧，但中间的交换机只支持标准大小：A 可以把帧发到交换机，交换机却不会把这么大的帧转发给 B。两端支持的上限再大，也不能代替中间设备的转发能力。</p>
+<p>更大的帧能让同样多的数据用更少的帧来传，减少重复的帧头和处理次数。但它不会把网口的传输速率变快，而且要让沿途设备都能处理相应大小的帧。</p>
+<h2 id="链路-MTU-与路径-MTU"><a href="#链路-MTU-与路径-MTU" class="headerlink" title="链路 MTU 与路径 MTU"></a>链路 MTU 与路径 MTU</h2><p>现在把 B 挪到另一个网络，中间加一台路由器。A 还是从 MTU 为 1500 的以太网发出一个 1500 字节的 IP 包，但路由器通往 B 的下一段链路只允许 1400 字节。</p>
+<p>路由器和刚才的交换机做的事不同。A 发出的帧只负责把 IP 包送到路由器。路由器取出里面的 IP 包，根据目的 IP 地址选下一段链路，再按那段链路的要求重新封装。问题就出在这一步：<strong>上一段装得下 1500 字节，下一段只装得下 1400 字节。</strong> 换一层帧头，并不会让里面的 IP 包变小。</p>
+<p>超出的部分怎么办，要看 IP 版本。IPv4 在允许分片时，路由器可以把一个大 IP 包拆成几个较小的 IP 分片，由接收端重新拼起来。如果包标明不许分片，路由器就丢弃它，并向发送端报告下一段放不下。IPv6 路由器不负责分片，遇到这种情况会丢包并发送 <code>Packet Too Big</code> 通知，告诉发送端把后续包发小一些；如果确实需要分片，也由发送端做。</p>
+<p><strong>路径 MTU 是一个 IP 包从起点到终点、不经分片就能通过的最大尺寸。</strong> 在这个例子里，两段链路分别允许 1500 和 1400 字节，所以路径 MTU 是 1400。发送端不必知道每段链路的配置，可以根据路由器返回的通知调整发包大小，这就是路径 MTU 发现的基本思路。</p>
+<p>一段链路的 MTU 回答“我能往下一站放多大的包”，路径 MTU 回答“这个包原样能不能走完全程”。前者是本段的限制，后者由整条路径上最小的限制决定。</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc2464">IPv6 在以太网上的封装（RFC 2464）</a>、<a target="_blank" rel="noopener" href="https://www.juniper.net/documentation/us/en/software/junos/interfaces-fundamentals/topics/topic-map/media-mtu.html">Juniper：链路与协议 MTU</a>、<a target="_blank" rel="noopener" href="https://www.cisco.com/c/en/us/support/docs/switches/catalyst-6000-series-switches/24048-148.html">Cisco：交换机的巨帧支持</a>、<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc1191">IPv4 路径 MTU 发现（RFC 1191）</a>、<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc8200">IPv6 规范（RFC 8200）</a>、<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc8201">IPv6 路径 MTU 发现（RFC 8201）</a>。</p>
+
+  </div>
+</article>
+
+
+
+  <section
+    class="post-comments"
+    data-comment-provider="utterances"
+    data-comment-light-theme="github-light"
+    data-comment-dark-theme="github-dark"
+  >
+    <h2 class="comments-title">COMMENTS</h2>
+    <script>
+      (function () {
+        var container = document.currentScript.parentElement;
+        var isDark = document.documentElement.classList.contains('theme-dark');
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.setAttribute('repo', 'cardchoosen/blog');
+        script.setAttribute('issue-term', 'pathname');
+        script.setAttribute('label', 'comment');
+        script.setAttribute('theme', isDark ? 'github-dark' : 'github-light');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      })();
+    </script>
+  </section>
+
+
+
+  <nav class="post-nav">
+    <div class="post-nav-cell">
+      
+        <span class="nav-label">OLDER</span>
+        <a href="/2026/11/16/ssh/" class="nav-link">SSH 登录原理</a>
+      
+    </div>
+    <div class="post-nav-cell right">
+      
+    </div>
+  </nav>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 nannnzhang</span>
+    <span class="footer-sep">|</span>
+    <span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+  </div>
+</footer>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      startup: {
+        typeset: true
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+<script src="/js/shelf.js"></script>
+
+</body>
+</html>
