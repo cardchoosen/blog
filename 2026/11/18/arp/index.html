@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script>
+    // 防 FOUC：CSS 加载前根据 localStorage 或系统偏好设置主题 class
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
+        document.documentElement.className = 'theme-' + theme;
+      } catch (e) {}
+    })();
+  </script>
+  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARP 地址解析</title>
+<meta name="description" content="">
+
+
+  <link rel="icon" href="/favicon.ico">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-light.min.css" media="(prefers-color-scheme: light)" class="hljs-theme-light">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)" class="hljs-theme-dark">
+<meta name="description" content="ARP（Address Resolution Protocol，地址解析协议）用来在本地以太网上，根据已知的 IPv4 地址查出对应的 MAC 地址。 比如，电脑知道办公室打印机的 IP 是 192.168.1.50，但还不知道它的 MAC，就可以用 ARP 发出询问。打印机收到后，把自己网卡的 MAC 地址回复给电脑。 这里用到两种地址，因为发送数据要做两件事。目的 IP 地址写在 IP 包里，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ARP 地址解析">
+<meta property="og:url" content="https://anemone.wiki/2026/11/18/arp/index.html">
+<meta property="og:site_name" content="Anemone&#39;s Blog">
+<meta property="og:description" content="ARP（Address Resolution Protocol，地址解析协议）用来在本地以太网上，根据已知的 IPv4 地址查出对应的 MAC 地址。 比如，电脑知道办公室打印机的 IP 是 192.168.1.50，但还不知道它的 MAC，就可以用 ARP 发出询问。打印机收到后，把自己网卡的 MAC 地址回复给电脑。 这里用到两种地址，因为发送数据要做两件事。目的 IP 地址写在 IP 包里，">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-18T03:30:56.000Z">
+<meta property="article:modified_time" content="2026-11-18T03:30:56.336Z">
+<meta property="article:author" content="nannnzhang">
+<meta property="article:tag" content="ARP">
+<meta property="article:tag" content="IPv4">
+<meta property="article:tag" content="MAC 地址">
+<meta property="article:tag" content="以太网">
+<meta name="twitter:card" content="summary">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+  <a href="/" class="brand-title">Anemone&#39;s Blog</a>
+  
+</div>
+
+<nav class="topnav">
+  
+    <a href="/" class="nav-item">首页</a>
+  
+    <a href="/archives" class="nav-item">归档</a>
+  
+    <a href="/categories/" class="nav-item">CATEGORY</a>
+  
+    <a href="/tags/" class="nav-item">TAG</a>
+  
+</nav>
+
+<button class="theme-toggle" type="button" aria-label="切换主题" title="切换深/浅主题">
+  <span class="theme-stack">
+    <span class="theme-char" data-char="深">深</span>
+    <span class="theme-char" data-char="浅">浅</span>
+  </span>
+</button>
+
+  </header>
+
+  <div class="main-layout">
+    
+<aside class="shelf">
+  <div class="shelf-head">目录</div>
+  <ul class="shelf-list">
+    
+      
+      <li class="shelf-item" data-cat="CMU 10-414: Deep Learning Systems">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name">CMU 10-414: Deep Learning Systems</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts">
+          
+            
+            <li><a href="/2026/09/08/bilibili-bv199rlyjez2-p2/" class="post-link">Lecture 2 - ML Refresher / Softmax Regression</a></li>
+          
+            
+            <li><a href="/2026/08/10/bilibili-bv199rlyjez2-p1/" class="post-link">Lecture 1 - Introduction and Logistics</a></li>
+          
+        </ul>
+      </li>
+    
+      
+      <li class="shelf-item" data-cat="操作系统原理">
+        <button class="shelf-cat" type="button">
+          <span class="cat-name">操作系统原理</span>
+          <span class="cat-count">2</span>
+        </button>
+        <ul class="shelf-posts">
+          
+            
+            <li><a href="/2026/11/16/ptrace/" class="post-link">ptrace：调试器怎样控制程序</a></li>
+          
+            
+            <li><a href="/2026/10/23/proot/" class="post-link">PRoot：不需要 root 的 chroot</a></li>
+          
+        </ul>
+      </li>
+    
+      
+      <li class="shelf-item" data-cat="计算机网络">
+        <button class="shelf-cat active" type="button">
+          <span class="cat-name">计算机网络</span>
+          <span class="cat-count">3</span>
+        </button>
+        <ul class="shelf-posts open">
+          
+            
+            <li><a href="/2026/11/18/arp/" class="post-link current">ARP 地址解析</a></li>
+          
+            
+            <li><a href="/2026/11/18/ethernet-mtu/" class="post-link">以太网的 MTU</a></li>
+          
+            
+            <li><a href="/2026/11/16/ssh/" class="post-link">SSH 登录原理</a></li>
+          
+        </ul>
+      </li>
+    
+  </ul>
+</aside>
+
+    <main class="content">
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">ARP 地址解析</h1>
+    <div class="post-meta">
+      <time class="post-date" datetime="2026-11-18T11:30:56">
+        2026-11-18
+      </time>
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-categories">
+  
+    
+    <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" class="category-link">计算机网络</a>
+  
+</span>
+
+      
+      
+        <span class="meta-sep">/</span>
+        
+<span class="post-tags">
+  
+    
+    <a href="/tags/%E4%BB%A5%E5%A4%AA%E7%BD%91/" class="tag-link">#以太网</a>
+  
+    , 
+    <a href="/tags/ARP/" class="tag-link">#ARP</a>
+  
+    , 
+    <a href="/tags/IPv4/" class="tag-link">#IPv4</a>
+  
+    , 
+    <a href="/tags/MAC-%E5%9C%B0%E5%9D%80/" class="tag-link">#MAC 地址</a>
+  
+</span>
+
+      
+      <span class="meta-sep">/</span>
+      <span class="post-views" id="busuanzi_container_page_pv">
+        阅读 <span id="busuanzi_value_page_pv">-</span>
+      </span>
+    </div>
+  </header>
+  <div class="post-body">
+    <p><strong>ARP（Address Resolution Protocol，地址解析协议）用来在本地以太网上，根据已知的 IPv4 地址查出对应的 MAC 地址。</strong> 比如，电脑知道办公室打印机的 IP 是 <code>192.168.1.50</code>，但还不知道它的 MAC，就可以用 ARP 发出询问。打印机收到后，把自己网卡的 MAC 地址回复给电脑。</p>
+<p>这里用到两种地址，因为发送数据要做两件事。<strong>目的 IP 地址</strong>写在 IP 包里，指明这个包最终要送到哪里。要让这个包在办公室的网线上传输，电脑还得把它装进一个<strong>以太网帧</strong>。帧是以太网收发数据的单位，开头有一个单独的地址栏，叫<strong>目的 MAC 地址</strong>，指明这段以太网上该由哪个网络接口接收这一帧。</p>
+<p>发给本地打印机时，这两个地址都指向打印机；发给外网服务器时，它们指向的却不是同一台设备。先看打印机。</p>
+<h2 id="同一子网：查询打印机的-MAC"><a href="#同一子网：查询打印机的-MAC" class="headerlink" title="同一子网：查询打印机的 MAC"></a>同一子网：查询打印机的 MAC</h2><p>假设电脑和打印机接在办公室的同一台交换机上。交换机连接着多台设备，负责把从一根网线收到的帧转发到相应的网线上。两台设备也在同一个 IP 子网内：在这个例子里，电脑的网络配置把打印机所在的一段 IP 地址划为本地，可以直接发送，不用先交给连接不同网络的路由器。</p>
+<p>你点下打印时，操作系统先用打印机的 IP 查<strong>这台电脑自己的路由表</strong>。这张表记录了去不同目的网络该从哪个接口发、是直接发还是交给路由器。查表的结果是“从有线网卡直接发给打印机”。到这一步，电脑已经选好了接收者，接下来才需要它的 MAC。</p>
+<p>接下来，电脑查看自己的 <strong>ARP 缓存</strong>，也就是这个接口上最近学到的 IP 与 MAC 对应关系。假设这是第一次打印，里面还没有打印机的记录。</p>
+<ol>
+<li><strong>电脑广播询问。</strong> 广播就是不单独指定一台接收设备，而是让同一本地网络里的设备都收到。电脑单独发出一帧 ARP 请求，目的 MAC 填以太网约定的广播地址 <code>ff:ff:ff:ff:ff:ff</code>，请求里写的是：“谁的 IP 是 <code>192.168.1.50</code>？请把你的 MAC 地址告诉我。”请求还带着电脑自己的 IP 和 MAC，方便对方回复。</li>
+<li><strong>打印机直接回复电脑。</strong> 交换机把这帧广播转发出去。能收到同一份以太网广播的范围叫作<strong>广播域</strong>；请求不会经由路由器传遍互联网。办公室里其他电脑收到请求，看到问的不是自己的 IP，不作应答。打印机看到问的是自己，就把自己的 MAC 写进应答。它从请求里已经知道电脑的 MAC，所以这次可以只回给电脑。</li>
+<li><strong>电脑发送打印数据。</strong> 电脑记下这条对应关系，把打印机的 MAC 填入新帧的帧头，再把原本要发的 IP 包装进去。刚才的请求和应答都没有携带打印数据；直到这个数据帧发出去，打印数据才真正上了网线。</li>
+</ol>
+<p>一份文档往往要分成许多包。只要缓存里的记录仍然有效，后续的帧就可以直接使用这个 MAC，不必每发一帧都问一次。记录也不会永远有效：打印机换了网卡，即使 IP 没变，旧 MAC 也可能不再适用。</p>
+<p>电脑用 ARP 缓存里的「IP → MAC」记录把帧头填好。交换机收到帧后，再用自己的转发表查「MAC → 端口」，决定从哪个网线接口把帧送到打印机。</p>
+<h2 id="跨子网：查询网关的-MAC"><a href="#跨子网：查询网关的-MAC" class="headerlink" title="跨子网：查询网关的 MAC"></a>跨子网：查询网关的 MAC</h2><p>现在，电脑改为访问互联网上的服务器。它查的还是同一张路由表，但这次的结果不同：服务器不在本地子网，包要先交给办公室的路由器。路由器连接办公室网络的那个接口，就是电脑使用的<strong>网关</strong>，假设地址是 <code>192.168.1.1</code>。</p>
+<p>如果缓存里没有对应记录，电脑广播问的是“谁的 IP 是 <code>192.168.1.1</code>”，而不是“谁的 IP 是远程服务器的 IP”。远程服务器收不到办公室里的以太网广播，也不需要收到。电脑此刻要做的，只是把包送到路由器手上。</p>
+<table>
+<thead>
+<tr>
+<th>从电脑发出的数据</th>
+<th>IP 包的目的 IP</th>
+<th>以太网帧的目的 MAC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>发给本地打印机</td>
+<td>打印机的 IP</td>
+<td>打印机的 MAC</td>
+</tr>
+<tr>
+<td>发给远程服务器</td>
+<td>服务器的 IP</td>
+<td>本地网关的 MAC</td>
+</tr>
+</tbody></table>
+<p>收到第二种帧后，路由器取出里面的 IP 包。现在轮到路由器用目的 IP 查<strong>路由器自己的路由表</strong>，决定下一步往哪里发。如果下一段也是以太网，它会为那一段重新封装帧。<strong>网关的 MAC 完成的是第一段交付，不会跟着包一路传到服务器。</strong></p>
+<p>这也解释了一个容易忽略的现象：假设你先打开外网的新闻网站，再连接另一台远程服务器。两个目的 IP 完全不同，但只要路由都指向同一个网关，而且电脑还缓存着网关的 MAC，第二次连接就不用为新服务器再广播一次。反过来，即使你事先知道远程服务器的 MAC，也不能把它填进办公室里的帧头来跳过网关。这个地址不能告诉办公室的交换机，去另一张网络该走哪条路。</p>
+<h2 id="ARP-的工作原理"><a href="#ARP-的工作原理" class="headerlink" title="ARP 的工作原理"></a>ARP 的工作原理</h2><p>ARP 能工作，是因为以太网提供了两种不同的交付方式：不知道对方的 MAC 时，可以先广播，让本地设备都听到问题；知道 MAC 后，就可以把后续数据单独发给对方。ARP 把广播得到的答案暂存在发送端，让一次询问能服务于后续多次发送。<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc826">RFC 826</a> 定义了这套请求与应答机制，<a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc1122#section-2.3.2">RFC 1122 §2.3.2</a> 说明了主机对缓存记录的管理要求。</p>
+<p>路由选出的、在当前链路上直接收包的设备，叫作<strong>下一跳</strong>。ARP 查的是下一跳的 MAC。打印时，下一跳就是打印机；访问外网时，下一跳是本地网关。这也是为什么电脑不需要知道远程服务器的 MAC，就能把数据发给它。</p>
+
+  </div>
+</article>
+
+
+
+  <section
+    class="post-comments"
+    data-comment-provider="utterances"
+    data-comment-light-theme="github-light"
+    data-comment-dark-theme="github-dark"
+  >
+    <h2 class="comments-title">COMMENTS</h2>
+    <script>
+      (function () {
+        var container = document.currentScript.parentElement;
+        var isDark = document.documentElement.classList.contains('theme-dark');
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.setAttribute('repo', 'cardchoosen/blog');
+        script.setAttribute('issue-term', 'pathname');
+        script.setAttribute('label', 'comment');
+        script.setAttribute('theme', isDark ? 'github-dark' : 'github-light');
+        script.setAttribute('crossorigin', 'anonymous');
+        script.async = true;
+        container.appendChild(script);
+      })();
+    </script>
+  </section>
+
+
+
+  <nav class="post-nav">
+    <div class="post-nav-cell">
+      
+        <span class="nav-label">OLDER</span>
+        <a href="/2026/11/18/ethernet-mtu/" class="nav-link">以太网的 MTU</a>
+      
+    </div>
+    <div class="post-nav-cell right">
+      
+    </div>
+  </nav>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 nannnzhang</span>
+    <span class="footer-sep">|</span>
+    <span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a></span>
+  </div>
+</footer>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      startup: {
+        typeset: true
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+<script src="/js/shelf.js"></script>
+
+</body>
+</html>
